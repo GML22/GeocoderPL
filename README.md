@@ -16,5 +16,5 @@ GeocoderPL uses two main data sorces: <br>
 </p>
   
 <p align="justify">
-Data contained in the abovementioned databases are parsed from GML format to SQLite database. Geographical coordinates of every address point are validated by checking that they lie inside the polygon of their district. 
+Selected data contained in the abovementioned databases are parsed from Graph Modeling Language format (GML) to create SQLite database. Geographical coordinates of every address point from the National Register of Boundaries are validated by checking that they lie inside the polygon of their district. For every address point in the National Register of Boundaries
 </p>
