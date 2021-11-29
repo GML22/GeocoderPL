@@ -16,7 +16,7 @@ GeocoderPL uses two main data sorces: <br>
 </p>
   
 <p align="justify">
-Selected data contained in the abovementioned databases are parsed from Geography Markup Language format (GML) to create SQLite database. Geographical coordinates of every address point from the PRG database are cross-validated by checking that they lie inside the polygon of their district. For every address point in PRG database the closest building in the BDOT10k database is found and if the distance between polygon of this building and address point is less than 10 meters then the building is assigned to adress point.
+Selected data contained in the abovementioned databases are parsed from Geography Markup Language format (GML) to create SQLite database. Geographic coordinates of every address point from the PRG database are cross-validated by checking that they lie inside the polygon of their district. For every address point in PRG database the closest building in the BDOT10k database is found and if the distance between polygon of this building and address point is less than 10 meters then the building is assigned to adress point.
 </p>
 
 <p align="center">
@@ -25,4 +25,12 @@ Selected data contained in the abovementioned databases are parsed from Geograph
 
 <p align="center">
   <img width=75% height=75% src="/imgs/GeocoderPL_GD.png"/>
+</p>
+
+<p align="justify">
+Geocoding using GeocoderPL search engine requires providing city name, street, building number or postal code of the address point for which we would like to find geographic coordinates. It is also possible to perform reverse geocoding - if you pass geographic coordinates to search engine then you will receive address point closest to these coordinates.
+</p>
+
+<p align="center">
+  <img width=75% height=75% src="/imgs/GeocoderPL_RG.png"/>
 </p>
