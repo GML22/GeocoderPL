@@ -11,7 +11,7 @@ GeocoderPL creates SQLite database containing all address points and buildings i
 
   1. The National Register of Boundaries Database (a.k.a. PRG database)- state maintained reference database of all address points in Poland (including administrative division of the country):<br>
   https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538 <br>
-  https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515/table <br>
+  https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515 <br>
   
   2. The Topographic Objects Database (a.k.a. BDOT10k database) -  state maintained vector database which contains the spatial location of all topographic features in Poland:<br> https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip 
 
