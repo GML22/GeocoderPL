@@ -3,7 +3,7 @@
 GeocoderPL is an application written in Python, which can be used for geocoding address points in Poland along with the possibility to display basic information about a given address point and the building assigned to this address. </p>
 
 <p align="center">
-  <img width=60% height=60% src="/imgs/GeocoderPL.png"/>
+  <img width=75% height=75% src="/imgs/GeocoderPL.png"/>
 </p>
 
 <p align="justify">
@@ -12,7 +12,7 @@ GeocoderPL uses two main data sorces: <br>
   2. The Topographic Objects Database (BDOT10k) -  state maintained vector database which contains the spatial location of all topographic features in Poland: https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip </p>
   
 <p align="center">
-  <img width=60% height=60% src="/imgs/GeocoderPL_KR.png"/>
+  <img width=75% height=75% src="/imgs/GeocoderPL_KR.png"/>
 </p>
   
 <p align="justify">
