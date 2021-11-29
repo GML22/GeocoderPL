@@ -1,0 +1,21 @@
+BUBD01;budynki mieszkalne jednorodzinne
+BUBD02;budynki o dwóch mieszkaniach
+BUBD03;budynki o trzech i więcej mieszkaniach
+BUBD04;budynki zbiorowego zamieszkania
+BUBD05;budynki hoteli
+BUBD06;budynki zakwaterowania turystycznego, pozostałe
+BUBD07;budynki biurowe
+BUBD08;budynki handlowo ‐ usługowe
+BUBD09;budynki łączności, dworców i terminali
+BUBD10;budynki garaży
+BUBD11;budynki przemysłowe
+BUBD12;zbiorniki, silosy i budynki magazynowe
+BUBD13;ogólnodostępne obiekty kulturalne
+BUBD14;budynki muzeów i bibliotek
+BUBD15;budynki szkół i instytucji badawczych
+BUBD16;budynki szpitali i zakładów opieki medycznej
+BUBD17;budynki kultury fizycznej
+BUBD18;budynki gospodarstw rolnych
+BUBD19;budynki przeznaczone do sprawowania kultu religijnego i czynności religijnych
+BUBD20;obiekty budowlane wpisane do rejestru zabytków i objęte indywidualną ochroną konserwatorską oraz nieruchome, archeologiczne dobra kultury
+BUBD21;pozostałe budynki niemieszkalne, gdzie indziej nie wymienione

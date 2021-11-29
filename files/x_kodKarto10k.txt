@@ -1,0 +1,35 @@
+0010_317_1;budynek mieszkalny wielorodzinny
+0010_318_1;budynek mieszkalny jednorodzinny
+0010_319;budynek mieszkalny wysoki
+0010_320_1;budynek użyteczności publicznej
+0010_321;budynek użyteczności publicznej wysoki
+0010_323_1;budynek przemysłowy
+0010_324;budynek przemysłowy wysoki
+0010_325_1;budynek gospodarczy
+0010_326_1;budynek zrujnowany lub ruina zabytkowa
+0010_327_1;świątynia chrześcijańska: kościół lub cerkiew
+0010_327_2;świątynia chrześcijańska: kościół lub cerkiew
+0010_328_1;świątynia niechrześcijańska
+0010_328_2;świątynia niechrześcijańska
+0010_329_1;kaplica
+0010_329_2;kaplica
+0010_330;figura, kapliczka lub krzyż przydrożny
+0010_331;pomnik
+0010_332;odosobniona mogiła
+0010_333;bunkier lub schron
+0010_334;wieża
+0010_335;wiatrak
+0010_336;wiata lub altana
+0010_337;szklarnia
+0010_338;stadion
+0010_339;bieżnia lub tor stadionu
+0010_340;trybuna dla widzów
+0010_341_1;skocznia narciarska
+0010_342;teren cmentarza
+0010_343_1;cmentarz chrześcijański
+0010_344_1;cmentarz niechrześcijański
+0010_345_1;cmentarz komunalny
+0010_346_1;cmentarz wojenny
+0010_347_1;cmentarz dla zwierząt
+0010_348;mur historyczny
+0010_349;ściana oporowa

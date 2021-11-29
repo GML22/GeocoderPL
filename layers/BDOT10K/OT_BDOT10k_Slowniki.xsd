@@ -1,0 +1,5929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ot="urn:gugik:specyfikacje:gmlas:bazaDanychObiektowTopograficznych10k:1.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:bt="urn:gugik:specyfikacje:gmlas:modelPodstawowy:1.0" targetNamespace="urn:gugik:specyfikacje:gmlas:bazaDanychObiektowTopograficznych10k:1.0" elementFormDefault="qualified" attributeFormDefault="unqualified" version="1.0">
+	<import namespace="http://www.opengis.net/gml/3.2" schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+	<import namespace="urn:gugik:specyfikacje:gmlas:modelPodstawowy:1.0" schemaLocation="BT_ModelPodstawowy.xsd"/>
+	<!-- ========= SlownikiBudowleIUrzadzenia =========================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_FunSzczegolowaBudynkuType">
+		<restriction base="string">
+			<enumeration value="1110.Dj">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekJednorodzinny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1110.Dl">
+				<annotation>
+					<appinfo>
+						<gml:description>domLetniskowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1110.Ls">
+				<annotation>
+					<appinfo>
+						<gml:description>lesniczowka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1121.Db">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekODwochMieszkaniach</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1122.Dw">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekWielorodzinny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Bs">
+				<annotation>
+					<appinfo>
+						<gml:description>bursaSzkolna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Db">
+				<annotation>
+					<appinfo>
+						<gml:description>domDlaBezdomnych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Dd">
+				<annotation>
+					<appinfo>
+						<gml:description>domDziecka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Os">
+				<annotation>
+					<appinfo>
+						<gml:description>domOpiekiSpolecznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Dp">
+				<annotation>
+					<appinfo>
+						<gml:description>domParafialny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Ds">
+				<annotation>
+					<appinfo>
+						<gml:description>domStudencki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Dz">
+				<annotation>
+					<appinfo>
+						<gml:description>domZakonny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Hr">
+				<annotation>
+					<appinfo>
+						<gml:description>hotelRobotniczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.In">
+				<annotation>
+					<appinfo>
+						<gml:description>internat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Kl">
+				<annotation>
+					<appinfo>
+						<gml:description>klasztor</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Km">
+				<annotation>
+					<appinfo>
+						<gml:description>koszary</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Po">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaOpiekunczoWychowawcza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Ra">
+				<annotation>
+					<appinfo>
+						<gml:description>rezydencjaAmbasadora</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Rb">
+				<annotation>
+					<appinfo>
+						<gml:description>rezydencjaBiskupia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Rp">
+				<annotation>
+					<appinfo>
+						<gml:description>rezydencjaPrezydencka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Zk">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladKarny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130.Zp">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladPoprawczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Dw">
+				<annotation>
+					<appinfo>
+						<gml:description>domWeselny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Ht">
+				<annotation>
+					<appinfo>
+						<gml:description>hotel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Mt">
+				<annotation>
+					<appinfo>
+						<gml:description>motel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Pj">
+				<annotation>
+					<appinfo>
+						<gml:description>pensjonat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Rj">
+				<annotation>
+					<appinfo>
+						<gml:description>restauracja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211.Zj">
+				<annotation>
+					<appinfo>
+						<gml:description>zajazd</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212.Dk">
+				<annotation>
+					<appinfo>
+						<gml:description>domekKempingowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212.Dr">
+				<annotation>
+					<appinfo>
+						<gml:description>domRekolekcyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212.Dw">
+				<annotation>
+					<appinfo>
+						<gml:description>domWypoczynkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212.Os">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekSzkoleniowoWypoczynkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212.St">
+				<annotation>
+					<appinfo>
+						<gml:description>schroniskoTurystyczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Bk">
+				<annotation>
+					<appinfo>
+						<gml:description>bank</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Ck">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumKonferencyjne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Km">
+				<annotation>
+					<appinfo>
+						<gml:description>kuriaMetropolitarna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Mn">
+				<annotation>
+					<appinfo>
+						<gml:description>ministerstwo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Pd">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaDyplomatycznaLubKonsularna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Pc">
+				<annotation>
+					<appinfo>
+						<gml:description>policja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Pk">
+				<annotation>
+					<appinfo>
+						<gml:description>prokuratura</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Pg">
+				<annotation>
+					<appinfo>
+						<gml:description>przejscieGraniczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Sd">
+				<annotation>
+					<appinfo>
+						<gml:description>sad</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Sf">
+				<annotation>
+					<appinfo>
+						<gml:description>siedzibaFirmyLubFirm</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Pw">
+				<annotation>
+					<appinfo>
+						<gml:description>starostwoPowiatowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Sg">
+				<annotation>
+					<appinfo>
+						<gml:description>strazGraniczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Sp">
+				<annotation>
+					<appinfo>
+						<gml:description>strazPozarna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Uc">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadCelny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Ug">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadGminy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Um">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMiasta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Umg">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMiastaIGminy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Mr">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMarszalkowski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Up">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaOperatoraPocztowego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Uw">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadWojewodzki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220.Ap">
+				<annotation>
+					<appinfo>
+						<gml:description>innyUrzadAdministracjiPublicznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Ap">
+				<annotation>
+					<appinfo>
+						<gml:description>apteka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Ch">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumHandlowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Dh">
+				<annotation>
+					<appinfo>
+						<gml:description>domTowarowyLubHandlowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Ht">
+				<annotation>
+					<appinfo>
+						<gml:description>halaTargowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Hw">
+				<annotation>
+					<appinfo>
+						<gml:description>halaWystawowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Hm">
+				<annotation>
+					<appinfo>
+						<gml:description>hipermarketLubSupermarket</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Ph">
+				<annotation>
+					<appinfo>
+						<gml:description>pawilonHandlowoUslugowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.So">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaObslugiPojazdow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230.Sp">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaPaliw</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Kk">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekKontroliRuchuKolejowego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Kp">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekKontroliRuchuPowietrznego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Ct">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumTelekomunikacyjne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Da">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecAutobusowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Dk">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecKolejowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Dl">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecLotniczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Hg">
+				<annotation>
+					<appinfo>
+						<gml:description>hangar</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Lm">
+				<annotation>
+					<appinfo>
+						<gml:description>latarniaMorska</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Lk">
+				<annotation>
+					<appinfo>
+						<gml:description>lokomotywowniaLubWagonownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Kg">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaKolejkiGorskiejLubWyciaguKrzeselkowego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Rt">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaNadawczaRadiaITelewizji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Tp">
+				<annotation>
+					<appinfo>
+						<gml:description>terminalPortowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Ab">
+				<annotation>
+					<appinfo>
+						<gml:description>zajezdniaAutobusowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Tr">
+				<annotation>
+					<appinfo>
+						<gml:description>zajezdniaTramwajowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241.Tb">
+				<annotation>
+					<appinfo>
+						<gml:description>zajezdniaTrolejbusowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1242.Gr">
+				<annotation>
+					<appinfo>
+						<gml:description>garaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1242.Pw">
+				<annotation>
+					<appinfo>
+						<gml:description>parkingWielopoziomowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.El">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrocieplownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Ek">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Kt">
+				<annotation>
+					<appinfo>
+						<gml:description>kotlownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Mn">
+				<annotation>
+					<appinfo>
+						<gml:description>mlyn</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Pr">
+				<annotation>
+					<appinfo>
+						<gml:description>produkcyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Rf">
+				<annotation>
+					<appinfo>
+						<gml:description>rafineria</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Ss">
+				<annotation>
+					<appinfo>
+						<gml:description>spalarniaSmieci</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Wr">
+				<annotation>
+					<appinfo>
+						<gml:description>warsztatRemontowoNaprawczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251.Wt">
+				<annotation>
+					<appinfo>
+						<gml:description>wiatrak</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Sp">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekSpedycji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Ch">
+				<annotation>
+					<appinfo>
+						<gml:description>chlodnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.El">
+				<annotation>
+					<appinfo>
+						<gml:description>elewator</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Mg">
+				<annotation>
+					<appinfo>
+						<gml:description>magazyn</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Sl">
+				<annotation>
+					<appinfo>
+						<gml:description>silos</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Gz">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikNaGaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252.Ci">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikNaCiecz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Oz">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekOgroduZooLubBotanicznego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Dk">
+				<annotation>
+					<appinfo>
+						<gml:description>domKultury</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Fh">
+				<annotation>
+					<appinfo>
+						<gml:description>filharmonia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Hw">
+				<annotation>
+					<appinfo>
+						<gml:description>halaWidowiskowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Ks">
+				<annotation>
+					<appinfo>
+						<gml:description>kasyno</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Kn">
+				<annotation>
+					<appinfo>
+						<gml:description>kino</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Kl">
+				<annotation>
+					<appinfo>
+						<gml:description>klubDyskoteka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Op">
+				<annotation>
+					<appinfo>
+						<gml:description>opera</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Sz">
+				<annotation>
+					<appinfo>
+						<gml:description>schroniskoDlaZwierzat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261.Tt">
+				<annotation>
+					<appinfo>
+						<gml:description>teatr</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262.Ar">
+				<annotation>
+					<appinfo>
+						<gml:description>archiwum</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262.Bl">
+				<annotation>
+					<appinfo>
+						<gml:description>biblioteka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262.Ci">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumInformacyjne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262.Gs">
+				<annotation>
+					<appinfo>
+						<gml:description>galeriaSztuki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262.Mz">
+				<annotation>
+					<appinfo>
+						<gml:description>muzeum</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Ob">
+				<annotation>
+					<appinfo>
+						<gml:description>obserwatoriumLubPlanetarium</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Pb">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaBadawcza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Ps">
+				<annotation>
+					<appinfo>
+						<gml:description>przedszkole</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Sh">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaHydrologiczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Sm">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaMeteorologiczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Sp">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolaPodstawowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Sd">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolaPonadpodstawowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263.Sw">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolaWyzsza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Hs">
+				<annotation>
+					<appinfo>
+						<gml:description>hospicjum</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Iw">
+				<annotation>
+					<appinfo>
+						<gml:description>izbaWytrzezwien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Jr">
+				<annotation>
+					<appinfo>
+						<gml:description>jednostkaRatownictwaMedycznego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Kw">
+				<annotation>
+					<appinfo>
+						<gml:description>klinikaWeterenaryjna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Oo">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekOpiekiSpolecznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Po">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaOchronyZdrowia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.St">
+				<annotation>
+					<appinfo>
+						<gml:description>sanatorium</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Sk">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaKrwiodawstwa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Ss">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaSanitarnoEpidemiologiczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Sz">
+				<annotation>
+					<appinfo>
+						<gml:description>szpital</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264.Zb">
+				<annotation>
+					<appinfo>
+						<gml:description>zlobek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Hs">
+				<annotation>
+					<appinfo>
+						<gml:description>halaSportowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Ht">
+				<annotation>
+					<appinfo>
+						<gml:description>halowyTorGokartowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Ks">
+				<annotation>
+					<appinfo>
+						<gml:description>klubSportowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Kt">
+				<annotation>
+					<appinfo>
+						<gml:description>kortyTenisowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Kr">
+				<annotation>
+					<appinfo>
+						<gml:description>kregielnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Pl">
+				<annotation>
+					<appinfo>
+						<gml:description>plywalnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Sg">
+				<annotation>
+					<appinfo>
+						<gml:description>salaGimnastyczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.St">
+				<annotation>
+					<appinfo>
+						<gml:description>strzelnica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Sl">
+				<annotation>
+					<appinfo>
+						<gml:description>sztuczneLodowisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265.Uj">
+				<annotation>
+					<appinfo>
+						<gml:description>ujezdzalnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1271.Bg">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekGospodarczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1271.Bp">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekProdukcyjnyZwierzatHodowlanych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1271.St">
+				<annotation>
+					<appinfo>
+						<gml:description>stajnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1271.Sz">
+				<annotation>
+					<appinfo>
+						<gml:description>szklarniaLubCieplarnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Bc">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiCmentarne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Ck">
+				<annotation>
+					<appinfo>
+						<gml:description>cerkiew</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Dp">
+				<annotation>
+					<appinfo>
+						<gml:description>domPogrzebowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Dz">
+				<annotation>
+					<appinfo>
+						<gml:description>dzwonnica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Ir">
+				<annotation>
+					<appinfo>
+						<gml:description>innyBudynekKultuReligijnego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Kp">
+				<annotation>
+					<appinfo>
+						<gml:description>kaplica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Ks">
+				<annotation>
+					<appinfo>
+						<gml:description>kosciol</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Kr">
+				<annotation>
+					<appinfo>
+						<gml:description>krematorium</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Mc">
+				<annotation>
+					<appinfo>
+						<gml:description>meczet</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272.Sn">
+				<annotation>
+					<appinfo>
+						<gml:description>synagoga</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1273.Zb">
+				<annotation>
+					<appinfo>
+						<gml:description>zabytekBezFunkcjiUzytkowej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.As">
+				<annotation>
+					<appinfo>
+						<gml:description>aresztSledczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Bc">
+				<annotation>
+					<appinfo>
+						<gml:description>bacowka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Sc">
+				<annotation>
+					<appinfo>
+						<gml:description>schroniskoDlaNieletnich</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Sg">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaGazowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Sp">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaPomp</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.St">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaTransformatorowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Tp">
+				<annotation>
+					<appinfo>
+						<gml:description>toaletaPubliczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Zk">
+				<annotation>
+					<appinfo>
+						<gml:description>zabudowaniaKoszarowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274.Zp">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladKarnyLubPoprawczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_FunOgolnaBudynkuType">
+		<restriction base="string">
+			<enumeration value="1110">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiMieszkalneJednorodzinne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1121">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiODwochMieszkaniach</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1122">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiOTrzechIWiecejMieszkaniach</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1130">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiZbiorowegoZamieszkania</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1211">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiHoteli</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1212">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiZakwaterowaniaTurystycznegoPozostale</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1220">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiBiurowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1230">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiHandlowoUslugowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1241">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiLacznosciDworcowITerminali</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1242">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiGarazy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1251">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiPrzemyslowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1252">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikSilosIBudynkiMagazynowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1261">
+				<annotation>
+					<appinfo>
+						<gml:description>ogolnodostepneObiektyKulturalne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1262">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiMuzeowIBibliotek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1263">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiSzkolIInstytucjiBadawczych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1264">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiSzpitaliIZakladowOpiekiMedycznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1265">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiKulturyFizycznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1271">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekGospodarstwaRolnego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1272">
+				<annotation>
+					<appinfo>
+						<gml:description>budynkiKultuReligijnego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1273">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekZabytkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1274">
+				<annotation>
+					<appinfo>
+						<gml:description>pozostaleBudynkiNiemieszkalne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliSportowejType">
+		<restriction base="string">
+			<enumeration value="Bdk">
+				<annotation>
+					<appinfo>
+						<gml:description>basenOdkryty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Bcf">
+				<annotation>
+					<appinfo>
+						<gml:description>basenZCzaszaFoliowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Bzn">
+				<annotation>
+					<appinfo>
+						<gml:description>bieznia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ktn">
+				<annotation>
+					<appinfo>
+						<gml:description>kortTenisowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kcf">
+				<annotation>
+					<appinfo>
+						<gml:description>kortTenisowyZCzaszaFoliowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pgz">
+				<annotation>
+					<appinfo>
+						<gml:description>placGierIZabaw</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Psp">
+				<annotation>
+					<appinfo>
+						<gml:description>placSportowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Snr">
+				<annotation>
+					<appinfo>
+						<gml:description>skoczniaNarciarska</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Std">
+				<annotation>
+					<appinfo>
+						<gml:description>stadion</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sst">
+				<annotation>
+					<appinfo>
+						<gml:description>sztucznyStok</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tsm">
+				<annotation>
+					<appinfo>
+						<gml:description>torSamochodowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tsn">
+				<annotation>
+					<appinfo>
+						<gml:description>torSaneczkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tzz">
+				<annotation>
+					<appinfo>
+						<gml:description>torZuzlowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_MaterialKonstrukcyjnyBudowliInzynierskiejType">
+		<restriction base="string">
+			<enumeration value="Bt">
+				<annotation>
+					<appinfo>
+						<gml:description>beton</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Cg">
+				<annotation>
+					<appinfo>
+						<gml:description>cegla</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dr">
+				<annotation>
+					<appinfo>
+						<gml:description>drewno</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Km">
+				<annotation>
+					<appinfo>
+						<gml:description>kamien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="St">
+				<annotation>
+					<appinfo>
+						<gml:description>stal</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zb">
+				<annotation>
+					<appinfo>
+						<gml:description>zelbet</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajZbiornikaTechnicznegoType">
+		<restriction base="string">
+			<enumeration value="Osd">
+				<annotation>
+					<appinfo>
+						<gml:description>osadnik</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zcc">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikNaCiecz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zmp">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikNaMaterialyPedneLubGaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zms">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiornikNaMaterialySypkie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_MaterialUmocnieniaType">
+		<restriction base="string">
+			<enumeration value="Btn">
+				<annotation>
+					<appinfo>
+						<gml:description>beton</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kam">
+				<annotation>
+					<appinfo>
+						<gml:description>kamien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pdr">
+				<annotation>
+					<appinfo>
+						<gml:description>paleDrewniane</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pbt">
+				<annotation>
+					<appinfo>
+						<gml:description>paleBetonowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pst">
+				<annotation>
+					<appinfo>
+						<gml:description>paleStalowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliHydrotechnicznejType">
+		<restriction base="string">
+			<enumeration value="Jry">
+				<annotation>
+					<appinfo>
+						<gml:description>jazRuchomyLubZastawkaPietrzaca</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jsy">
+				<annotation>
+					<appinfo>
+						<gml:description>jazStaly</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Slz">
+				<annotation>
+					<appinfo>
+						<gml:description>sluza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zap">
+				<annotation>
+					<appinfo>
+						<gml:description>zapora</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="JZ">
+				<annotation>
+					<appinfo>
+						<gml:description>jaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKomunikacjiType">
+		<restriction base="string">
+			<enumeration value="dr">
+				<annotation>
+					<appinfo>
+						<gml:description>drogowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kl">
+				<annotation>
+					<appinfo>
+						<gml:description>kolejowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="tr">
+				<annotation>
+					<appinfo>
+						<gml:description>tramwajowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajUrzadzeniaTransportowegoType">
+		<restriction base="string">
+			<enumeration value="Kln">
+				<annotation>
+					<appinfo>
+						<gml:description>kolejLinowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Okl">
+				<annotation>
+					<appinfo>
+						<gml:description>obrotnicaKolejowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Suw">
+				<annotation>
+					<appinfo>
+						<gml:description>suwnica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tsm">
+				<annotation>
+					<appinfo>
+						<gml:description>tasmociag</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wnt">
+				<annotation>
+					<appinfo>
+						<gml:description>wyciagNarciarski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajCmentarzaType">
+		<restriction base="string">
+			<enumeration value="Kom">
+				<annotation>
+					<appinfo>
+						<gml:description>komunalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wjn">
+				<annotation>
+					<appinfo>
+						<gml:description>wojenny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wzn">
+				<annotation>
+					<appinfo>
+						<gml:description>wyznaniowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zwr">
+				<annotation>
+					<appinfo>
+						<gml:description>dlaZwierzat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajInnejBudowliType">
+		<restriction base="string">
+			<enumeration value="Est">
+				<annotation>
+					<appinfo>
+						<gml:description>estrada</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ogr">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodzenieTrwale</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prn">
+				<annotation>
+					<appinfo>
+						<gml:description>peronKolejowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pfw">
+				<annotation>
+					<appinfo>
+						<gml:description>platformaWidokowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rmp">
+				<annotation>
+					<appinfo>
+						<gml:description>rampa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trb">
+				<annotation>
+					<appinfo>
+						<gml:description>trybuna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_WyznanieType">
+		<restriction base="string">
+			<enumeration value="1">
+				<annotation>
+					<appinfo>
+						<gml:description>chrzescijanskie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="0">
+				<annotation>
+					<appinfo>
+						<gml:description>inne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_MaterialBudowliZiemnejType">
+		<restriction base="string">
+			<enumeration value="Bt">
+				<annotation>
+					<appinfo>
+						<gml:description>zOkladzinaBetonowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gr">
+				<annotation>
+					<appinfo>
+						<gml:description>ziemny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliInzynierskiejType">
+		<restriction base="string">
+			<enumeration value="e">
+				<annotation>
+					<appinfo>
+						<gml:description>estakada</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="w">
+				<annotation>
+					<appinfo>
+						<gml:description>wiadukt</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="k">
+				<annotation>
+					<appinfo>
+						<gml:description>kladkaDlaPieszych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="m">
+				<annotation>
+					<appinfo>
+						<gml:description>most</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d">
+				<annotation>
+					<appinfo>
+						<gml:description>przejsciePodziemneDlaPieszych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="p">
+				<annotation>
+					<appinfo>
+						<gml:description>przepust</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="t">
+				<annotation>
+					<appinfo>
+						<gml:description>tunel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajUmocnieniaType">
+		<restriction base="string">
+			<enumeration value="Flc">
+				<annotation>
+					<appinfo>
+						<gml:description>falochron</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ost">
+				<annotation>
+					<appinfo>
+						<gml:description>ostroga</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sop">
+				<annotation>
+					<appinfo>
+						<gml:description>scianaOporowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ubr">
+				<annotation>
+					<appinfo>
+						<gml:description>umocnienieBrzegu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliZiemnejType">
+		<restriction base="string">
+			<enumeration value="F">
+				<annotation>
+					<appinfo>
+						<gml:description>fosaSuchaIWykop</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="N">
+				<annotation>
+					<appinfo>
+						<gml:description>nasyp</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="W">
+				<annotation>
+					<appinfo>
+						<gml:description>walPrzeciwpowodziowyLubGrobla</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KonstrukcjaBudowliInzynierskiejType">
+		<restriction base="string">
+			<enumeration value="Blk">
+				<annotation>
+					<appinfo>
+						<gml:description>belkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Luk">
+				<annotation>
+					<appinfo>
+						<gml:description>lukowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Obt">
+				<annotation>
+					<appinfo>
+						<gml:description>obrotowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pws">
+				<annotation>
+					<appinfo>
+						<gml:description>podwieszony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wsc">
+				<annotation>
+					<appinfo>
+						<gml:description>wiszacy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Inn">
+				<annotation>
+					<appinfo>
+						<gml:description>pozostaleKonstrukcje</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajUrzadzeniaTechnicznegoType">
+		<restriction base="string">
+			<enumeration value="Sng">
+				<annotation>
+					<appinfo>
+						<gml:description>szybNaftowyLubGazowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Uwd">
+				<annotation>
+					<appinfo>
+						<gml:description>ujecieWody</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trn">
+				<annotation>
+					<appinfo>
+						<gml:description>transformator</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ztr">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolTransformatorow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zdp">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolDystrybutorowPaliwa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zum">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolUrzadzenStacjiMeteorologicznej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zrp">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolUrzadzenTerminaluRopyNaftowejLubMaterialowRopopochodnych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_LiczbaPoziomowType">
+		<restriction base="string">
+			<enumeration value="1">
+				<annotation>
+					<appinfo>
+						<gml:description>jednopoziomowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="2">
+				<annotation>
+					<appinfo>
+						<gml:description>dwupoziomowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ============== CODE LISTS ==============-->
+	<simpleType name="OT_RodzajBudowliTechnicznejType">
+		<union memberTypes="ot:OT_RodzajBudowliTechnicznejEnumerationType ot:OT_RodzajBudowliTechnicznejOtherType"/>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliTechnicznejEnumerationType">
+		<restriction base="string">
+			<enumeration value="Ckm">
+				<annotation>
+					<appinfo>
+						<gml:description>chlodniaKominowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kmn">
+				<annotation>
+					<appinfo>
+						<gml:description>kominPrzemyslowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mos">
+				<annotation>
+					<appinfo>
+						<gml:description>masztOswietleniowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mtl">
+				<annotation>
+					<appinfo>
+						<gml:description>masztTelekomunikacyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Twt">
+				<annotation>
+					<appinfo>
+						<gml:description>turbinaWiatrowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sen">
+				<annotation>
+					<appinfo>
+						<gml:description>slupEnergetyczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pkl">
+				<annotation>
+					<appinfo>
+						<gml:description>podporaKoleiLinowej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wcs">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaCisnien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wpp">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaPrzeciwpozarowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wsk">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaSzybuKopalnianego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wtl">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaTelekomunikacyjna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wdk">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaWidokowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajBudowliTechnicznejOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_GromadzonaSubstancjaType">
+		<union memberTypes="ot:OT_GromadzonaSubstancjaEnumerationType ot:OT_GromadzonaSubstancjaOtherType"/>
+	</simpleType>
+	<simpleType name="OT_GromadzonaSubstancjaEnumerationType">
+		<restriction base="string">
+			<enumeration value="Bnz">
+				<annotation>
+					<appinfo>
+						<gml:description>benzyna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Cmn">
+				<annotation>
+					<appinfo>
+						<gml:description>cement</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gzm">
+				<annotation>
+					<appinfo>
+						<gml:description>gazZiemny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Psz">
+				<annotation>
+					<appinfo>
+						<gml:description>pasza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rpa">
+				<annotation>
+					<appinfo>
+						<gml:description>ropa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wod">
+				<annotation>
+					<appinfo>
+						<gml:description>woda</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zbz">
+				<annotation>
+					<appinfo>
+						<gml:description>zboze</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_GromadzonaSubstancjaOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKonstrukcjiZbiornikaType">
+		<union memberTypes="ot:OT_RodzajKonstrukcjiZbiornikaEnumerationType ot:OT_RodzajKonstrukcjiZbiornikaOtherType"/>
+	</simpleType>
+	<simpleType name="OT_RodzajKonstrukcjiZbiornikaEnumerationType">
+		<restriction base="string">
+			<enumeration value="Bsn">
+				<annotation>
+					<appinfo>
+						<gml:description>basen</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Cld">
+				<annotation>
+					<appinfo>
+						<gml:description>cylindryczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kls">
+				<annotation>
+					<appinfo>
+						<gml:description>kulisty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pkl">
+				<annotation>
+					<appinfo>
+						<gml:description>polkulisty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zso">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolScianOporowych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKonstrukcjiZbiornikaOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiObiektyInne ================================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajObiektuKomunikacyjnegoType">
+		<restriction base="string">
+			<enumeration value="Eka">
+				<annotation>
+					<appinfo>
+						<gml:description>ekranAkustyczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pst">
+				<annotation>
+					<appinfo>
+						<gml:description>pasStartowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pgr">
+				<annotation>
+					<appinfo>
+						<gml:description>przejscieGraniczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pat">
+				<annotation>
+					<appinfo>
+						<gml:description>przystanekAutobusowyTramwajowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pkl">
+				<annotation>
+					<appinfo>
+						<gml:description>przystanekKolejowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sch">
+				<annotation>
+					<appinfo>
+						<gml:description>schody</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Swt">
+				<annotation>
+					<appinfo>
+						<gml:description>sygnalizatorSwietlny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wmt">
+				<annotation>
+					<appinfo>
+						<gml:description>wejscieDoStacjiMetra</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mpo">
+				<annotation>
+					<appinfo>
+						<gml:description>miejscePoboruOplat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajObiektuPrzyrodniczegoType">
+		<restriction base="string">
+			<enumeration value="Dwo">
+				<annotation>
+					<appinfo>
+						<gml:description>drzewoGrupaDrzew</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gnr">
+				<annotation>
+					<appinfo>
+						<gml:description>glazNarzutowyGrupa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kkr">
+				<annotation>
+					<appinfo>
+						<gml:description>kepaKrzewow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kko">
+				<annotation>
+					<appinfo>
+						<gml:description>kepaKosodrzewiny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lod">
+				<annotation>
+					<appinfo>
+						<gml:description>liniaOddzialowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mls">
+				<annotation>
+					<appinfo>
+						<gml:description>malyLas</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Osk">
+				<annotation>
+					<appinfo>
+						<gml:description>odosobnionaSkala</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zwp">
+				<annotation>
+					<appinfo>
+						<gml:description>pasKrzakowZywoplot</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Psk">
+				<annotation>
+					<appinfo>
+						<gml:description>progSkalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rdr">
+				<annotation>
+					<appinfo>
+						<gml:description>rzadDrzew</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wdj">
+				<annotation>
+					<appinfo>
+						<gml:description>wejscieDoJaskini</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wds">
+				<annotation>
+					<appinfo>
+						<gml:description>wodospad</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zrd">
+				<annotation>
+					<appinfo>
+						<gml:description>zrodlo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajMokradlaType">
+		<restriction base="string">
+			<enumeration value="Bg">
+				<annotation>
+					<appinfo>
+						<gml:description>bagno</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pd">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodmokly</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="MO">
+				<annotation>
+					<appinfo>
+						<gml:description>mokradlo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ============== CODE LISTS ==============-->
+	<simpleType name="OT_RodzajObiektuOrientacyjnegoType">
+		<union memberTypes="ot:OT_RodzajObiektuOrientacyjnegoEnumerationType ot:OT_RodzajObiektuOrientacyjnegoOtherType"/>
+	</simpleType>
+	<simpleType name="OT_RodzajObiektuOrientacyjnegoEnumerationType">
+		<restriction base="string">
+			<enumeration value="Bun">
+				<annotation>
+					<appinfo>
+						<gml:description>bunkierSchron</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Fgk">
+				<annotation>
+					<appinfo>
+						<gml:description>figuraKapliczkaKrzyz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ftn">
+				<annotation>
+					<appinfo>
+						<gml:description>fontanna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mhi">
+				<annotation>
+					<appinfo>
+						<gml:description>murHistoryczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mog">
+				<annotation>
+					<appinfo>
+						<gml:description>mogilaOdosobniona</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pmn">
+				<annotation>
+					<appinfo>
+						<gml:description>pomnik</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pom">
+				<annotation>
+					<appinfo>
+						<gml:description>pomostMolo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rzb">
+				<annotation>
+					<appinfo>
+						<gml:description>ruinaZabytkowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sgl">
+				<annotation>
+					<appinfo>
+						<gml:description>studniaGlebinowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Skl">
+				<annotation>
+					<appinfo>
+						<gml:description>szklarnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wal">
+				<annotation>
+					<appinfo>
+						<gml:description>wiataAltana</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wtr">
+				<annotation>
+					<appinfo>
+						<gml:description>wiatrak</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wwk">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaObserwacyjna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wdw">
+				<annotation>
+					<appinfo>
+						<gml:description>wodowskaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajObiektuOrientacyjnegoOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiOgolne ====================================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_SkrKartoType">
+		<restriction base="string">
+			<enumeration value="amb.">
+				<annotation>
+					<appinfo>
+						<gml:description>ambasada</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="B">
+				<annotation>
+					<appinfo>
+						<gml:description>bank</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="b.">
+				<annotation>
+					<appinfo>
+						<gml:description>brod</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="b. tran.">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaTransportowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="bas. kąp.">
+				<annotation>
+					<appinfo>
+						<gml:description>basenKapielowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="bud.">
+				<annotation>
+					<appinfo>
+						<gml:description>budowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="biur.">
+				<annotation>
+					<appinfo>
+						<gml:description>biurowiec</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="bot.">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodBotaniczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="c. han.">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumHandlowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="chm.">
+				<annotation>
+					<appinfo>
+						<gml:description>plantacjaChmielu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. dz.">
+				<annotation>
+					<appinfo>
+						<gml:description>domDziecka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. h.">
+				<annotation>
+					<appinfo>
+						<gml:description>domHandlowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. k.">
+				<annotation>
+					<appinfo>
+						<gml:description>domKultury</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. op.">
+				<annotation>
+					<appinfo>
+						<gml:description>domOpieki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. paraf.">
+				<annotation>
+					<appinfo>
+						<gml:description>domParafialny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. s.">
+				<annotation>
+					<appinfo>
+						<gml:description>domStudenta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. wych.">
+				<annotation>
+					<appinfo>
+						<gml:description>domWychowawczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. wyp.">
+				<annotation>
+					<appinfo>
+						<gml:description>domWypoczynkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="dw. aut.">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecAutobusowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="el.">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="elc.">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrocieplownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="elw.">
+				<annotation>
+					<appinfo>
+						<gml:description>elewator</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="fort.">
+				<annotation>
+					<appinfo>
+						<gml:description>twierdzaLubForteca</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="gar.">
+				<annotation>
+					<appinfo>
+						<gml:description>garaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="gaz.">
+				<annotation>
+					<appinfo>
+						<gml:description>gazowniaZbiornikGazu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="H">
+				<annotation>
+					<appinfo>
+						<gml:description>hotel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="h. targ.">
+				<annotation>
+					<appinfo>
+						<gml:description>halaTargowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="h. sport.">
+				<annotation>
+					<appinfo>
+						<gml:description>halaSportowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="hłd.">
+				<annotation>
+					<appinfo>
+						<gml:description>halda</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="hod.">
+				<annotation>
+					<appinfo>
+						<gml:description>budynekFermHodowlanych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="int.">
+				<annotation>
+					<appinfo>
+						<gml:description>internat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="K">
+				<annotation>
+					<appinfo>
+						<gml:description>kino</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kemp.">
+				<annotation>
+					<appinfo>
+						<gml:description>kemping</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kl.">
+				<annotation>
+					<appinfo>
+						<gml:description>klasztor</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kłm.">
+				<annotation>
+					<appinfo>
+						<gml:description>kamieniolom</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kop.">
+				<annotation>
+					<appinfo>
+						<gml:description>kopalnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="letn.">
+				<annotation>
+					<appinfo>
+						<gml:description>domkiLetniskowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="ląd.">
+				<annotation>
+					<appinfo>
+						<gml:description>ladowisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="lotn.">
+				<annotation>
+					<appinfo>
+						<gml:description>lotnisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="M">
+				<annotation>
+					<appinfo>
+						<gml:description>muzeum</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="mag.">
+				<annotation>
+					<appinfo>
+						<gml:description>magazyny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="metalurg.">
+				<annotation>
+					<appinfo>
+						<gml:description>przemyslMetalurgiczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="nft.">
+				<annotation>
+					<appinfo>
+						<gml:description>szybNaftowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="niecz.">
+				<annotation>
+					<appinfo>
+						<gml:description>nieczynny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="obs. astr.">
+				<annotation>
+					<appinfo>
+						<gml:description>obserwatoriumAstronomiczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="oczyszcz.">
+				<annotation>
+					<appinfo>
+						<gml:description>oczyszczalniaSciekow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="osad.">
+				<annotation>
+					<appinfo>
+						<gml:description>osadnik</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="ośr. wyp.">
+				<annotation>
+					<appinfo>
+						<gml:description>terenOsrodkaWyp</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="P">
+				<annotation>
+					<appinfo>
+						<gml:description>policja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="p.">
+				<annotation>
+					<appinfo>
+						<gml:description>parking</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="p. kol.">
+				<annotation>
+					<appinfo>
+						<gml:description>przystanekKolejowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="piask.">
+				<annotation>
+					<appinfo>
+						<gml:description>kopalniaPiaskuPiaskownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pl. sport.">
+				<annotation>
+					<appinfo>
+						<gml:description>placSportowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pleb.">
+				<annotation>
+					<appinfo>
+						<gml:description>plebania</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pocz.">
+				<annotation>
+					<appinfo>
+						<gml:description>placowkaOperatoraPocztowego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pog. rat.">
+				<annotation>
+					<appinfo>
+						<gml:description>pogotowieRatunkowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pomp.">
+				<annotation>
+					<appinfo>
+						<gml:description>przepompownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="port">
+				<annotation>
+					<appinfo>
+						<gml:description>portWodnyPrzystan</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="port lot.">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecLotniczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pr.">
+				<annotation>
+					<appinfo>
+						<gml:description>prom</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="przedszk.">
+				<annotation>
+					<appinfo>
+						<gml:description>przedszkole</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="pw.">
+				<annotation>
+					<appinfo>
+						<gml:description>przewozLodziami</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="r. zab.">
+				<annotation>
+					<appinfo>
+						<gml:description>ruinyZabytkowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="rafin.">
+				<annotation>
+					<appinfo>
+						<gml:description>rafineria</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="rem.">
+				<annotation>
+					<appinfo>
+						<gml:description>remizaStrazacka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="rest.">
+				<annotation>
+					<appinfo>
+						<gml:description>restauracja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="rmp.">
+				<annotation>
+					<appinfo>
+						<gml:description>rampa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="S">
+				<annotation>
+					<appinfo>
+						<gml:description>sad</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="san.">
+				<annotation>
+					<appinfo>
+						<gml:description>sanatorium</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="schr.">
+				<annotation>
+					<appinfo>
+						<gml:description>schronisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="sil.">
+				<annotation>
+					<appinfo>
+						<gml:description>silos</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="stadn.">
+				<annotation>
+					<appinfo>
+						<gml:description>stadnina</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="SP">
+				<annotation>
+					<appinfo>
+						<gml:description>starostwoPowiatowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="st.">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaKolejowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="szk.">
+				<annotation>
+					<appinfo>
+						<gml:description>szkola</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="szpit.">
+				<annotation>
+					<appinfo>
+						<gml:description>szpital</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="T">
+				<annotation>
+					<appinfo>
+						<gml:description>teatr</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="targ.">
+				<annotation>
+					<appinfo>
+						<gml:description>targowiskoBazar</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="UG">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadGminy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="UM">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMiasta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="UMG">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMiastaIGminy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="UMr.">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadMarszalkowski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="utyliz.">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladUtylizacyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="UW">
+				<annotation>
+					<appinfo>
+						<gml:description>urzadWojewodzki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="w. ciśn.">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaCisnien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="w. obs.">
+				<annotation>
+					<appinfo>
+						<gml:description>wiezaObserwacyjna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="wdc.">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladWodociagowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="wikl.">
+				<annotation>
+					<appinfo>
+						<gml:description>plantacjaWikliny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="zaj.">
+				<annotation>
+					<appinfo>
+						<gml:description>zajezdniaAutobusowaLubTramwajowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="z. kar.">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladKarny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="zdr.">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekZdrowia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Źr. min.">
+				<annotation>
+					<appinfo>
+						<gml:description>zrodloMineralne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="ZOO">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodZoologiczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="żłb.">
+				<annotation>
+					<appinfo>
+						<gml:description>zlobek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="żw.">
+				<annotation>
+					<appinfo>
+						<gml:description>miejsceWydobyciaZwiru</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="d. wes.">
+				<annotation>
+					<appinfo>
+						<gml:description>domWeselny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kąp.">
+				<annotation>
+					<appinfo>
+						<gml:description>kapielisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="kort">
+				<annotation>
+					<appinfo>
+						<gml:description>kortTenisowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="p. prom.">
+				<annotation>
+					<appinfo>
+						<gml:description>przystanPromowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="p. golf.">
+				<annotation>
+					<appinfo>
+						<gml:description>poleGolfowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="rdst.">
+				<annotation>
+					<appinfo>
+						<gml:description>radiostacja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="gl.">
+				<annotation>
+					<appinfo>
+						<gml:description>miejsceWydobyciaGliny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="nadl.">
+				<annotation>
+					<appinfo>
+						<gml:description>nadlesnictwo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_ZrodloDanychType">
+		<restriction base="string">
+			<enumeration value="GEOS">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychGeodezyjnychGrawimetrycznych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="EGiB">
+				<annotation>
+					<appinfo>
+						<gml:description>ewidencjaGruntowIBudynkow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="GESUT">
+				<annotation>
+					<appinfo>
+						<gml:description>geodezyjnaEwidencjaSieciUzbrojeniaTerenu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="PRG">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychPanstwowegoRejestruGranic</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="PRNG">
+				<annotation>
+					<appinfo>
+						<gml:description>panstwowyRejestrNazwGeograficznych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="EMUiA">
+				<annotation>
+					<appinfo>
+						<gml:description>ewidencjaMiejscowosciUlicAdresow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="RCiWN">
+				<annotation>
+					<appinfo>
+						<gml:description>rejestrCenWartosciNieruchomosci</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="BDO">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychOgolnogeograficznych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ort">
+				<annotation>
+					<appinfo>
+						<gml:description>ortofotomapa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mz">
+				<annotation>
+					<appinfo>
+						<gml:description>mapaZasadnicza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mtp10">
+				<annotation>
+					<appinfo>
+						<gml:description>mapaTopograficzna10k</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mtp50">
+				<annotation>
+					<appinfo>
+						<gml:description>mapaTopograficzna50k</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="VMAPL2_v1">
+				<annotation>
+					<appinfo>
+						<gml:description>vmapLevel2PierwszejEdycji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="VMAPL2_v2">
+				<annotation>
+					<appinfo>
+						<gml:description>vmapLevel2DrugiejEdycji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="TBD">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychTopograficznych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CORINE">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychCLC</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CRFOP">
+				<annotation>
+					<appinfo>
+						<gml:description>centralnyRejestrFormOchronyPrzyrody</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="BDD">
+				<annotation>
+					<appinfo>
+						<gml:description>bankDanychDrogowych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="BDOT500">
+				<annotation>
+					<appinfo>
+						<gml:description>bazaDanychWgInstrK1</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="KSOCH">
+				<annotation>
+					<appinfo>
+						<gml:description>krajowySystemObszarowChronionych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="LMN">
+				<annotation>
+					<appinfo>
+						<gml:description>lesnaMapaNumeryczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="MPHP">
+				<annotation>
+					<appinfo>
+						<gml:description>mapaPodzialuHydrograficznegoPolski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="PKP">
+				<annotation>
+					<appinfo>
+						<gml:description>bazyDanychPKP</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="RZAB">
+				<annotation>
+					<appinfo>
+						<gml:description>rejestrZabytkow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="TERYT">
+				<annotation>
+					<appinfo>
+						<gml:description>krajowyRejestrUrzedowegoPodzialuTerytorialnegoKraju</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Str">
+				<annotation>
+					<appinfo>
+						<gml:description>pomiarStereoskopowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trn">
+				<annotation>
+					<appinfo>
+						<gml:description>pomiarTerenowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajRepGeomType">
+		<restriction base="string">
+			<enumeration value="SG">
+				<annotation>
+					<appinfo>
+						<gml:description>srodekGeometryczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="MC">
+				<annotation>
+					<appinfo>
+						<gml:description>miejsceCharakterystyczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="PU">
+				<annotation>
+					<appinfo>
+						<gml:description>punktUmowny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="OG">
+				<annotation>
+					<appinfo>
+						<gml:description>osGeometryczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="OI">
+				<annotation>
+					<appinfo>
+						<gml:description>osInterpolowana</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="LU">
+				<annotation>
+					<appinfo>
+						<gml:description>liniaUmowna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="SL">
+				<annotation>
+					<appinfo>
+						<gml:description>sztucznyLacznik</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="KR">
+				<annotation>
+					<appinfo>
+						<gml:description>krawedz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="ZP">
+				<annotation>
+					<appinfo>
+						<gml:description>zarysPodstawy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="ZU">
+				<annotation>
+					<appinfo>
+						<gml:description>zasiegUmowny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="MA">
+				<annotation>
+					<appinfo>
+						<gml:description>maksymalnyZasieg</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="MI">
+				<annotation>
+					<appinfo>
+						<gml:description>minimalnyZasieg</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="SZ">
+				<annotation>
+					<appinfo>
+						<gml:description>sredniZasieg</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KatIstnieniaType">
+		<restriction base="string">
+			<enumeration value="Eks">
+				<annotation>
+					<appinfo>
+						<gml:description>eksploatowany</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Bud">
+				<annotation>
+					<appinfo>
+						<gml:description>wBudowie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zns">
+				<annotation>
+					<appinfo>
+						<gml:description>zniszczony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tmc">
+				<annotation>
+					<appinfo>
+						<gml:description>tymczasowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ncn">
+				<annotation>
+					<appinfo>
+						<gml:description>nieczynny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KatDokladnosciType">
+		<restriction base="string">
+			<enumeration value="Dok">
+				<annotation>
+					<appinfo>
+						<gml:description>dokladny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prz">
+				<annotation>
+					<appinfo>
+						<gml:description>przyblizony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Npw">
+				<annotation>
+					<appinfo>
+						<gml:description>niepewny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiPodzialTerytorialny ==========================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajJednostkiAdministracyjnejType">
+		<restriction base="string">
+			<enumeration value="Pns">
+				<annotation>
+					<appinfo>
+						<gml:description>panstwo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Woj">
+				<annotation>
+					<appinfo>
+						<gml:description>wojewodztwo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pow">
+				<annotation>
+					<appinfo>
+						<gml:description>powiat</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="GM">
+				<annotation>
+					<appinfo>
+						<gml:description>gminaMiejska</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="GW">
+				<annotation>
+					<appinfo>
+						<gml:description>gminaWiejska</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gmw">
+				<annotation>
+					<appinfo>
+						<gml:description>gminaMiejskoWiejska</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CmG">
+				<annotation>
+					<appinfo>
+						<gml:description>miastoWGminieMiejskoWiejskiej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CwG">
+				<annotation>
+					<appinfo>
+						<gml:description>obszarWiejskiWGminieMiejskoWiejskiej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dzl">
+				<annotation>
+					<appinfo>
+						<gml:description>dzielnica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dlg">
+				<annotation>
+					<appinfo>
+						<gml:description>delegatura</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajMiejscowosciType">
+		<restriction base="string">
+			<enumeration value="Ms">
+				<annotation>
+					<appinfo>
+						<gml:description>miasto</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CMs">
+				<annotation>
+					<appinfo>
+						<gml:description>czescMiasta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ws">
+				<annotation>
+					<appinfo>
+						<gml:description>wies</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CWs">
+				<annotation>
+					<appinfo>
+						<gml:description>czescWsi</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kl">
+				<annotation>
+					<appinfo>
+						<gml:description>kolonia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="CKl">
+				<annotation>
+					<appinfo>
+						<gml:description>czescKolonii</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Osd">
+				<annotation>
+					<appinfo>
+						<gml:description>osada</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="COsd">
+				<annotation>
+					<appinfo>
+						<gml:description>czescOsady</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Osl">
+				<annotation>
+					<appinfo>
+						<gml:description>osiedle</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prz">
+				<annotation>
+					<appinfo>
+						<gml:description>przysiolek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ls">
+				<annotation>
+					<appinfo>
+						<gml:description>lesniczowka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gj">
+				<annotation>
+					<appinfo>
+						<gml:description>gajowka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Inn">
+				<annotation>
+					<appinfo>
+						<gml:description>innyObiekt</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiPokrycieTerenu =============================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajSurowcaType">
+		<restriction base="string">
+			<enumeration value="Gl">
+				<annotation>
+					<appinfo>
+						<gml:description>glina</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Km">
+				<annotation>
+					<appinfo>
+						<gml:description>kamien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Md">
+				<annotation>
+					<appinfo>
+						<gml:description>miedz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pk">
+				<annotation>
+					<appinfo>
+						<gml:description>piasek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Co">
+				<annotation>
+					<appinfo>
+						<gml:description>rudaCynkuIOlowiu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sr">
+				<annotation>
+					<appinfo>
+						<gml:description>siarka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tf">
+				<annotation>
+					<appinfo>
+						<gml:description>torf</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wb">
+				<annotation>
+					<appinfo>
+						<gml:description>wegielBrunatny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wp">
+				<annotation>
+					<appinfo>
+						<gml:description>wapien</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zw">
+				<annotation>
+					<appinfo>
+						<gml:description>zwir</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajZabudowyType">
+		<restriction base="string">
+			<enumeration value="Wld">
+				<annotation>
+					<appinfo>
+						<gml:description>wielorodzinna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jrd">
+				<annotation>
+					<appinfo>
+						<gml:description>jednorodzinna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pmg">
+				<annotation>
+					<appinfo>
+						<gml:description>przemyslowoSkladowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Hnd">
+				<annotation>
+					<appinfo>
+						<gml:description>handlowoUslugowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Inn">
+				<annotation>
+					<appinfo>
+						<gml:description>pozostalaZabudowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajRoslinnosciTerenuZabudowyType">
+		<restriction base="string">
+			<enumeration value="Br">
+				<annotation>
+					<appinfo>
+						<gml:description>brak</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Bl">
+				<annotation>
+					<appinfo>
+						<gml:description>brakPlacTwardy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dr">
+				<annotation>
+					<appinfo>
+						<gml:description>drzewa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sd">
+				<annotation>
+					<appinfo>
+						<gml:description>sad</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tr">
+				<annotation>
+					<appinfo>
+						<gml:description>trawa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuNiezabudowanegoType">
+		<restriction base="string">
+			<enumeration value="Urz">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodUrzadzeniamiTechnicznymiBudowlami</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tps">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPrzemyslowoSkladowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="TN">
+				<annotation>
+					<appinfo>
+						<gml:description>terenNiezabudowany</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajRoslinnosciTerenuRolnegoType">
+		<restriction base="string">
+			<enumeration value="Rt">
+				<annotation>
+					<appinfo>
+						<gml:description>roslinnoscTrawiasta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gr">
+				<annotation>
+					<appinfo>
+						<gml:description>gruntOrny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuUprawTrwalychType">
+		<restriction base="string">
+			<enumeration value="Odz">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodkiDzialkowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pln">
+				<annotation>
+					<appinfo>
+						<gml:description>plantacja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sad">
+				<annotation>
+					<appinfo>
+						<gml:description>sad</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Szl">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolkaLesna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Szr">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolkaRoslinOzdobnych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajCharakteruZabudowyType">
+		<restriction base="string">
+			<enumeration value="Zwr">
+				<annotation>
+					<appinfo>
+						<gml:description>zwarta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gst">
+				<annotation>
+					<appinfo>
+						<gml:description>gesta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Luz">
+				<annotation>
+					<appinfo>
+						<gml:description>luzna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuSkladowaniaOdpadowType">
+		<restriction base="string">
+			<enumeration value="Odk">
+				<annotation>
+					<appinfo>
+						<gml:description>terenSkladowaniaOdpadowKomunalnych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Odp">
+				<annotation>
+					<appinfo>
+						<gml:description>terenSkladowaniaOdpadowPrzemyslowych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="SO">
+				<annotation>
+					<appinfo>
+						<gml:description>skladowiskoOdpadow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajGruntuNieuzytkowanegoType">
+		<restriction base="string">
+			<enumeration value="Skl">
+				<annotation>
+					<appinfo>
+						<gml:description>piargUsypiskoRumowiskoSkalne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kam">
+				<annotation>
+					<appinfo>
+						<gml:description>terenKamienisty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Psk">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPiaszczystyZwirowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Inn">
+				<annotation>
+					<appinfo>
+						<gml:description>pozostaleGruntyNieuzytkowane</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="GN">
+				<annotation>
+					<appinfo>
+						<gml:description>gruntNieuzytkowany</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuKomunikacyjnegoType">
+		<restriction base="string">
+			<enumeration value="Dkw">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodDrogaKolowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trw">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodTorowiskiem</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dtr">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodDrogaKolowaTorowiskiem</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ltn">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodDrogaLotniskowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="TK">
+				<annotation>
+					<appinfo>
+						<gml:description>terenPodDrogamiKolowymiSzynowymiLotniskowymi</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajObszaruWodyType">
+		<restriction base="string">
+			<enumeration value="Pm">
+				<annotation>
+					<appinfo>
+						<gml:description>wodyMorskie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pp">
+				<annotation>
+					<appinfo>
+						<gml:description>wodyPlynace</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ps">
+				<annotation>
+					<appinfo>
+						<gml:description>wodyStojace</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KatDrzewostanuType">
+		<restriction base="string">
+			<enumeration value="I">
+				<annotation>
+					<appinfo>
+						<gml:description>iglasty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="L">
+				<annotation>
+					<appinfo>
+						<gml:description>lisciasty</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="M">
+				<annotation>
+					<appinfo>
+						<gml:description>mieszany</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuLesnegoLubZadrzewionegoType">
+		<restriction base="string">
+			<enumeration value="Las">
+				<annotation>
+					<appinfo>
+						<gml:description>las</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zag">
+				<annotation>
+					<appinfo>
+						<gml:description>zagajnik</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zdr">
+				<annotation>
+					<appinfo>
+						<gml:description>zadrzewienie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="LZ">
+				<annotation>
+					<appinfo>
+						<gml:description>terenLesnyZadrzewiony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTerenuKrzewiastegoType">
+		<restriction base="string">
+			<enumeration value="Kos">
+				<annotation>
+					<appinfo>
+						<gml:description>zaroslaKosodrzewiny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Krz">
+				<annotation>
+					<appinfo>
+						<gml:description>zaroslaKrzewow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="RK">
+				<annotation>
+					<appinfo>
+						<gml:description>roslinnoscKrzewiasta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajZwalowiskaWyrobiskaType">
+		<restriction base="string">
+			<enumeration value="Wrb">
+				<annotation>
+					<appinfo>
+						<gml:description>wyrobisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zwl">
+				<annotation>
+					<appinfo>
+						<gml:description>zwalowisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ============== CODE LISTS ==============-->
+	<simpleType name="OT_GatunekDrzewostanuType">
+		<union memberTypes="ot:OT_GatunekDrzewostanuEnumerationType ot:OT_GatunekDrzewostanuOtherType"/>
+	</simpleType>
+	<simpleType name="OT_GatunekDrzewostanuEnumerationType">
+		<restriction base="string">
+			<enumeration value="Akc">
+				<annotation>
+					<appinfo>
+						<gml:description>akacja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Brz">
+				<annotation>
+					<appinfo>
+						<gml:description>brzoza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Buk">
+				<annotation>
+					<appinfo>
+						<gml:description>buk</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dgl">
+				<annotation>
+					<appinfo>
+						<gml:description>daglezja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dab">
+				<annotation>
+					<appinfo>
+						<gml:description>dab</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Grb">
+				<annotation>
+					<appinfo>
+						<gml:description>grab</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jwr">
+				<annotation>
+					<appinfo>
+						<gml:description>jawor</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jsn">
+				<annotation>
+					<appinfo>
+						<gml:description>jesion</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jdl">
+				<annotation>
+					<appinfo>
+						<gml:description>jodla</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kln">
+				<annotation>
+					<appinfo>
+						<gml:description>klon</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lmb">
+				<annotation>
+					<appinfo>
+						<gml:description>limba</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lpa">
+				<annotation>
+					<appinfo>
+						<gml:description>lipa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mdr">
+				<annotation>
+					<appinfo>
+						<gml:description>modrzew</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Olc">
+				<annotation>
+					<appinfo>
+						<gml:description>olcha</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Osk">
+				<annotation>
+					<appinfo>
+						<gml:description>osika</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ssn">
+				<annotation>
+					<appinfo>
+						<gml:description>sosna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Swr">
+				<annotation>
+					<appinfo>
+						<gml:description>swierk</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tpl">
+				<annotation>
+					<appinfo>
+						<gml:description>topola</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wiz">
+				<annotation>
+					<appinfo>
+						<gml:description>wiaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wib">
+				<annotation>
+					<appinfo>
+						<gml:description>wierzba</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_GatunekDrzewostanuOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_GatunekUprawTrwalychType">
+		<union memberTypes="ot:OT_GatunekUprawTrwalychEnumerationType ot:OT_GatunekUprawTrwalychOtherType"/>
+	</simpleType>
+	<simpleType name="OT_GatunekUprawTrwalychEnumerationType">
+		<restriction base="string">
+			<enumeration value="Agr">
+				<annotation>
+					<appinfo>
+						<gml:description>agrest</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Aro">
+				<annotation>
+					<appinfo>
+						<gml:description>aronia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Brz">
+				<annotation>
+					<appinfo>
+						<gml:description>brzoskwinia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Chm">
+				<annotation>
+					<appinfo>
+						<gml:description>chmiel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Czr">
+				<annotation>
+					<appinfo>
+						<gml:description>czeresnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Grs">
+				<annotation>
+					<appinfo>
+						<gml:description>grusza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Jbl">
+				<annotation>
+					<appinfo>
+						<gml:description>jablon</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mrl">
+				<annotation>
+					<appinfo>
+						<gml:description>morela</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prz">
+				<annotation>
+					<appinfo>
+						<gml:description>porzeczka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Slw">
+				<annotation>
+					<appinfo>
+						<gml:description>sliwa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wkl">
+				<annotation>
+					<appinfo>
+						<gml:description>wiklina</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Win">
+				<annotation>
+					<appinfo>
+						<gml:description>winorosl</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wsn">
+				<annotation>
+					<appinfo>
+						<gml:description>wisnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dig">
+				<annotation>
+					<appinfo>
+						<gml:description>drzewaIglaste</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dls">
+				<annotation>
+					<appinfo>
+						<gml:description>drzewaLisciaste</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dms">
+				<annotation>
+					<appinfo>
+						<gml:description>drzewaMieszane</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_GatunekUprawTrwalychOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiSiecKomunikacyjna ==========================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_MaterialNawierzchniType">
+		<restriction base="string">
+			<enumeration value="Bt">
+				<annotation>
+					<appinfo>
+						<gml:description>beton</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Br">
+				<annotation>
+					<appinfo>
+						<gml:description>bruk</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kl">
+				<annotation>
+					<appinfo>
+						<gml:description>klinkier</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kk">
+				<annotation>
+					<appinfo>
+						<gml:description>kostkaKamienna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kp">
+				<annotation>
+					<appinfo>
+						<gml:description>kostkaPrefabrykowana</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mb">
+				<annotation>
+					<appinfo>
+						<gml:description>masaBitumiczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pb">
+				<annotation>
+					<appinfo>
+						<gml:description>plytyBetonowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tl">
+				<annotation>
+					<appinfo>
+						<gml:description>tluczen</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zw">
+				<annotation>
+					<appinfo>
+						<gml:description>zwir</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gr">
+				<annotation>
+					<appinfo>
+						<gml:description>gruntNaturalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gz">
+				<annotation>
+					<appinfo>
+						<gml:description>stabilizacjaZwiremLubZuzlem</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="T">
+				<annotation>
+					<appinfo>
+						<gml:description>nawierzchniaTwarda</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="U">
+				<annotation>
+					<appinfo>
+						<gml:description>nawierzchniaUtwardzona</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="G">
+				<annotation>
+					<appinfo>
+						<gml:description>nawierzchniaGruntowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajPrzeprawyType">
+		<restriction base="string">
+			<enumeration value="Br">
+				<annotation>
+					<appinfo>
+						<gml:description>brod</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ld">
+				<annotation>
+					<appinfo>
+						<gml:description>przeprawaLodziami</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pr">
+				<annotation>
+					<appinfo>
+						<gml:description>przeprawaPromowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RuchRowerowyType">
+		<restriction base="string">
+			<enumeration value="Wlc">
+				<annotation>
+					<appinfo>
+						<gml:description>wylaczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Dps">
+				<annotation>
+					<appinfo>
+						<gml:description>dopuszczony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ndp">
+				<annotation>
+					<appinfo>
+						<gml:description>niedopuszczony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajToruType">
+		<restriction base="string">
+			<enumeration value="Tn">
+				<annotation>
+					<appinfo>
+						<gml:description>torNormalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ts">
+				<annotation>
+					<appinfo>
+						<gml:description>torSzeroki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tw">
+				<annotation>
+					<appinfo>
+						<gml:description>torWaski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajPojazduSzynowegoType">
+		<restriction base="string">
+			<enumeration value="Kol">
+				<annotation>
+					<appinfo>
+						<gml:description>kolej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mtr">
+				<annotation>
+					<appinfo>
+						<gml:description>metro</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trm">
+				<annotation>
+					<appinfo>
+						<gml:description>tramwaj</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KlasaCiaguRuchuPieszegoType">
+		<restriction base="string">
+			<enumeration value="Ap">
+				<annotation>
+					<appinfo>
+						<gml:description>alejka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pm">
+				<annotation>
+					<appinfo>
+						<gml:description>pasaz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sc">
+				<annotation>
+					<appinfo>
+						<gml:description>sciezka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajTrakcjiType">
+		<restriction base="string">
+			<enumeration value="Nz">
+				<annotation>
+					<appinfo>
+						<gml:description>niezelektryfikowana</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Z">
+				<annotation>
+					<appinfo>
+						<gml:description>zelektryfikowana</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KlasaDrogiType">
+		<restriction base="string">
+			<enumeration value="A">
+				<annotation>
+					<appinfo>
+						<gml:description>autostrada</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="S">
+				<annotation>
+					<appinfo>
+						<gml:description>ekspresowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="GP">
+				<annotation>
+					<appinfo>
+						<gml:description>glownaRuchuPrzyspieszonego</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="G">
+				<annotation>
+					<appinfo>
+						<gml:description>glowna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Z">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiorcza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="L">
+				<annotation>
+					<appinfo>
+						<gml:description>lokalna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="D">
+				<annotation>
+					<appinfo>
+						<gml:description>dojazdowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="I">
+				<annotation>
+					<appinfo>
+						<gml:description>inna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_PolozenieObiektuSieciTransportowejType">
+		<restriction base="string">
+			<enumeration value="-1">
+				<annotation>
+					<appinfo>
+						<gml:description>podPowierzchniaGruntu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="0">
+				<annotation>
+					<appinfo>
+						<gml:description>naPowierzchniGruntu</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="1">
+				<annotation>
+					<appinfo>
+						<gml:description>ponadPowierzchniaGruntuPoziom1</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="2">
+				<annotation>
+					<appinfo>
+						<gml:description>ponadPowierzchniaGruntuPoziom2</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="3">
+				<annotation>
+					<appinfo>
+						<gml:description>ponadPowierzchniaGruntuPoziom3</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="4">
+				<annotation>
+					<appinfo>
+						<gml:description>ponadPowierzchniaGruntuPoziom4</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KatZarzadzaniaDrogiType">
+		<restriction base="string">
+			<enumeration value="K">
+				<annotation>
+					<appinfo>
+						<gml:description>krajowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="W">
+				<annotation>
+					<appinfo>
+						<gml:description>wojewodzka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="P">
+				<annotation>
+					<appinfo>
+						<gml:description>powiatowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="G">
+				<annotation>
+					<appinfo>
+						<gml:description>gminna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Z">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="I">
+				<annotation>
+					<appinfo>
+						<gml:description>inna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_FunkcjaToruType">
+		<restriction base="string">
+			<enumeration value="Tsz">
+				<annotation>
+					<appinfo>
+						<gml:description>torSzlakowyZwykly</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tss">
+				<annotation>
+					<appinfo>
+						<gml:description>torSzlakowyStacyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tzs">
+				<annotation>
+					<appinfo>
+						<gml:description>torZwyklyStacyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Bcz">
+				<annotation>
+					<appinfo>
+						<gml:description>bocznica</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="TS">
+				<annotation>
+					<appinfo>
+						<gml:description>torSzlakowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_FunkcjaTransportowaType">
+		<restriction base="string">
+			<enumeration value="Psz">
+				<annotation>
+					<appinfo>
+						<gml:description>ruchPieszy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sam">
+				<annotation>
+					<appinfo>
+						<gml:description>ruchSamochodowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tos">
+				<annotation>
+					<appinfo>
+						<gml:description>ruchOsobowoTowarowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tow">
+				<annotation>
+					<appinfo>
+						<gml:description>ruchTowarowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_TypKrzyzowanDrogType">
+		<restriction base="string">
+			<enumeration value="Rd">
+				<annotation>
+					<appinfo>
+						<gml:description>rondo</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wa">
+				<annotation>
+					<appinfo>
+						<gml:description>wezelBezkolizyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wb">
+				<annotation>
+					<appinfo>
+						<gml:description>wezelCzesciowoBezkolizyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wc">
+				<annotation>
+					<appinfo>
+						<gml:description>wezelKolizyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiSiecUzbrojeniaTerenu ========================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajLiniiNapowietrznejType">
+		<restriction base="string">
+			<enumeration value="NN">
+				<annotation>
+					<appinfo>
+						<gml:description>najwyzszeNapiecie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="WN">
+				<annotation>
+					<appinfo>
+						<gml:description>wysokieNapiecie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="SN">
+				<annotation>
+					<appinfo>
+						<gml:description>srednieNapiecie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="n/n">
+				<annotation>
+					<appinfo>
+						<gml:description>niskieNapiecie</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="LTK">
+				<annotation>
+					<appinfo>
+						<gml:description>telekomunikacyjna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_PolozenieRurociaguType">
+		<restriction base="string">
+			<enumeration value="Nzp">
+				<annotation>
+					<appinfo>
+						<gml:description>nadziemnyNaPodporach</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Nzz">
+				<annotation>
+					<appinfo>
+						<gml:description>nadziemnyZawieszony</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Nzm">
+				<annotation>
+					<appinfo>
+						<gml:description>naziemny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pdz">
+				<annotation>
+					<appinfo>
+						<gml:description>podziemny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajPrzewoduRurowegoType">
+		<restriction base="string">
+			<enumeration value="B">
+				<annotation>
+					<appinfo>
+						<gml:description>benzynowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="C">
+				<annotation>
+					<appinfo>
+						<gml:description>cieplowniczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="G">
+				<annotation>
+					<appinfo>
+						<gml:description>gazowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="K">
+				<annotation>
+					<appinfo>
+						<gml:description>kanalizacji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="N">
+				<annotation>
+					<appinfo>
+						<gml:description>naftowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="W">
+				<annotation>
+					<appinfo>
+						<gml:description>wodociagowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiSiecWodna ================================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajRzekiType">
+		<restriction base="string">
+			<enumeration value="Rz">
+				<annotation>
+					<appinfo>
+						<gml:description>rzeka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="St">
+				<annotation>
+					<appinfo>
+						<gml:description>strumienPotokLubStruga</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="RS">
+				<annotation>
+					<appinfo>
+						<gml:description>rzekaStrumienPotokLubStruga</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajRowuMelioracyjnegoType">
+		<restriction base="string">
+			<enumeration value="Rzb">
+				<annotation>
+					<appinfo>
+						<gml:description>zbiorczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rzw">
+				<annotation>
+					<appinfo>
+						<gml:description>zwykly</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="RM">
+				<annotation>
+					<appinfo>
+						<gml:description>rowMelioracyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_StatusEksploatacjiType">
+		<restriction base="string">
+			<enumeration value="Nz">
+				<annotation>
+					<appinfo>
+						<gml:description>niezeglowny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Z">
+				<annotation>
+					<appinfo>
+						<gml:description>zeglowny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_PolozenieCiekuType">
+		<restriction base="string">
+			<enumeration value="0">
+				<annotation>
+					<appinfo>
+						<gml:description>naPowierzchni</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="-1">
+				<annotation>
+					<appinfo>
+						<gml:description>podPowierzchnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_PrzebiegCiekuType">
+		<restriction base="string">
+			<enumeration value="Cgl">
+				<annotation>
+					<appinfo>
+						<gml:description>ciekGlowny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rbc">
+				<annotation>
+					<appinfo>
+						<gml:description>ramieBoczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiTerenyChronione ============================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajRezerwatuType">
+		<restriction base="string">
+			<enumeration value="Ls">
+				<annotation>
+					<appinfo>
+						<gml:description>lesny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wd">
+				<annotation>
+					<appinfo>
+						<gml:description>wodny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="St">
+				<annotation>
+					<appinfo>
+						<gml:description>stepowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sl">
+				<annotation>
+					<appinfo>
+						<gml:description>slonoroslowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Fn">
+				<annotation>
+					<appinfo>
+						<gml:description>faunistyczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Fl">
+				<annotation>
+					<appinfo>
+						<gml:description>florystyczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tf">
+				<annotation>
+					<appinfo>
+						<gml:description>torfowiskowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pn">
+				<annotation>
+					<appinfo>
+						<gml:description>przyrodyNieozywionej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kr">
+				<annotation>
+					<appinfo>
+						<gml:description>krajobrazowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ========= SlownikiUzytkowanieTerenu =========================-->
+	<!-- ============ ENUMERATIONS =============-->
+	<simpleType name="OT_RodzajKompleksuOchronyZdrowiaType">
+		<restriction base="string">
+			<enumeration value="Zop">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladOpiekiSocjalnejDomDziecka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zsz">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolSzpitalnySanatoryjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuHandlowoUslugowegoType">
+		<restriction base="string">
+			<enumeration value="Chu">
+				<annotation>
+					<appinfo>
+						<gml:description>centrumHandlowoUslugowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Trg">
+				<annotation>
+					<appinfo>
+						<gml:description>targowiskoBazar</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajInnegoKompleksuType">
+		<restriction base="string">
+			<enumeration value="Pwk">
+				<annotation>
+					<appinfo>
+						<gml:description>poligonWojskowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zsp">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladSpecjalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_LokalizacjaPortuType">
+		<restriction base="string">
+			<enumeration value="Mrs">
+				<annotation>
+					<appinfo>
+						<gml:description>morski</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Srd">
+				<annotation>
+					<appinfo>
+						<gml:description>srodladowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuSakralnegoType">
+		<restriction base="string">
+			<enumeration value="Cmt">
+				<annotation>
+					<appinfo>
+						<gml:description>cmentarz</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zsk">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolSakralnyKlasztorny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuMieszkaniowegoType">
+		<restriction base="string">
+			<enumeration value="Osd">
+				<annotation>
+					<appinfo>
+						<gml:description>osiedleMieszkaniowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pss">
+				<annotation>
+					<appinfo>
+						<gml:description>posesja</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuOswiatowegoType">
+		<restriction base="string">
+			<enumeration value="Ond">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekNaukowoDoswiadczalny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pzl">
+				<annotation>
+					<appinfo>
+						<gml:description>przedszkoleZlobek</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Szk">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolaZespolSzkol</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Szw">
+				<annotation>
+					<appinfo>
+						<gml:description>szkolaWyzsza</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuKomunikacyjnegoType">
+		<restriction base="string">
+			<enumeration value="Dau">
+				<annotation>
+					<appinfo>
+						<gml:description>dworzecAutobusowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lot">
+				<annotation>
+					<appinfo>
+						<gml:description>lotniskoLadowisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Mop">
+				<annotation>
+					<appinfo>
+						<gml:description>miejsceObslugiPodroznych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prk">
+				<annotation>
+					<appinfo>
+						<gml:description>parking</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pwd">
+				<annotation>
+					<appinfo>
+						<gml:description>portWodnyPrzystan</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Skl">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaKolejowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Smt">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaMetra</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Spl">
+				<annotation>
+					<appinfo>
+						<gml:description>stacjaPaliw</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tkl">
+				<annotation>
+					<appinfo>
+						<gml:description>terenKolejowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zjz">
+				<annotation>
+					<appinfo>
+						<gml:description>zajezdniaBazaTransportowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajPortuType">
+		<restriction base="string">
+			<enumeration value="Woj">
+				<annotation>
+					<appinfo>
+						<gml:description>wojskowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Hnd">
+				<annotation>
+					<appinfo>
+						<gml:description>handlowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ryb">
+				<annotation>
+					<appinfo>
+						<gml:description>rybacki</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pzp">
+				<annotation>
+					<appinfo>
+						<gml:description>przystanZeglugiPasazerskiej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_KopalinaType">
+		<restriction base="string">
+			<enumeration value="Wkm">
+				<annotation>
+					<appinfo>
+						<gml:description>wegielKamienny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wbr">
+				<annotation>
+					<appinfo>
+						<gml:description>wegielBrunatny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rnf">
+				<annotation>
+					<appinfo>
+						<gml:description>ropaNaftowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gzm">
+				<annotation>
+					<appinfo>
+						<gml:description>gazZiemny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Smt">
+				<annotation>
+					<appinfo>
+						<gml:description>surowceMetaliczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Skm">
+				<annotation>
+					<appinfo>
+						<gml:description>solKamienna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Srk">
+				<annotation>
+					<appinfo>
+						<gml:description>siarka</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Isk">
+				<annotation>
+					<appinfo>
+						<gml:description>inneSurowceSkalne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ich">
+				<annotation>
+					<appinfo>
+						<gml:description>inneSurowceChemiczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuZabytkowoHistorycznegoType">
+		<restriction base="string">
+			<enumeration value="Mpn">
+				<annotation>
+					<appinfo>
+						<gml:description>miejscePamieciNarodowej</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Skn">
+				<annotation>
+					<appinfo>
+						<gml:description>skansen</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Twf">
+				<annotation>
+					<appinfo>
+						<gml:description>twierdzaForteca</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zmz">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolMuzealny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zpl">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolPalacowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zzm">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolZamkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajElektrowniType">
+		<restriction base="string">
+			<enumeration value="Cpl">
+				<annotation>
+					<appinfo>
+						<gml:description>cieplna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wdn">
+				<annotation>
+					<appinfo>
+						<gml:description>wodna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Wtr">
+				<annotation>
+					<appinfo>
+						<gml:description>wiatrowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sln">
+				<annotation>
+					<appinfo>
+						<gml:description>sloneczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Atm">
+				<annotation>
+					<appinfo>
+						<gml:description>atomowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKopalniType">
+		<restriction base="string">
+			<enumeration value="Odk">
+				<annotation>
+					<appinfo>
+						<gml:description>odkrywkowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Glb">
+				<annotation>
+					<appinfo>
+						<gml:description>glebinowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Otw">
+				<annotation>
+					<appinfo>
+						<gml:description>otworowa</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuUslugHotelarskichType">
+		<restriction base="string">
+			<enumeration value="Hmt">
+				<annotation>
+					<appinfo>
+						<gml:description>holelMotel</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kmp">
+				<annotation>
+					<appinfo>
+						<gml:description>kemping</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Owp">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekWypoczynkowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sct">
+				<annotation>
+					<appinfo>
+						<gml:description>schroniskoTurystyczne</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuSportowoRekreacyjnegoType">
+		<restriction base="string">
+			<enumeration value="Obt">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodBotaniczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ozl">
+				<annotation>
+					<appinfo>
+						<gml:description>ogrodZoologiczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Osr">
+				<annotation>
+					<appinfo>
+						<gml:description>osrodekSportowoRekreacyjny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prk">
+				<annotation>
+					<appinfo>
+						<gml:description>park</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zdl">
+				<annotation>
+					<appinfo>
+						<gml:description>zespolDomowLetniskowych</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajLotniskaType">
+		<restriction base="string">
+			<enumeration value="Prl">
+				<annotation>
+					<appinfo>
+						<gml:description>portLotniczy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lws">
+				<annotation>
+					<appinfo>
+						<gml:description>lotniskoWojskowe</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Lin">
+				<annotation>
+					<appinfo>
+						<gml:description>lotniskoInneLadowisko</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<!-- ============== CODE LISTS ==============-->
+	<simpleType name="OT_RodzajKompleksuPrzemyslowoGospodarczegoType">
+		<union memberTypes="ot:OT_RodzajKompleksuPrzemyslowoGospodarczegoEnumerationType ot:OT_RodzajKompleksuPrzemyslowoGospodarczegoOtherType"/>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuPrzemyslowoGospodarczegoEnumerationType">
+		<restriction base="string">
+			<enumeration value="Elc">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrocieplownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Elw">
+				<annotation>
+					<appinfo>
+						<gml:description>elektrownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Gaz">
+				<annotation>
+					<appinfo>
+						<gml:description>gazownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ghd">
+				<annotation>
+					<appinfo>
+						<gml:description>gospodarstwoHodowlane</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Hut">
+				<annotation>
+					<appinfo>
+						<gml:description>huta</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Kpl">
+				<annotation>
+					<appinfo>
+						<gml:description>kopalnia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Ocs">
+				<annotation>
+					<appinfo>
+						<gml:description>oczyszczalniaSciekow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Pel">
+				<annotation>
+					<appinfo>
+						<gml:description>podstacjaElektroenergetyczna</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Prz">
+				<annotation>
+					<appinfo>
+						<gml:description>przepompownia</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Rfn">
+				<annotation>
+					<appinfo>
+						<gml:description>rafineria</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Sdp">
+				<annotation>
+					<appinfo>
+						<gml:description>skladowiskoOdpadow</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Tuw">
+				<annotation>
+					<appinfo>
+						<gml:description>terenUjeciaWody</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zmt">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladMetalurgiczny</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zpr">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladProdukcyjnyUslugowyRemontowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zut">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladUtylizacji</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+			<enumeration value="Zwd">
+				<annotation>
+					<appinfo>
+						<gml:description>zakladWodociagowy</gml:description>
+					</appinfo>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+	<simpleType name="OT_RodzajKompleksuPrzemyslowoGospodarczegoOtherType">
+		<restriction base="string">
+			<pattern value="other: \w{2,}"/>
+		</restriction>
+	</simpleType>
+</schema>
