@@ -55,5 +55,5 @@ GeocoderPL can be also used for finding address point by providing name of publi
 </p>
 
 <p align="justify">
-GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQLite database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen's toner map (visualisation purpose only).
+GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQLite database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen's Map (visualisation purpose only).
 </p>
