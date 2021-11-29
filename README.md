@@ -8,13 +8,13 @@ GeocoderPL is an application written in Python, which can be used for geocoding 
 
 <p align="justify">
 GeocoderPL uses two main data sorces: <br>
-  1. The National Register of Boundaries (PRG) - state maintained reference database of all address points in Poland (including administrative division of the country): https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538 <br>
-  2. The Topographic Objects Database (BDOT10k) -  state maintained vector database which contains the spatial location of all topographic features in Poland: https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip </p>
+  1. The National Register of Boundaries Database (a.k.a. PRG database)- state maintained reference database of all address points in Poland (including administrative division of the country): https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538 <br>
+  2. The Topographic Objects Database (a.k.a. BDOT10k database) -  state maintained vector database which contains the spatial location of all topographic features in Poland: https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip </p>
   
 <p align="center">
   <img width=75% height=75% src="/imgs/GeocoderPL_KR.png"/>
 </p>
   
 <p align="justify">
-Selected data contained in the abovementioned databases are parsed from Graph Modeling Language format (GML) to create SQLite database. Geographical coordinates of every address point from the National Register of Boundaries are validated by checking that they lie inside the polygon of their district. For every address point in the National Register of Boundaries
+Selected data contained in the abovementioned databases are parsed from Graph Modeling Language format (GML) to create SQLite database. Geographical coordinates of every address point from the PRG database are cross-validated by checking that they lie inside the polygon of their district. For every address point in PRG database the closest building in the BDOT10k database is found and if the distance between polygon of this building and address point is less than 10 meters then the building is assigned to adress point.
 </p>
