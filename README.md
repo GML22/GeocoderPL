@@ -1,6 +1,6 @@
 # GeocoderPL
 <p align="justify">
-GeocoderPL is an application written in Python, which can be used for geocoding address points in Poland along with the possibility to display basic information about a given address point and the building assigned to this address. GeocoderPL has a form of search engine with three map layers: OpenStreetMap, Google Maps and Stamen's toner map.</p>
+GeocoderPL is an application written in Python, which can be used for geocoding address points in Poland along with the possibility to display basic information about a given address point and the building assigned to this address. GeocoderPL has a form of search engine with three map layers: OpenStreetMap, Google Maps and Stamens Map.</p>
 
 <p align="center">
   <img width=75% height=75% src="/imgs/GeocoderPL.png"/>
