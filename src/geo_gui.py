@@ -54,7 +54,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                                  r"(\.\d+)?)$")
 
         # Ustalamy najważniejsze parametry okna mapy
-        self.setWindowTitle("GEO PYTHON")
+        self.setWindowTitle("GeocoderPL")
         icon_path = self.fls_path + '\\geo_icon.png'
         assrt_msg = "W folderze '" + self.fls_path + "' brakuje pliku 'geo_icon.png'. Uzupełnij ten plik i uruchom " + \
                     "program ponownie!"
