@@ -32,6 +32,7 @@ def main():
     parent_path = os.path.abspath(os.path.join(curr_dir, os.pardir))
     fls_path = parent_path + "\\files\\"
     lyrs_path = parent_path + "\\layers\\"
+    test = 1
 
     # Definiujemy sciezke do bazy danych
     db_path = fls_path + db_name
