@@ -21,7 +21,7 @@ from geo_utilities import *
 def create_gui_window(fls_path, cursor, sekt_num):
     """ Function that creates GUI window """
 
-    all_addrs_path = fls_path + "all_address_phrases.obj"
+    all_addrs_path = os.path.join(fls_path, "all_address_phrases.obj")
     assrt_msg = "W folderze '" + fls_path + "' brakuje pliku 'all_address_phrases.obj'. Uzupełnij ten plik i " + \
                 "uruchom program ponownie!"
     assert os.path.exists(all_addrs_path), assrt_msg
@@ -55,7 +55,7 @@ class MyGeoGUI(QtWidgets.QWidget):
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")
-        icon_path = self.fls_path + '\\geo_icon.png'
+        icon_path = os.path.join(self.fls_path, 'geo_icon.png')
         assrt_msg = "W folderze '" + self.fls_path + "' brakuje pliku 'geo_icon.png'. Uzupełnij ten plik i uruchom " + \
                     "program ponownie!"
         assert os.path.exists(icon_path), assrt_msg

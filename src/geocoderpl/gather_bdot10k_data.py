@@ -37,7 +37,7 @@ def read_bdot10k_dicts(lyrs_path, fls_path):
     """ Function that reads BDOT10K dicts into dictionairy"""
 
     # Parsujemy XMLa
-    dicts_path = lyrs_path + "BDOT10K\\OT_BDOT10k_Slowniki.xsd"
+    dicts_path = os.path.join(lyrs_path, "BDOT10K\\OT_BDOT10k_Slowniki.xsd")
     assrt_msg = "W folderze '" + lyrs_path + "\\BDOT10K' brakuje pliku 'OT_BDOT10k_Slowniki.xsd'. Uzupełnij ten " + \
                 "plik i uruchom program ponownie!"
     assert os.path.exists(dicts_path), assrt_msg
@@ -66,7 +66,7 @@ def read_bdot10k_dicts(lyrs_path, fls_path):
             bdot10k_dicts[curr_attrib['name']] = curr_dict
 
     # Importujemy inne słowniki niezawarte w domyślnym zestawie słowników
-    bubd_codes_path = fls_path + "x_kod.txt"
+    bubd_codes_path = os.path.join(fls_path, "x_kod.txt")
     assrt_msg1 = "W folderze '" + fls_path + "' brakuje pliku 'x_kod.txt'. Uzupełnij ten plik i uruchom program " + \
                  "ponownie!"
     assert os.path.exists(bubd_codes_path), assrt_msg1
@@ -74,7 +74,7 @@ def read_bdot10k_dicts(lyrs_path, fls_path):
     bdot10k_dicts["x_kod"] = csv_to_dict(bubd_codes_path)
 
     # Importujemy inne słowniki niezawarte w domyślnym zestawie słowników
-    karto10k_path = fls_path + "x_kodKarto10k.txt"
+    karto10k_path = os.path.join(fls_path, "x_kodKarto10k.txt")
     assrt_msg2 = "W folderze '" + fls_path + "' brakuje pliku 'x_kodKarto10k.txt'. Uzupełnij ten plik i uruchom " + \
                  "program ponownie!"
     assert os.path.exists(karto10k_path), assrt_msg2
@@ -93,7 +93,7 @@ def csv_to_dict(file_path):
 def open_bdot10k_parse_xml(lyrs_path, bdot10k_dicts, coords_prec, cursor, curr_conn, sekt_num):
     """ Opening zipped BDOT10K database, parsing xml files and inserting rows into db """
 
-    bdot10k_path = lyrs_path + "BDOT10K\\Polska_GML.zip"
+    bdot10k_path = os.path.join(lyrs_path, "BDOT10K\\Polska_GML.zip")
     assrt_msg = "W folderze '" + lyrs_path + "\\BDOT10K' brakuje pliku 'Polska_GML.zip'. Uzupełnij ten plik i " + \
                 "uruchom program ponownie!"
     assert os.path.exists(bdot10k_path), assrt_msg

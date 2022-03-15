@@ -41,7 +41,7 @@ def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords
     addr_arr = np.empty((sekt_num, sekt_num, 1), dtype=object)
     addr_arr[...] = ''
     addr_phrs_dict = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
-    prg_path = lyrs_path + "PRG_punkty_adresowe\\PRG-punkty_adresowe.zip"
+    prg_path = os.path.join(lyrs_path, "PRG_punkty_adresowe\\PRG-punkty_adresowe.zip")
     assrt_msg = "W folderze '" + lyrs_path + "\\PRG_punkty_adresowe' brakuje pliku 'PRG-punkty_adresowe.zip'. " + \
                 "Uzupełnij ten plik i uruchom program ponownie!"
     assert os.path.exists(prg_path), assrt_msg
@@ -83,7 +83,7 @@ def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords
     addr_phrs_dict.pop("C_LEN", None)
 
     # Zapisujemy zbiór unikalnych adresow na dysku twardym
-    with open(fls_path + "all_address_phrases.obj", 'wb') as f:
+    with open(os.path.join(fls_path, "all_address_phrases.obj"), 'wb') as f:
         pickle.dump(addr_phrs_dict, f, pickle.HIGHEST_PROTOCOL)
 
 

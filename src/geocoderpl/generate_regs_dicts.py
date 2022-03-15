@@ -15,8 +15,8 @@ from geo_utilities import time_decorator
 def create_regs_dicts(fls_path, lyrs_path):
     """ Funtion that creates dictionary containing regions shapes """
 
-    if not os.path.exists(fls_path + "regs_dict.npy"):
-        regions_path = lyrs_path + "Granice_adminitracyjne\\00_jednostki_administracyjne.zip"
+    if not os.path.exists(os.path.join(fls_path, "regs_dict.npy")):
+        regions_path = os.path.join(lyrs_path, "Granice_adminitracyjne\\00_jednostki_administracyjne.zip")
         assrt_msg = "W folderze '" + lyrs_path + "\\Granice_adminitracyjne' brakuje pliku " + \
                     "'00_jednostki_administracyjne.zip'. Uzupełnij ten plik i uruchom program ponownie!"
         assert os.path.exists(regions_path), assrt_msg
@@ -49,9 +49,9 @@ def create_regs_dicts(fls_path, lyrs_path):
 
         # Zapisujemy r_dict do pliku
         regs_dict = {"REGIONS": r_dict, "TERYT": t_dict}
-        np.save(fls_path + "regs_dict.npy", regs_dict)
+        np.save(os.path.join(fls_path, "regs_dict.npy"), regs_dict)
 
-    regs_dict = np.load(fls_path + "regs_dict.npy", allow_pickle=True).item()
+    regs_dict = np.load(os.path.join(fls_path, "regs_dict.npy"), allow_pickle=True).item()
     return regs_dict
 
 

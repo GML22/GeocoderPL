@@ -1,5 +1,0 @@
-00:17:14 root[19192] INFO: 0. Rozpoczêcie wykonywania funkcji 'main'
-00:17:14 root[19192] INFO: 0. Rozpoczêcie wykonywania funkcji 'create_regs_dicts'
-00:17:14 root[19192] INFO: 1. £¹czny czas wykonywania funkcji 'create_regs_dicts': 0.13 sekundy
-00:18:58 root[19192] INFO: 1. £¹czny czas wykonywania funkcji 'main': 104.01 sekundy
-00:18:58 root[19192] INFO: £¹czny czas wykonywania programu: 104.02 sekundy.
