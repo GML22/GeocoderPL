@@ -71,6 +71,6 @@ def main():
 
 
 if __name__ == "__main__":
-    strt_time = time.time()
+    s_time = time.time()
     main()
-    logging.getLogger('root').info("Łączny czas wykonywania programu - {:.2f} sekundy.".format(time.time() - strt_time))
+    logging.getLogger('root').info("Łączny czas wykonywania programu - {:.2f} sekundy.".format(time.time() - s_time))
