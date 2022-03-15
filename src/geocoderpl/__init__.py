@@ -10,7 +10,7 @@ from generate_regs_dicts import create_regs_dicts
 from geo_gui import create_gui_window
 from geo_utilities import time_decorator, create_logger
 
-# Tworzymy plik loggera
+# Tworzymy domyślny obiekt loggera
 create_logger('root')
 
 
@@ -71,6 +71,6 @@ def main():
 
 
 if __name__ == "__main__":
-    start_time = time.time()
+    strt_time = time.time()
     main()
-    logging.getLogger('root').info("Łączny czas wykonywania programu: {:.2f} sekundy.".format(time.time() - start_time))
+    logging.getLogger('root').info("Łączny czas wykonywania programu - {:.2f} sekundy.".format(time.time() - strt_time))

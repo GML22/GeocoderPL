@@ -46,7 +46,7 @@ def time_decorator(func):
         ret_vals = func(*args, **kwargs)
 
         time_passed = time.time() - start_time
-        logger.info("1. Łączny czas wykonywania funkcji '" + func.__name__ + "': {:.2f} sekundy".format(time_passed))
+        logger.info("1. Łączny czas wykonywania funkcji '" + func.__name__ + "' - {:.2f} sekundy".format(time_passed))
 
         return ret_vals
 
