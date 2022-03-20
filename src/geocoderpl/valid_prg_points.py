@@ -2,6 +2,7 @@
 shapefile of its district and determining closest building shape for given PRG point """
 import geocoder
 import pandas as pd
+from osgeo import ogr
 from unidecode import unidecode
 
 from geo_utilities import *
