@@ -31,11 +31,11 @@ def create_logger(name: str) -> logging.Logger:
     return logger
 
 
-def time_decorator(func: Any) -> Any:
+def time_decorator(func):
     """ Decorator that logs information about time of function execution """
 
     @functools.wraps(func)
-    def time_wrapper(*args: Any, **kwargs: Any) -> Any:
+    def time_wrapper(*args, **kwargs):
         start_time = time.time()
         logger = logging.getLogger('root')
         logger.info("0. Rozpoczęcie wykonywania funkcji '" + func.__name__ + "'")
