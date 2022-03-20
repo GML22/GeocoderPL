@@ -1,7 +1,9 @@
 """ Module that creates dictionary containing the shapes of regions """
 
 import os
+import pickle
 import zipfile
+from collections import OrderedDict
 
 import numpy as np
 from matplotlib import path
@@ -12,123 +14,99 @@ from geo_utilities import time_decorator
 
 
 @time_decorator
-def create_regs_dicts(fls_path, lyrs_path):
-    """ Funtion that creates dictionary containing regions shapes """
+def create_regs_dicts() -> dict:
+    """ Function that creates dictionary containing regions shapes """
 
-    if not os.path.exists(os.path.join(fls_path, "regs_dict.npy")):
-        regions_path = os.path.join(lyrs_path, "Granice_adminitracyjne\\00_jednostki_administracyjne.zip")
-        assrt_msg = "W folderze '" + lyrs_path + "\\Granice_adminitracyjne' brakuje pliku " + \
-                    "'00_jednostki_administracyjne.zip'. Uzupełnij ten plik i uruchom program ponownie!"
-        assert os.path.exists(regions_path), assrt_msg
+    # Sciezka na dysku z zapisanym slownikiem regionow
+    regs_path = os.path.join(os.environ["PARENT_PATH"], os.environ['REGS_PATH'])
 
-        regions_shapes = get_region_shapes(regions_path)
-        all_regs_names = list(regions_shapes.keys())
-        t_dict = {"CODE_KEY": {}, "NAME_KEY": {}}
-        r_dict = {}
+    if not os.path.exists(regs_path):
+        # Podstawowe parametry
+        regs_shps = get_region_shapes()
 
-        # Transformujemy wspolrzednie do ukladu 4326 (przy przy okazji korygujemy kolejność współrzędnych)
-        shapes = regions_shapes[all_regs_names[0]].GetLayer(0)
-        curr_epsg = int(shapes.GetSpatialRef().GetAttrValue("AUTHORITY", 1))
+        # Transformujemy wspolrzednie do ukladu 4326 (przy okazji korygujemy kolejność współrzędnych)
+        f_shp = next(iter(regs_shps.values())).GetLayer(0)
+        curr_epsg = int(f_shp.GetSpatialRef().GetAttrValue("AUTHORITY", 1))
         in_sp_ref = osr.SpatialReference()
         in_sp_ref.ImportFromEPSG(curr_epsg)
         out_sp_ref = osr.SpatialReference()
-        out_sp_ref.ImportFromEPSG(4326)
-        coord_trans = osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
+        out_sp_ref.ImportFromEPSG(int(os.environ['WORLD_CRDS']))
+        crds_trans = osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
 
-        # KRAJ
-        get_reg_dict('_pan', all_regs_names, regions_shapes, t_dict, coord_trans, r_dict)
+        # Wypelniamy słownik ze sciezkami regionow
+        fill_regs_dict(regs_shps, crds_trans)
 
-        # WOJEWÓDZTWA
-        get_reg_dict('_woj', all_regs_names, regions_shapes, t_dict, coord_trans, r_dict)
-
-        # POWIATY
-        get_reg_dict('_pow', all_regs_names, regions_shapes, t_dict, coord_trans, r_dict)
-
-        # GMINY
-        get_reg_dict('_gmin', all_regs_names, regions_shapes, t_dict, coord_trans, r_dict)
-
-        # Zapisujemy r_dict do pliku
-        regs_dict = {"REGIONS": r_dict, "TERYT": t_dict}
-        np.save(os.path.join(fls_path, "regs_dict.npy"), regs_dict)
-
-    regs_dict = np.load(os.path.join(fls_path, "regs_dict.npy"), allow_pickle=True).item()
+    try:
+        # Wczytyujemy z dysku zapisany słownik
+        with open(regs_path, 'rb') as file:
+            regs_dict = pickle.load(file)
+    except FileNotFoundError:
+        raise Exception("Pod podanym adresem: '" + regs_path + "' nie ma pliku regs_dict.obj'. Uzupełnij ten plik i " +
+                        "uruchom program ponownie!")
     return regs_dict
 
 
 @time_decorator
-def get_region_shapes(regions_path):
+def get_region_shapes() -> OrderedDict:
     """ Function that creates shapes for each regions """
 
-    with zipfile.ZipFile(regions_path, "r") as zfile:
-        regions_shapes = {os.path.basename(os.path.normpath(name)): ogr.Open(r'/vsizip/' + regions_path + '/' + name)
-                          for name in zfile.namelist() if name[-4:] == ".shp" and ("_gmin" in name or "_pow" in name or
-                                                                                   "_woj" in name or "_pan" in name)}
-    return regions_shapes
+    # Scieżka do pliku z jednostkami administracyjnymi
+    ja_path = os.path.join(os.environ["PARENT_PATH"], os.environ['JA_PATH'])
+
+    try:
+        with zipfile.ZipFile(ja_path, "r") as zfile:
+            regs_shps = OrderedDict(
+                sorted({os.path.basename(os.path.normpath(name)): ogr.Open(r'/vsizip/' + ja_path + '/' + name)
+                        for name in zfile.namelist() if name[-4:] == ".shp" and
+                        ("_gmin" in name or "_pow" in name or "_woj" in name or "_pan" in name)}.items()))
+    except FileNotFoundError:
+        raise Exception("Pod podanym adresem: '" + ja_path + "' nie ma pliku '00_jednostki_administracyjne.zip'. " +
+                        "Uzupełnij ten plik i uruchom program ponownie!")
+    return regs_shps
 
 
-def get_reg_dict(reg_sub, all_regs_names, regions_shapes, t_dict, coord_trans, r_dict):
+def fill_regs_dict(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> None:
     """ Function that returns dictionairies with shapes paths """
 
-    kraj_ind = [i for i, s in enumerate(all_regs_names) if reg_sub in s][0]
-    file = regions_shapes[all_regs_names[kraj_ind]]
-    shapes = file.GetLayer(0)
+    # Tworzymy słownik regionow i ich ksztaltow
+    regs_dict = {}
 
-    for feature in shapes:
-        feat_itms = feature.items()
-        name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
-        teryt = feat_itms['JPT_KOD_JE']
-        t_dict["CODE_KEY"][teryt] = name
-        geom = feature.geometry()
-        geom.Transform(coord_trans)
-        pth_l = []
+    # Dla każdego podfolderu w pliku granice administracyjne spisujemy
+    for reg_name, reg_file in regs_shps.items():
+        shapes = reg_file.GetLayer(0)
 
-        if geom.GetGeometryName() == "POLYGON":
-            geom_ref = geom.GetGeometryRef(0)
-            pth_l += [path.Path(np.asarray(geom_ref.GetPoints()), readonly=True, closed=True)]
-        else:
-            geom_count = geom.GetGeometryCount()
-            pth_l += [path.Path(np.asarray(geom.GetGeometryRef(i).GetGeometryRef(0).GetPoints()),
-                                readonly=True, closed=True) for i in range(geom_count)]
+        for feature in shapes:
+            feat_itms = feature.items()
+            name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
+            teryt = feat_itms['JPT_KOD_JE']
+            geom = feature.geometry()
+            geom.Transform(crds_trans)
+            path_l = []
 
-        if reg_sub == "_pan":
-            r_dict["Polska"] = {"Paths": pth_l, "Województwa": {}}
-        elif reg_sub == "_woj":
-            if teryt not in r_dict["Polska"]["Województwa"]:
-                r_dict["Polska"]["Województwa"][teryt] = {"Name": name, "Paths": pth_l, "Powiaty": {}}
+            if geom.GetGeometryName() == "POLYGON":
+                geom_ref = geom.GetGeometryRef(0)
+                path_l += [path.Path(np.asarray(geom_ref.GetPoints()), readonly=True, closed=True)]
             else:
-                r_dict["Polska"]["Województwa"][teryt]["Paths"] += pth_l
+                geom_count = geom.GetGeometryCount()
+                path_l += [path.Path(np.asarray(geom.GetGeometryRef(i).GetGeometryRef(0).GetPoints()),
+                                     readonly=True, closed=True) for i in range(geom_count)]
 
-            if name not in t_dict["NAME_KEY"]:
-                t_dict["NAME_KEY"][name] = {"TERYT": [teryt], "POWIATY": {}}
+            # Ustalamy finalną nazwę regionu
+            fin_name = name if len(teryt) < 3 else regs_dict[teryt[:2]][0] + ";" + name if len(teryt) < 5 else \
+                regs_dict[teryt[:4]][0] + ";" + name
+
+            # Uzupełniamy słownik numerami TERYT
+            if fin_name not in regs_dict:
+                regs_dict[fin_name] = [teryt]
             else:
-                t_dict["NAME_KEY"][name]["TERYT"] += [teryt]
+                regs_dict[fin_name] += [teryt]
 
-        elif reg_sub == "_pow":
-            w_name = teryt[:2]
-
-            if teryt not in r_dict["Polska"]["Województwa"][w_name]["Powiaty"]:
-                r_dict["Polska"]["Województwa"][w_name]["Powiaty"].update({teryt: {"Name": name, "Paths": pth_l,
-                                                                                   "Gminy": {}}})
+            # Uzupełniamy słownik obrysami regionów
+            if teryt not in regs_dict:
+                regs_dict[teryt] = [fin_name, path_l]
             else:
-                r_dict["Polska"]["Województwa"][w_name]["Powiaty"][teryt]["Paths"] += pth_l
+                regs_dict[teryt][1] += path_l
 
-            if name not in t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"]:
-                t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"][name] = {"TERYT": [teryt], "GMINY": {}}
-            else:
-                t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"][name]["TERYT"] += [teryt]
-        else:
-            w_name = teryt[:2]
-            p_name = teryt[:4]
-
-            if teryt not in r_dict["Polska"]["Województwa"][w_name]["Powiaty"][p_name]["Gminy"]:
-                r_dict["Polska"]["Województwa"][w_name]["Powiaty"][p_name]["Gminy"].update({
-                    teryt: {"Name": name, "Paths": pth_l}})
-            else:
-                r_dict["Polska"]["Województwa"][w_name]["Powiaty"][p_name]["Gminy"][teryt]["Paths"] += pth_l
-
-            if name in t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"][t_dict["CODE_KEY"][p_name]]["GMINY"]:
-                t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"][
-                    t_dict["CODE_KEY"][p_name]]["GMINY"][name]["TERYT"] += [teryt]
-            else:
-                t_dict["NAME_KEY"][t_dict["CODE_KEY"][w_name]]["POWIATY"][
-                    t_dict["CODE_KEY"][p_name]]["GMINY"][name] = {"TERYT": [teryt]}
+    # Zapisujemy regs_dict na dysku
+    with open(os.path.join(os.environ["PARENT_PATH"], os.environ['REGS_PATH']), 'wb') as f:
+        pickle.dump(regs_dict, f, pickle.HIGHEST_PROTOCOL)

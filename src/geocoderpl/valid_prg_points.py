@@ -1,22 +1,20 @@
 """ Module for converting spatial reference of PRG points from 2180 to 4326, checking if given PRG point belongs to
 shapefile of its district and determining closest building shape for given PRG point """
 import geocoder
-import numpy as np
 import pandas as pd
-import logging
 from unidecode import unidecode
 
 from geo_utilities import *
 
 
 @time_decorator
-def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, sekt_num, max_dist):
+def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
     """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
     to shapefile of its district and finds closest building shape for given PRG point """
 
     # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny zawierajace
     # przekonwertowane wspolrzedne
-    trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], "2180", "4326")
+    trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], str(pl_crds), str(world_crds))
 
     # Grupujemy kolumny z nazwami powiatow oraz gmin i sprawdzamy czy punkty adresowe z bazy PRG znajduja sie wewnatrz
     # shapefili ich gmin
@@ -25,7 +23,7 @@ def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, se
     grouped_regions = df_regions.groupby(['POWIAT', 'GMINA'], as_index=False).groups
 
     # Tworzymy system transformujący wspolrzedne geograficzne
-    coord_trans = create_coords_transform(4326, 2180, True)
+    coord_trans = create_coords_transform(world_crds, pl_crds, True)
 
     # Tworzymy inne przydatne obiekty
     woj_idx = woj_name.rfind("_") + 1
@@ -43,7 +41,7 @@ def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, se
     # oraz znajdujemy najbliższy budynek do danego punktu PRG
     points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, trans_szer, points_arr, popraw_list,
                           coord_trans, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                          cursor, addr_phrs_dict, sekt_num, max_dist)
+                          cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds)
 
     # Tworzymy finalna macierz informacji, ktora zapiszemy w bazie
     fin_points_arr = np.empty((pts_arr_shp[0], pts_arr_shp[1] + 7), dtype=object)
@@ -73,7 +71,7 @@ def points_in_shape(c_paths, curr_coords):
 
 def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, trans_szer, points_arr, popraw_list,
                           coord_trans, dists_lists, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                          dod_opis_list, cursor, addr_phrs_dict, sekt_num, max_dist):
+                          dod_opis_list, cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -83,18 +81,14 @@ def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, tran
             logging.info(gmin_name)
             pow_name = get_corr_reg_name(unidecode(pow_name.upper()))
             gmin_name = get_corr_reg_name(unidecode(gmin_name.upper()))
-            t_dict = regs_dict["TERYT"]
-            r_dict = regs_dict["REGIONS"]
 
             # Pobieramy kody TERYT danej gminy
-            gmin_codes = t_dict["NAME_KEY"][woj_name]["POWIATY"][pow_name]["GMINY"][gmin_name]["TERYT"]
-            woj_code = gmin_codes[0][:2]
-            pow_code = gmin_codes[0][:4]
+            gmin_codes = regs_dict[woj_name + ";" + pow_name + ";" + gmin_name]
             c_paths = []
 
             # Dla kazdego kodu TERYT gminy pobieramy sciezki wielokatow tej gminy
             for gmn_code in gmin_codes:
-                c_paths += r_dict["Polska"]["Województwa"][woj_code]["Powiaty"][pow_code]["Gminy"][gmn_code]["Paths"]
+                c_paths += regs_dict[gmn_code][1]
 
             curr_coords = np.column_stack((trans_dlug[coords_inds], trans_szer[coords_inds]))
             points_flags = points_in_shape(c_paths, curr_coords)
@@ -125,7 +119,7 @@ def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, tran
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
             get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, cursor,
-                           coord_trans, addr_phrs_dict, sekt_num, max_dist)
+                           coord_trans, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds)
 
 
 def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coord_trans, dists_lists, zrodlo_list):
@@ -187,11 +181,11 @@ def calc_pnt_dist(c_paths, x_val, y_val, coord_trans):
 
 
 def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, cursor,
-                   coord_trans, addr_phrs_dict, sekt_num, max_dist):
+                   coord_trans, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Ustalamy sektory dla wybranych przez naas punktow PRG
-    coords_sekts = np.asarray(get_sector_codes(curr_coords[:, 1], curr_coords[:, 0], sekt_num)).T
+    coords_sekts = np.asarray(get_sector_codes(curr_coords[:, 1], curr_coords[:, 0])).T
     coords_sekts_zfill = np.char.chararray.zfill(coords_sekts.astype(str), 3)
     sekt_kod_list[coords_inds] = np.char.add(np.char.add(coords_sekts_zfill[:, 0], '_'), coords_sekts_zfill[:, 1])
 
@@ -200,7 +194,7 @@ def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod
     unique_sekts, sekts_ids = np.unique([[str(max(i, 0)).zfill(3) + "_" + str(min(j, sekt_num - 1)).zfill(3)
                                           for i in range(szer - 1, szer + 2) for j in range(dlug - 1, dlug + 2)]
                                          for szer, dlug in coords_sekts], axis=0, return_inverse=True)
-    sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params(sekt_num)
+    sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params()
 
     # Dla każdej unikalnej kombinacji sektorow przeprowadzamy wyszukiwanie obrysow budynkow
     for x, unq_sekt in enumerate(unique_sekts):
@@ -254,14 +248,15 @@ def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod
         # indeks w bazie w raz z wyliczona odlegloscia
         c_addr_arr = addr_phrs_dict["ADDR_ARR"][int(curr_sekt[0]), int(curr_sekt[1])]
         gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids,
-                          crds_inds, pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist)
+                          crds_inds, pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist, pl_crds,
+                          world_crds)
 
 
 def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids, crds_inds,
-                      pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist):
+                      pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist, pl_crds, world_crds):
     """ Function that finds closest buidling shape for given PRG point """
 
-    trans_szer, trans_dlug = convert_coords(c_coords, "4326", "2180")
+    trans_szer, trans_dlug = convert_coords(c_coords, str(world_crds), str(pl_crds))
     coords_pts = [ogr.Geometry(ogr.wkbPoint) for _ in range(c_len)]
     [c_point.AddPoint(trans_dlug[i], trans_szer[i]) for i, c_point in enumerate(coords_pts)]
     c_db_len = addr_phrs_dict["C_LEN"]

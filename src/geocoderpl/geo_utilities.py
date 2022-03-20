@@ -1,20 +1,18 @@
 """ Module that collects variety utility functions for geospatial programming """
 
 import functools
-import glob
+import logging
 import os
 import time
-import logging
 from functools import lru_cache
 
-import fiona
-from osgeo import gdal, osr, ogr
+import numpy as np
+import pyproj
+from osgeo import osr
 from pyproj import Proj, transform
-from shapely.geometry import shape, mapping
-from shapely.ops import cascaded_union
 
 
-def create_logger(name):
+def create_logger(name: str) -> logging.Logger:
     """ Function that creates logging file """
 
     # Deklaracja najwazniejszych sciezek
@@ -33,11 +31,11 @@ def create_logger(name):
     return logger
 
 
-def time_decorator(func):
+def time_decorator(func: Any) -> Any:
     """ Decorator that logs information about time of function execution """
 
     @functools.wraps(func)
-    def time_wrapper(*args, **kwargs):
+    def time_wrapper(*args: Any, **kwargs: Any) -> Any:
         start_time = time.time()
         logger = logging.getLogger('root')
         logger.info("0. Rozpoczęcie wykonywania funkcji '" + func.__name__ + "'")
@@ -53,18 +51,8 @@ def time_decorator(func):
     return time_wrapper
 
 
-@time_decorator
-def compress_imgs(img_form, comp_alg, comp_pred):
-    """ Function that compress images of given format (e.g. Gtiff) using given compression algorithm (e.g. LZW)
-     and predictor of compression (e.g. 2)"""
-
-    translateoptions = gdal.TranslateOptions(gdal.ParseCommandLine("-of " + img_form + " -co COMPRESS= " + comp_alg +
-                                                                   " -co PREDICTOR=" + comp_pred + " -co TILED=YES"))
-    curr_tif = "org_img.tif"
-    gdal.Translate("comp_img.tif", curr_tif, options=translateoptions)
-
-
-def create_coords_transform(in_epsg, out_epsg, change_map_strateg=False):
+def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: bool = False) -> \
+        osr.CoordinateTransformation:
     """ Function that creates object that transforms geographical coordinates """
 
     # Zmieniamy system koordynatow dla gmin
@@ -85,7 +73,7 @@ def create_coords_transform(in_epsg, out_epsg, change_map_strateg=False):
     return osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
 
 
-def clear_xml_node(curr_node):
+def clear_xml_node(curr_node) -> None:
     """ Function that clears unnecessary XML nodes from RAM memory """
     curr_node.clear()
 
@@ -95,30 +83,36 @@ def clear_xml_node(curr_node):
 
 
 @lru_cache
-def get_sectors_params(sekts_num):
+def get_sectors_params() -> tuple:
     """ Calculating basic parameters of sectors """
+
     # Ustalamy podstawowe parametry
-    plnd_max_szer = 55
-    plnd_min_szer = 48
+    sekts_num = int(os.environ["SEKT_NUM"])
+    plnd_max_szer = int(os.environ["PLND_MAX_SZER"])
+    plnd_min_szer = int(os.environ["PLND_MIN_SZER"])
     sekt_szer = (plnd_max_szer - plnd_min_szer) / sekts_num
-    plnd_min_dl = 13
-    plnd_max_dl = 25
+    plnd_min_dl = int(os.environ["PLND_MIN_DL"])
+    plnd_max_dl = int(os.environ["PLND_MAX_DL"])
     sekt_dl = (plnd_max_dl - plnd_min_dl) / sekts_num
+    fin_tup = (sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl)
+    return fin_tup
 
-    return sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl
 
-
-def get_sector_codes(poly_centr_y, poly_centr_x, sekts_num):
+def get_sector_codes(poly_centr_y: float, poly_centr_x: float) -> (int, int):
     """ Function that returns sector code for given coordinates """
 
     # Wyliczamy finalny kod sektora
-    sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params(sekts_num)
+    sek_tup = get_sectors_params()
+    sekt_szer = sek_tup[0]
+    sekt_dl = sek_tup[1]
+    plnd_min_szer = sek_tup[2]
+    plnd_min_dl = sek_tup[3]
     c_sekt_szer = ((poly_centr_y - plnd_min_szer) / sekt_szer).astype(int)
     c_sekt_dl = ((poly_centr_x - plnd_min_dl) / sekt_dl).astype(int)
     return c_sekt_szer, c_sekt_dl
 
 
-def convert_coords(all_coords, in_system, out_system):
+def convert_coords(all_coords: np.ndarray, in_system: str, out_system: str) -> pyproj.Transformer:
     """ Function that converts multiple coordinates between given systems """
 
     in_proj = Proj('epsg:' + in_system)

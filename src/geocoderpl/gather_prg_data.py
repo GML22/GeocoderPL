@@ -14,7 +14,8 @@ from valid_prg_points import check_prg_points
 
 
 @time_decorator
-def create_prg_table(lyrs_path, fls_path, regs_dict, curr_conn, cursor, coords_prec, sekt_num, max_dist):
+def create_prg_table(lyrs_path, fls_path, regs_dict, curr_conn, cursor, coords_prec, sekt_num, max_dist, pl_crds,
+                     world_crds):
     """ Function that gathers PRG address points into SQL database """
 
     # Tworzymy pusta baze danych PRG_TABLE
@@ -30,11 +31,13 @@ def create_prg_table(lyrs_path, fls_path, regs_dict, curr_conn, cursor, coords_p
     cursor.execute("CREATE INDEX idx_prg_sector ON PRG_TABLE(KOD_SEKTORA)")
 
     # Otwieramy zzipowana baze PRG, parsujemy znajdujace sie w srodku xmle i zapisujemy punkty adresowe PRG do bazy
-    open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist)
+    open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist, pl_crds,
+                       world_crds)
 
 
 @time_decorator
-def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist):
+def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist, pl_crds,
+                       world_crds):
     """ Opening zipped PRG database, parsing xml files and inserting rows into db """
 
     perms_dict = get_super_permut_dict(6)
@@ -64,10 +67,10 @@ def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords
             points_arr = create_points_list(xml_contex, t1, t2, t3, t4, t5, t6, t7, t8, t9, coords_prec, perms_dict,
                                             addr_phrs_dict)
 
-            # Konwertujemy wspolrzedne PRG z ukladu 2180 do ukladu 4326 i sprawdzamy czy leżą one wewnątrz shapefile'a
-            # swojej gminy
+            # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one wewnątrz
+            # shapefile'a swojej gminy
             fin_points_arr = check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, sekt_num,
-                                              max_dist)
+                                              max_dist, pl_crds, world_crds)
             addr_phrs_dict["C_LEN"] += len(fin_points_arr)
             addr_phrs_dict["LIST"] = []
 

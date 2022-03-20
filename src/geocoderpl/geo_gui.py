@@ -8,7 +8,6 @@ import sys
 from itertools import cycle
 
 import folium
-import numpy as np
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
@@ -18,7 +17,7 @@ from unidecode import unidecode
 from geo_utilities import *
 
 
-def create_gui_window(fls_path, cursor, sekt_num):
+def create_gui_window(fls_path, cursor, sekt_num, start_lat, start_long, max_sekts):
     """ Function that creates GUI window """
 
     all_addrs_path = os.path.join(fls_path, "all_address_phrases.obj")
@@ -31,7 +30,7 @@ def create_gui_window(fls_path, cursor, sekt_num):
 
     geo_app = QtWidgets.QApplication(sys.argv)
     geo_app.setStyleSheet('''QWidget {background-color: rgb(255, 255, 255);}''')
-    my_geo_gui = MyGeoGUI(fls_path, cursor, addr_phrases, sekt_num)
+    my_geo_gui = MyGeoGUI(fls_path, cursor, addr_phrases, sekt_num, start_lat, start_long, max_sekts)
     my_geo_gui.show()
 
     try:
@@ -43,13 +42,16 @@ def create_gui_window(fls_path, cursor, sekt_num):
 class MyGeoGUI(QtWidgets.QWidget):
     """ Class creating GUI window """
 
-    def __init__(self, fls_path, cursor, addr_phrases, sekt_num):
+    def __init__(self, fls_path, cursor, addr_phrases, sekt_num, start_lat, start_long, max_sekts):
         super().__init__()
         self.fls_path = fls_path
         self.cursor = cursor
         self.addr_uniq_words = addr_phrases["UNIQUES"]
         self.addr_arr = addr_phrases["ADDR_ARR"]
         self.sekt_num = sekt_num
+        self.start_lat = start_lat
+        self.start_long = start_long
+        self.max_sekts = max_sekts
         self.c_ptrn = re.compile(r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))" +
                                  r"(\.\d+)?)$")
 
@@ -73,7 +75,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                            "<b>Funkcja budynku: </b>", "<b>Liczba kondygnacji: </b>", "<b>Zabytek: </b>",
                            "<b>Szacunkowa powierzchnia: </b>"]
         self.res_coords = {}
-        self.start_coords = np.asarray((52.230024, 21.010981))
+        self.start_coords = np.asarray((self.start_lat, self.start_long))
         self.c_map = folium.Map(title="GEO PYTHON", zoom_start=19, location=self.start_coords, control_scale=True,
                                 tiles=None)
         form_lat = "function(num) {return L.Util.formatNum(num, 3) + 'º N';};"
@@ -179,9 +181,9 @@ class MyGeoGUI(QtWidgets.QWidget):
             for i, add in enumerate(self.adds_list):
                 if add != "" and curr_text in add and '' in ids_row:
                     found_flag = get_prg_ids(addrs_num, add, curr_text, ids_row)
-                elif found_flag and '' in ids_row and sek_licz <= 25:
+                elif found_flag and '' in ids_row and sek_licz <= self.max_sekts:
                     sek_licz += 1
-                elif '' not in ids_row or (found_flag and sek_licz > 25):
+                elif '' not in ids_row or (found_flag and sek_licz > self.max_sekts):
                     c_prg = ", ".join(ids_row).strip().replace(" ,", "")
                     c_prg = c_prg[:-1] if c_prg[-1] == ',' else c_prg
                     prg_ids += c_prg
@@ -219,7 +221,7 @@ class MyGeoGUI(QtWidgets.QWidget):
     def change_sekts_order(self, c_sekt):
         """ Method that changes order of sectors in adds_list """
 
-        if np.abs(c_sekt - self.c_sekt).max() > 25:
+        if np.abs(c_sekt - self.c_sekt).max() > self.max_sekts:
             c_ids_spl = self.spiral_ids_arr + c_sekt
             c_inds = c_ids_spl[np.logical_and((c_ids_spl >= 0).prod(1),
                                               (c_ids_spl < self.a_arr_shp).prod(1))]

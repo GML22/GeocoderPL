@@ -1,51 +1,48 @@
 """ Module that gathers BDOT10K buildings polygons into SQL database """
 import re
 import zipfile
-import logging
 from io import BytesIO
 
-import numpy as np
 import pandas as pd
+import sqlalchemy as sa
 from lxml import etree
+from sqlalchemy.orm import declarative_base, Session
 
 from geo_utilities import *
 
+# Tworzymy domyslny obiekt dla bazy BDOT10K
+base_bdot10k = declarative_base()
+
 
 @time_decorator
-def create_bdot10k_table(fls_path, lyrs_path, coords_prec, curr_conn, cursor, sekt_num):
+def create_bdot10k_table(sql_engine: sa.engine) -> None:
     """ Function that gathers BDOT10K BUBD polygons into SQL database """
 
     # Wczytujemy niezbędne słowniki BDOT10K
-    bdot10k_dicts = read_bdot10k_dicts(lyrs_path, fls_path)
+    bdot10k_dicts = read_bdot10k_dicts()
 
     # Tworzymy pusta baze danych BDOT10K_TABLE
-    cursor.execute("""CREATE TABLE IF NOT EXISTS BDOT10K_TABLE(BDOT10K_BUBD_ID integer PRIMARY KEY, KOD_SEKTORA text 
-                   NOT NULL, KATEGORIA_BUDYNKU text NOT NULL, NAZWA_KARTOGRAFICZNA text NOT NULL, STAN_BUDYNKU text 
-                   NOT NULL, FUNKCJA_BUDYNKU text NOT NULL, LICZBA_KONDYGNACJI real NOT NULL, CZY_ZABYTEK integer 
-                   NOT NULL, OPIS_BUDYNKU text NOT NULL, POWIERZCHNIA real NOT NULL, CENTROID_LAT real NOT NULL, 
-                   CENTROID_LONG real NOT NULL, BUBD_GEOJSON text NOT NULL)""")
-
-    # Tworzymy indeks, który przyspieszy kwerendy WHERE dla sektorow
-    cursor.execute("CREATE INDEX idx_sector_code ON BDOT10K_TABLE(KOD_SEKTORA)")
+    base_bdot10k.metadata.create_all(sql_engine)
 
     # Otwieramy plik ".zip" BDOT10K i parsujemy XMLe
-    open_bdot10k_parse_xml(lyrs_path, bdot10k_dicts, coords_prec, cursor, curr_conn, sekt_num)
+    open_bdot10k_parse_xml(bdot10k_dicts, sql_engine)
 
 
 @time_decorator
-def read_bdot10k_dicts(lyrs_path, fls_path):
+def read_bdot10k_dicts() -> dict:
     """ Function that reads BDOT10K dicts into dictionairy"""
 
     # Parsujemy XMLa
-    dicts_path = os.path.join(lyrs_path, "BDOT10K\\OT_BDOT10k_Slowniki.xsd")
-    assrt_msg = "W folderze '" + lyrs_path + "\\BDOT10K' brakuje pliku 'OT_BDOT10k_Slowniki.xsd'. Uzupełnij ten " + \
-                "plik i uruchom program ponownie!"
-    assert os.path.exists(dicts_path), assrt_msg
-
+    dicts_path = os.path.join(os.environ["PARENT_PATH"], os.environ['SLOWS_PATH'])
     t1 = '{http://www.opengis.net/gml/3.2}description'
     t2 = '{http://www.w3.org/2001/XMLSchema}enumeration'
     t3 = '{http://www.w3.org/2001/XMLSchema}simpleType'
-    xml_contex = etree.iterparse(dicts_path, events=('start',), tag=(t1, t2, t3))
+
+    try:
+        xml_contex = etree.iterparse(dicts_path, events=('start',), tag=(t1, t2, t3))
+    except FileNotFoundError:
+        raise Exception("Pod adresem: '" + dicts_path + "' nie ma pliku 'OT_BDOT10k_Slowniki.xsd'. Uzupełnij ten " +
+                        "plik i uruchom program ponownie!")
     bdot10k_dicts = {}
     curr_dict = {}
     c_val = ""
@@ -66,38 +63,31 @@ def read_bdot10k_dicts(lyrs_path, fls_path):
             bdot10k_dicts[curr_attrib['name']] = curr_dict
 
     # Importujemy inne słowniki niezawarte w domyślnym zestawie słowników
-    bubd_codes_path = os.path.join(fls_path, "x_kod.txt")
-    assrt_msg1 = "W folderze '" + fls_path + "' brakuje pliku 'x_kod.txt'. Uzupełnij ten plik i uruchom program " + \
-                 "ponownie!"
-    assert os.path.exists(bubd_codes_path), assrt_msg1
-
+    bubd_codes_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BUBD_CODES_PATH'])
     bdot10k_dicts["x_kod"] = csv_to_dict(bubd_codes_path)
 
     # Importujemy inne słowniki niezawarte w domyślnym zestawie słowników
-    karto10k_path = os.path.join(fls_path, "x_kodKarto10k.txt")
-    assrt_msg2 = "W folderze '" + fls_path + "' brakuje pliku 'x_kodKarto10k.txt'. Uzupełnij ten plik i uruchom " + \
-                 "program ponownie!"
-    assert os.path.exists(karto10k_path), assrt_msg2
+    karto10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['KARTO10K_PATH'])
     bdot10k_dicts["x_kodKarto10k"] = csv_to_dict(karto10k_path)
-
     return bdot10k_dicts
 
 
-def csv_to_dict(file_path):
+def csv_to_dict(c_path: str) -> dict:
     """ Function that imports CSV file and creates dictionairy from first two columns of that file """
-    x_kod = pd.read_csv(file_path, sep=";", dtype=str, engine='c', header=None, low_memory=False).values
+
+    try:
+        x_kod = pd.read_csv(c_path, sep=";", dtype=str, engine='c', header=None, low_memory=False).values
+    except FileNotFoundError:
+        raise Exception("Pod adresem: '" + bubd_codes_path + "' nie ma pliku potrzebnego pliku. Uzupełnij ten plik i" +
+                        " uruchom program ponownie!")
     return {row[0]: row[1] for row in x_kod}
 
 
 @time_decorator
-def open_bdot10k_parse_xml(lyrs_path, bdot10k_dicts, coords_prec, cursor, curr_conn, sekt_num):
+def open_bdot10k_parse_xml(bdot10k_dicts: dict, sql_engine: sa.engine) -> None:
     """ Opening zipped BDOT10K database, parsing xml files and inserting rows into db """
 
-    bdot10k_path = os.path.join(lyrs_path, "BDOT10K\\Polska_GML.zip")
-    assrt_msg = "W folderze '" + lyrs_path + "\\BDOT10K' brakuje pliku 'Polska_GML.zip'. Uzupełnij ten plik i " + \
-                "uruchom program ponownie!"
-    assert os.path.exists(bdot10k_path), assrt_msg
-
+    # Definiujemy podstawowe tagi
     t0 = "{urn:gugik:specyfikacje:gmlas:bazaDanychObiektowTopograficznych10k:1.0}x_kod"
     t1 = "{urn:gugik:specyfikacje:gmlas:bazaDanychObiektowTopograficznych10k:1.0}x_skrKarto"
     t2 = "{urn:gugik:specyfikacje:gmlas:bazaDanychObiektowTopograficznych10k:1.0}x_katIstnienia"
@@ -109,35 +99,38 @@ def open_bdot10k_parse_xml(lyrs_path, bdot10k_dicts, coords_prec, cursor, curr_c
     all_tags = (t0, t1, t2, t3, t4, t5, t6, t7)
     tags_dict = {tag: i for i, tag in enumerate(all_tags)}
     dicts_tags = {t0: 'x_kod', t1: 'OT_SkrKartoType', t2: 'OT_KatIstnieniaType', t3: 'OT_FunSzczegolowaBudynkuType'}
+    bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
 
-    with zipfile.ZipFile(bdot10k_path, "r") as zfile:
-        for woj_name in zfile.namelist():
-            woj_zip = BytesIO(zfile.read(woj_name))
-            logging.info(woj_name)
-            bdot10k_woj_rows = []
+    try:
+        with zipfile.ZipFile(bdot10k_path, "r") as zfile:
+            for woj_name in zfile.namelist():
+                woj_zip = BytesIO(zfile.read(woj_name))
+                logging.info(woj_name)
+                bdot10k_woj_rows = []
 
-            with zipfile.ZipFile(woj_zip, "r") as zfile2:
-                for pow_name in zfile2.namelist():
-                    pow_zip = BytesIO(zfile2.read(pow_name))
-                    with zipfile.ZipFile(pow_zip, "r") as zfile3:
-                        for xml_file in zfile3.namelist():
-                            if "BUBD" in xml_file:
-                                # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
-                                bdot10k_pow_rows = extract_xml_info(zfile3, xml_file, all_tags, tags_dict, dicts_tags,
-                                                                    bdot10k_dicts, coords_prec, t0, t1, t2, t3, t4, t5,
-                                                                    t7, sekt_num)
-                                bdot10k_woj_rows += bdot10k_pow_rows
+                with zipfile.ZipFile(woj_zip, "r") as zfile2:
+                    for pow_name in zfile2.namelist():
+                        pow_zip = BytesIO(zfile2.read(pow_name))
+                        with zipfile.ZipFile(pow_zip, "r") as zfile3:
+                            for xml_file in zfile3.namelist():
+                                if "BUBD" in xml_file:
+                                    # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
+                                    bdot10k_pow_rows = extract_xml_info(zfile3, xml_file, all_tags, tags_dict,
+                                                                        dicts_tags, bdot10k_dicts, t0, t1, t2, t3, t4,
+                                                                        t5, t7)
+                                    bdot10k_woj_rows += bdot10k_pow_rows
 
-            # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
-            cursor.executemany("""INSERT INTO BDOT10K_TABLE(KOD_SEKTORA, KATEGORIA_BUDYNKU, NAZWA_KARTOGRAFICZNA,
-                               STAN_BUDYNKU, FUNKCJA_BUDYNKU, LICZBA_KONDYGNACJI, CZY_ZABYTEK, OPIS_BUDYNKU,
-                               POWIERZCHNIA, CENTROID_LAT, CENTROID_LONG, BUBD_GEOJSON)
-                               values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", bdot10k_woj_rows)
-            curr_conn.commit()
+                # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+                with Session(sql_engine) as session:
+                    session.bulk_save_objects(bdot10k_woj_rows)
+                    session.commit()
+    except FileNotFoundError:
+        raise Exception("Pod podanym adresem: '" + bdot10k_path + "' nie ma pliku 'Polska_GML.zip'. Uzupełnij ten " +
+                        "plik i uruchom program ponownie!")
 
 
-def extract_xml_info(zfile3, xml_file, all_tags, tags_dict, dicts_tags, bdot10k_dicts, coords_prec, t0, t1, t2, t3, t4,
-                     t5, t7, sekt_num):
+def extract_xml_info(zfile3: zipfile.ZipFile, xml_file: str, all_tags: tuple, tags_dict: dict, dicts_tags: dict,
+                     bdot10k_dicts: dict, t0: str, t1: str, t2: str, t3: str, t4: str, t5: str, t7: str) -> list:
     """ Function that extracts useful information about buildings from xml files of districts """
 
     bubd_xml = BytesIO(zfile3.read(xml_file))
@@ -163,14 +156,15 @@ def extract_xml_info(zfile3, xml_file, all_tags, tags_dict, dicts_tags, bdot10k_
             poly_area = poly_geom.GetArea()
             fin_row[-4] = int(poly_area) if fin_row[4] == 0 else int(poly_area * fin_row[4])
 
-            # Konwertujemy współrzędne z układu 2180 do 4326
-            coord_trans = create_coords_transform(2180, 4326, True)
+            # Konwertujemy współrzędne z układu map polskich do układu map google
+            coord_trans = create_coords_transform(int(os.environ["PL_CRDS"]), int(os.environ["WORLD_CRDS"]), True)
             poly_geom.Transform(coord_trans)
 
             # Wyliczamy centroid wielokata budynku
             poly_centroid = poly_geom.Centroid()
             poly_centr_y = np.asarray(poly_centroid.GetY())
             poly_centr_x = np.asarray(poly_centroid.GetX())
+            coords_prec = int(os.environ["COORDS_PREC"])
             fin_row[-3] = np.round(poly_centr_y, coords_prec)
             fin_row[-2] = np.round(poly_centr_x, coords_prec)
 
@@ -180,9 +174,12 @@ def extract_xml_info(zfile3, xml_file, all_tags, tags_dict, dicts_tags, bdot10k_
             fin_row[-1] = reduced_geojson
 
             # Dodajemy nowy wiersz do lacznej listy
-            c_sekt_szer, c_sekt_dl = get_sector_codes(poly_centr_y, poly_centr_x, sekt_num)
+            c_sekt_tpl = get_sector_codes(poly_centr_y, poly_centr_x)
+            c_sekt_szer = c_sekt_tpl[0]
+            c_sekt_dl = c_sekt_tpl[1]
             kod_sektora = str(c_sekt_szer).zfill(3) + "_" + str(c_sekt_dl).zfill(3)
-            bdot10k_pow_rows.append([kod_sektora] + fin_row)
+            fin_row2 = [kod_sektora] + fin_row
+            bdot10k_pow_rows.append(BDOT10K(*fin_row2))
             fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
 
         elif c_tag == t5:
@@ -208,7 +205,7 @@ def extract_xml_info(zfile3, xml_file, all_tags, tags_dict, dicts_tags, bdot10k_
     return bdot10k_pow_rows
 
 
-def reduce_coordinates_precision(geojson_poly, precision):
+def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
     """ Function that reduce decimal precision of coordinates in GeoJSON file
         0 decimal places is a precision of about 111 km
         1 decimal place is a precsion of about 11 km
@@ -239,3 +236,47 @@ def reduce_coordinates_precision(geojson_poly, precision):
     fin_geojson = "".join([geojson_poly[row[0]:row[1]] + str(all_nums[i]) if i < all_nums_len else
                            geojson_poly[row[0]:row[1]] for i, row in enumerate(text_ids)])
     return fin_geojson
+
+
+class BDOT10K(base_bdot10k):
+    """ Klasa definiująca wiersze w tabeli 'BDOT10K_TABLE' """
+
+    # Defniujemy nazwę tabeli
+    __tablename__ = "BDOT10K_TABLE"
+
+    # Definiujemy kolumny tabeli
+    bdot10k_bubd_id = sa.Column('BDOT10K_BUBD_ID', sa.Integer, primary_key=True)
+    kod_sektora = sa.Column('KOD_SEKTORA', sa.String, nullable=False, index=True)
+    kat_budynku = sa.Column('KATEGORIA_BUDYNKU', sa.String, nullable=False)
+    nazwa_kart = sa.Column('NAZWA_KARTOGRAFICZNA', sa.String, nullable=False)
+    stan_budynku = sa.Column('STAN_BUDYNKU', sa.String, nullable=False)
+    funkcja_budynku = sa.Column('FUNKCJA_BUDYNKU', sa.String, nullable=False)
+    liczba_kond = sa.Column('LICZBA_KONDYGNACJI', sa.Float, nullable=False)
+    czy_zabytek = sa.Column('CZY_ZABYTEK', sa.Integer, nullable=False)
+    opis_budynku = sa.Column('OPIS_BUDYNKU', sa.String, nullable=False)
+    powierzchnia = sa.Column('POWIERZCHNIA', sa.Float, nullable=False)
+    centr_lat = sa.Column('CENTROID_LAT', sa.Float, nullable=False)
+    centr_long = sa.Column('CENTROID_LONG', sa.Float, nullable=False)
+    bubd_geojson = sa.Column('BUBD_GEOJSON', sa.String, nullable=False)
+
+    def __init__(self, kod_sektora: str, kat_budynku: str, nazwa_kart: str, stan_budynku: str, funkcja_budynku: str,
+                 liczba_kond: float, czy_zabytek: int, opis_budynku: str, powierzchnia: float, centr_lat: float,
+                 centr_long: float, bubd_geojson: str) -> None:
+        self.kod_sektora = kod_sektora
+        self.kat_budynku = kat_budynku
+        self.nazwa_kart = nazwa_kart
+        self.stan_budynku = stan_budynku
+        self.funkcja_budynku = funkcja_budynku
+        self.liczba_kond = liczba_kond
+        self.czy_zabytek = czy_zabytek
+        self.opis_budynku = opis_budynku
+        self.powierzchnia = powierzchnia
+        self.centr_lat = centr_lat
+        self.centr_long = centr_long
+        self.bubd_geojson = bubd_geojson
+
+    def __repr__(self) -> str:
+        return "<BDOT10K('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')>" % \
+               (self.kod_sektora, self.kat_budynku, self.nazwa_kart, self.stan_budynku, self.funkcja_budynku,
+                self.liczba_kond, self.czy_zabytek, self.opis_budynku, self.powierzchnia, self.centr_lat,
+                self.centr_long, self.bubd_geojson)
