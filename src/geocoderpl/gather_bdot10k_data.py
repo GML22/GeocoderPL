@@ -7,7 +7,7 @@ import pandas as pd
 import sqlalchemy as sa
 from lxml import etree
 from sqlalchemy.orm import declarative_base, Session
-
+from osgeo import ogr
 from geo_utilities import *
 
 # Tworzymy domyslny obiekt dla bazy BDOT10K
