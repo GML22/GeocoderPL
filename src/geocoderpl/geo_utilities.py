@@ -6,6 +6,7 @@ import os
 import time
 from functools import lru_cache
 
+import lxml
 import numpy as np
 import pyproj
 from osgeo import osr
@@ -73,7 +74,7 @@ def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: boo
     return osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
 
 
-def clear_xml_node(curr_node) -> None:
+def clear_xml_node(curr_node: lxml.etree.Element) -> None:
     """ Function that clears unnecessary XML nodes from RAM memory """
     curr_node.clear()
 
