@@ -7,7 +7,7 @@ GeocoderPL is an application written in Python, which can be used for geocoding 
 </p>
 
 <p align="justify">
-GeocoderPL creates SQLite database containing all address points and buildings in Poland by parsing files in Geography Markup Language format (GML) to SQL tables. The main data sources of GeocoderPL are following:<br>
+GeocoderPL creates SQLite database containing all address points and buildings in Poland by parsing files in Geography Markup Language format to SQL tables. The main data sources of GeocoderPL are following:<br>
 
   1. The National Register of Boundaries Database (a.k.a. PRG database)- state maintained reference database of all address points in Poland (including administrative division of the country):<br>
   https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538 <br>
