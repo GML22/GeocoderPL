@@ -239,7 +239,7 @@ def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
 
 
 class BDOT10K(base_bdot10k):
-    """ Klasa definiująca wiersze w tabeli 'BDOT10K_TABLE' """
+    """ Class that defines columns of 'BDOT10K_TABLE' """
 
     # Defniujemy nazwę tabeli
     __tablename__ = "BDOT10K_TABLE"

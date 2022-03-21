@@ -14,8 +14,7 @@ from valid_prg_points import check_prg_points
 
 
 @time_decorator
-def create_prg_table(lyrs_path, fls_path, regs_dict, curr_conn, cursor, coords_prec, sekt_num, max_dist, pl_crds,
-                     world_crds):
+def create_prg_table(regs_dict: dict) -> None:
     """ Function that gathers PRG address points into SQL database """
 
     # Tworzymy pusta baze danych PRG_TABLE
