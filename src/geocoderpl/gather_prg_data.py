@@ -5,7 +5,9 @@ import zipfile
 from io import BytesIO
 
 import numpy as np
+import sqlalchemy as sa
 from lxml import etree
+from sqlalchemy.orm import declarative_base
 from unidecode import unidecode
 
 from geo_utilities import time_decorator, clear_xml_node
@@ -14,89 +16,79 @@ from valid_prg_points import check_prg_points
 
 
 @time_decorator
-def create_prg_table(regs_dict: dict) -> None:
+def create_prg_table(regs_dict: dict, sql_engine: sa.engine) -> None:
     """ Function that gathers PRG address points into SQL database """
 
     # Tworzymy pusta baze danych PRG_TABLE
-    cursor.execute("""CREATE TABLE IF NOT EXISTS PRG_TABLE(PRG_POINT_ID integer PRIMARY KEY, WOJEWODZTWO text NOT NULL, 
-                   POWIAT text NOT NULL, GMINA text NOT NULL, MIEJSCOWOSC text NOT NULL, MIEJSCOWOSC2 text NOT NULL, 
-                   ULICA text NOT NULL, NUMER text NOT NULL, KOD_POCZTOWY text NOT NULL, STATUS text NOT NULL, 
-                   SZEROKOSC real NOT NULL, DLUGOSC real NOT NULL, ZRODLO text NOT NULL, CZY_POPRAWNY integer NOT NULL,
-                   ODLEGLOSC_OD_GMINY real NOT NULL, BDOT10K_BUBD_ID integer NOT NULL, ODLEGLOSC_OD_BUDYNKU real 
-                   NOT NULL, KOD_SEKTORA text NOT NULL, DODATKOWY_OPIS text NOT NULL, FOREIGN KEY (BDOT10K_BUBD_ID) 
-                   REFERENCES BDOT10K_TABLE (BDOT10K_BUBD_ID))""")
-
-    # Tworzymy indeks, który przyspieszy kwerendy WHERE dla sektorow
-    cursor.execute("CREATE INDEX idx_prg_sector ON PRG_TABLE(KOD_SEKTORA)")
+    base_prg.metadata.create_all(sql_engine)
 
     # Otwieramy zzipowana baze PRG, parsujemy znajdujace sie w srodku xmle i zapisujemy punkty adresowe PRG do bazy
-    open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist, pl_crds,
-                       world_crds)
+    open_zip_parse_xml(regs_dict, sql_engine)
 
 
 @time_decorator
-def open_zip_parse_xml(lyrs_path, fls_path, curr_conn, cursor, regs_dict, coords_prec, sekt_num, max_dist, pl_crds,
-                       world_crds):
+def open_zip_parse_xml(regs_dict: dict, sql_engine: sa.engine) -> None:
     """ Opening zipped PRG database, parsing xml files and inserting rows into db """
 
-    perms_dict = get_super_permut_dict(6)
+    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+    sekt_num = int(os.environ["SEKT_NUM"])
     addr_arr = np.empty((sekt_num, sekt_num, 1), dtype=object)
     addr_arr[...] = ''
-    addr_phrs_dict = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
-    prg_path = os.path.join(lyrs_path, "PRG_punkty_adresowe\\PRG-punkty_adresowe.zip")
-    assrt_msg = "W folderze '" + lyrs_path + "\\PRG_punkty_adresowe' brakuje pliku 'PRG-punkty_adresowe.zip'. " + \
-                "Uzupełnij ten plik i uruchom program ponownie!"
-    assert os.path.exists(prg_path), assrt_msg
+    addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
+    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
 
-    with zipfile.ZipFile(prg_path, "r") as zfile:
-        for woj_name in zfile.namelist():
-            xml_file = BytesIO(zfile.read(woj_name))
-            t1 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}jednostkaAdmnistracyjna'
-            t2 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}miejscowosc'
-            t3 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}czescMiejscowosci'
-            t4 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}ulica'
-            t5 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}numerPorzadkowy'
-            t6 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}kodPocztowy'
-            t7 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}status'
-            t8 = '{http://www.opengis.net/gml/3.2}pos'
-            t9 = 'pos'
-            xml_contex = etree.iterparse(xml_file, events=('end',), tag=(t1, t2, t3, t4, t5, t6, t7, t8))
+    try:
+        with zipfile.ZipFile(prg_path, "r") as zfile:
+            for woj_name in zfile.namelist():
+                xml_file = BytesIO(zfile.read(woj_name))
+                t1 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}jednostkaAdmnistracyjna'
+                t2 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}miejscowosc'
+                t3 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}czescMiejscowosci'
+                t4 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}ulica'
+                t5 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}numerPorzadkowy'
+                t6 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}kodPocztowy'
+                t7 = '{urn:gugik:specyfikacje:gmlas:panstwowyRejestrGranicAdresy:1.0}status'
+                t8 = '{http://www.opengis.net/gml/3.2}pos'
+                t9 = 'pos'
+                xml_contex = etree.iterparse(xml_file, events=('end',), tag=(t1, t2, t3, t4, t5, t6, t7, t8))
 
-            # Tworzymy listę punktów
-            points_arr = create_points_list(xml_contex, t1, t2, t3, t4, t5, t6, t7, t8, t9, coords_prec, perms_dict,
-                                            addr_phrs_dict)
+                # Tworzymy listę punktów
+                points_arr = create_points_list(xml_contex, t1, t2, t3, t4, t5, t6, t7, t8, t9, perms_dict, addr_phrs_d)
 
-            # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one wewnątrz
-            # shapefile'a swojej gminy
-            fin_points_arr = check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, sekt_num,
-                                              max_dist, pl_crds, world_crds)
-            addr_phrs_dict["C_LEN"] += len(fin_points_arr)
-            addr_phrs_dict["LIST"] = []
+                # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
+                # wewnątrz shapefile'a swojej gminy
+                fin_points_list = check_prg_points(points_arr, regs_dict, woj_name, addr_phrs_d)
 
-            # Zapisujemy do bazy danych informacje dotyczące punktów adresowych w danym województwie
-            cursor.executemany("""INSERT INTO PRG_TABLE(WOJEWODZTWO, POWIAT, GMINA, MIEJSCOWOSC, MIEJSCOWOSC2, ULICA, 
-                               NUMER, KOD_POCZTOWY, STATUS, SZEROKOSC, DLUGOSC, ZRODLO, CZY_POPRAWNY, 
-                               ODLEGLOSC_OD_GMINY, BDOT10K_BUBD_ID, ODLEGLOSC_OD_BUDYNKU, KOD_SEKTORA, DODATKOWY_OPIS) 
-                               values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", fin_points_arr)
-            curr_conn.commit()
+                # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+                with sa.orm.Session(sql_engine) as session:
+                    session.bulk_save_objects(fin_points_list)
+                    session.commit()
 
-    # Usuwamy zbędne obkiety ze złownika
-    addr_phrs_dict.pop("LIST", None)
-    addr_phrs_dict.pop("C_LEN", None)
+                addr_phrs_dict["C_LEN"] += len(fin_points_list)
+                addr_phrs_dict["LIST"] = []
+    except FileNotFoundError:
+        raise Exception("Pod podanym adresem: '" + prg_path + "' nie ma pliku 'PRG-punkty_adresowe.zip'. Pobierz ten" +
+                        " plik ze strony: 'https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni" +
+                        "-jednostek-podziaow-terytorialnych-kraju/resource/29538' i uruchom program ponownie!")
+
+    # Usuwamy zbędne obiekty ze słownika
+    addr_phrs_d.pop("LIST", None)
+    addr_phrs_d.pop("C_LEN", None)
 
     # Zapisujemy zbiór unikalnych adresow na dysku twardym
     with open(os.path.join(fls_path, "all_address_phrases.obj"), 'wb') as f:
         pickle.dump(addr_phrs_dict, f, pickle.HIGHEST_PROTOCOL)
 
 
-def get_super_permut_dict(max_len):
+def get_super_permut_dict(max_len: int) -> dict:
     """ Function that creates indices providing superpermutations for lists of strings with length of maximum 5
     elements """
 
     return {i: SuperPerms(i).fin_super_perm_ids for i in range(1, max_len + 1)}
 
 
-def create_points_list(xml_contex, t1, t2, t3, t4, t5, t6, t7, t8, t9, coords_prec, perms_dict, addr_phrs_dict):
+def create_points_list(xml_contex: lxml.etree.iterparse, t1: str, t2: str, t3: str, t4: str, t5: str, t6: str, t7: str,
+                       t8: str, t9: str, perms_dict: dict, addr_phrs_dict: dict) -> np.ndarray:
     """ Creating list of data points """
 
     c_row = [''] * 11

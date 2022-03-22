@@ -4,7 +4,7 @@ import itertools
 
 
 class SuperPerms(object):
-    def __init__(self, max_v):
+    def __init__(self, max_v: int) -> None:
         self.max_v = max_v
         self.all_inds = list(range(self.max_v))
         self.base_vals = "".join([str(i) for i in self.all_inds])
@@ -13,7 +13,7 @@ class SuperPerms(object):
                         "".join(perm) != self.base_vals]
         self.fin_super_perm_ids = self.get_super_perm()
 
-    def get_super_perm(self, p_vals=None, c_perms=None):
+    def get_super_perm(self, p_vals: str = None, c_perms: list = None) -> list:
         """ Function that finds final superpermutation (shortests list of indices) """
 
         if p_vals is None:

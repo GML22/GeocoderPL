@@ -6,12 +6,9 @@ from io import BytesIO
 import pandas as pd
 import sqlalchemy as sa
 from lxml import etree
-from sqlalchemy.orm import declarative_base, Session
 from osgeo import ogr
-from geo_utilities import *
 
-# Tworzymy domyslny obiekt dla bazy BDOT10K
-base_bdot10k = declarative_base()
+from geo_utilities import *
 
 
 @time_decorator
@@ -20,9 +17,6 @@ def create_bdot10k_table(sql_engine: sa.engine) -> None:
 
     # Wczytujemy niezbędne słowniki BDOT10K
     bdot10k_dicts = read_bdot10k_dicts()
-
-    # Tworzymy pusta baze danych BDOT10K_TABLE
-    base_bdot10k.metadata.create_all(sql_engine)
 
     # Otwieramy plik ".zip" BDOT10K i parsujemy XMLe
     open_bdot10k_parse_xml(bdot10k_dicts, sql_engine)
@@ -78,8 +72,8 @@ def csv_to_dict(c_path: str) -> dict:
     try:
         x_kod = pd.read_csv(c_path, sep=";", dtype=str, engine='c', header=None, low_memory=False).values
     except FileNotFoundError:
-        raise Exception("Pod adresem: '" + bubd_codes_path + "' nie ma pliku potrzebnego pliku. Uzupełnij ten plik i" +
-                        " uruchom program ponownie!")
+        raise Exception("Pod adresem: '" + c_path + "' nie ma pliku potrzebnego pliku. Uzupełnij ten plik i  uruchom " +
+                        "program ponownie!")
     return {row[0]: row[1] for row in x_kod}
 
 
@@ -121,12 +115,13 @@ def open_bdot10k_parse_xml(bdot10k_dicts: dict, sql_engine: sa.engine) -> None:
                                     bdot10k_woj_rows += bdot10k_pow_rows
 
                 # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
-                with Session(sql_engine) as session:
+                with sa.orm.Session(sql_engine) as session:
                     session.bulk_save_objects(bdot10k_woj_rows)
                     session.commit()
     except FileNotFoundError:
-        raise Exception("Pod podanym adresem: '" + bdot10k_path + "' nie ma pliku 'Polska_GML.zip'. Uzupełnij ten " +
-                        "plik i uruchom program ponownie!")
+        raise Exception("Pod podanym adresem: '" + bdot10k_path + "' nie ma pliku 'Polska_GML.zip'. Pobierz ten plik" +
+                        " ze strony: 'https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip' i uruchom program " +
+                        "ponownie!")
 
 
 def extract_xml_info(zfile3: zipfile.ZipFile, xml_file: str, all_tags: tuple, tags_dict: dict, dicts_tags: dict,
@@ -236,47 +231,3 @@ def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
     fin_geojson = "".join([geojson_poly[row[0]:row[1]] + str(all_nums[i]) if i < all_nums_len else
                            geojson_poly[row[0]:row[1]] for i, row in enumerate(text_ids)])
     return fin_geojson
-
-
-class BDOT10K(base_bdot10k):
-    """ Class that defines columns of 'BDOT10K_TABLE' """
-
-    # Defniujemy nazwę tabeli
-    __tablename__ = "BDOT10K_TABLE"
-
-    # Definiujemy kolumny tabeli
-    bdot10k_bubd_id = sa.Column('BDOT10K_BUBD_ID', sa.Integer, primary_key=True)
-    kod_sektora = sa.Column('KOD_SEKTORA', sa.String, nullable=False, index=True)
-    kat_budynku = sa.Column('KATEGORIA_BUDYNKU', sa.String, nullable=False)
-    nazwa_kart = sa.Column('NAZWA_KARTOGRAFICZNA', sa.String, nullable=False)
-    stan_budynku = sa.Column('STAN_BUDYNKU', sa.String, nullable=False)
-    funkcja_budynku = sa.Column('FUNKCJA_BUDYNKU', sa.String, nullable=False)
-    liczba_kond = sa.Column('LICZBA_KONDYGNACJI', sa.Float, nullable=False)
-    czy_zabytek = sa.Column('CZY_ZABYTEK', sa.Integer, nullable=False)
-    opis_budynku = sa.Column('OPIS_BUDYNKU', sa.String, nullable=False)
-    powierzchnia = sa.Column('POWIERZCHNIA', sa.Float, nullable=False)
-    centr_lat = sa.Column('CENTROID_LAT', sa.Float, nullable=False)
-    centr_long = sa.Column('CENTROID_LONG', sa.Float, nullable=False)
-    bubd_geojson = sa.Column('BUBD_GEOJSON', sa.String, nullable=False)
-
-    def __init__(self, kod_sektora: str, kat_budynku: str, nazwa_kart: str, stan_budynku: str, funkcja_budynku: str,
-                 liczba_kond: float, czy_zabytek: int, opis_budynku: str, powierzchnia: float, centr_lat: float,
-                 centr_long: float, bubd_geojson: str) -> None:
-        self.kod_sektora = kod_sektora
-        self.kat_budynku = kat_budynku
-        self.nazwa_kart = nazwa_kart
-        self.stan_budynku = stan_budynku
-        self.funkcja_budynku = funkcja_budynku
-        self.liczba_kond = liczba_kond
-        self.czy_zabytek = czy_zabytek
-        self.opis_budynku = opis_budynku
-        self.powierzchnia = powierzchnia
-        self.centr_lat = centr_lat
-        self.centr_long = centr_long
-        self.bubd_geojson = bubd_geojson
-
-    def __repr__(self) -> str:
-        return "<BDOT10K('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')>" % \
-               (self.kod_sektora, self.kat_budynku, self.nazwa_kart, self.stan_budynku, self.funkcja_budynku,
-                self.liczba_kond, self.czy_zabytek, self.opis_budynku, self.powierzchnia, self.centr_lat,
-                self.centr_long, self.bubd_geojson)

@@ -9,13 +9,15 @@ from geo_utilities import *
 
 
 @time_decorator
-def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
+def check_prg_points(points_arr: np.ndarray, regs_dict: dict, woj_name: str, addr_phrs_dict: dict) -> list:
     """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
     to shapefile of its district and finds closest building shape for given PRG point """
 
     # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny zawierajace
     # przekonwertowane wspolrzedne
-    trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], str(pl_crds), str(world_crds))
+    world_crds = os.environ['WORLD_CRDS']
+    pl_crds = os.environ['PL_CRDS']
+    trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], pl_crds, world_crds)
 
     # Grupujemy kolumny z nazwami powiatow oraz gmin i sprawdzamy czy punkty adresowe z bazy PRG znajduja sie wewnatrz
     # shapefili ich gmin
@@ -24,7 +26,7 @@ def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, se
     grouped_regions = df_regions.groupby(['POWIAT', 'GMINA'], as_index=False).groups
 
     # Tworzymy system transformujący wspolrzedne geograficzne
-    coord_trans = create_coords_transform(world_crds, pl_crds, True)
+    coord_trans = create_coords_transform(int(world_crds), int(pl_crds), True)
 
     # Tworzymy inne przydatne obiekty
     woj_idx = woj_name.rfind("_") + 1
@@ -42,7 +44,7 @@ def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, se
     # oraz znajdujemy najbliższy budynek do danego punktu PRG
     points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, trans_szer, points_arr, popraw_list,
                           coord_trans, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                          cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds)
+                          addr_phrs_dict)
 
     # Tworzymy finalna macierz informacji, ktora zapiszemy w bazie
     fin_points_arr = np.empty((pts_arr_shp[0], pts_arr_shp[1] + 7), dtype=object)
@@ -59,7 +61,7 @@ def check_prg_points(points_arr, regs_dict, woj_name, cursor, addr_phrs_dict, se
     return fin_points_arr
 
 
-def points_in_shape(c_paths, curr_coords):
+def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
     """ Checking if point lies inside shape of district """
 
     points_flags = np.zeros(len(curr_coords), dtype=bool)
@@ -71,8 +73,8 @@ def points_in_shape(c_paths, curr_coords):
 
 
 def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, trans_szer, points_arr, popraw_list,
-                          coord_trans, dists_lists, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                          dod_opis_list, cursor, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
+                          coord_trans, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
+                          dod_opis_list, addr_phrs_dict):
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -116,14 +118,14 @@ def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, tran
                         address = c_numer + ", " + c_miejsc + ", " + c_gmin + ", " + c_pow
 
                     get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row, coord_trans,
-                                   dists_lists, zrodlo_list)
+                                   dists_list, zrodlo_list)
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
-            get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, cursor,
-                           coord_trans, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds)
+            get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
+                           coord_trans, addr_phrs_dict)
 
 
-def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coord_trans, dists_lists, zrodlo_list):
+def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coord_trans, dists_list, zrodlo_list):
     """ Function that returns OSM coordinates of address point or distance from the district shapefile """
 
     status_code = 500
@@ -152,7 +154,7 @@ def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coo
             if not in_flag:
                 popraw_list[c_ind] = 0
                 max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], coord_trans)
-                dists_lists[c_ind] = max_dist
+                dists_list[c_ind] = max_dist
             else:
                 outside_pts[1] = x_val
                 outside_pts[0] = y_val
@@ -160,7 +162,7 @@ def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coo
         else:
             popraw_list[c_ind] = 0
             max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], coord_trans)
-            dists_lists[c_ind] = max_dist
+            dists_list[c_ind] = max_dist
 
 
 def calc_pnt_dist(c_paths, x_val, y_val, coord_trans):
@@ -181,8 +183,8 @@ def calc_pnt_dist(c_paths, x_val, y_val, coord_trans):
     return min_dist
 
 
-def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, cursor,
-                   coord_trans, addr_phrs_dict, sekt_num, max_dist, pl_crds, world_crds):
+def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, coord_trans,
+                   addr_phrs_dict):
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Ustalamy sektory dla wybranych przez naas punktow PRG
@@ -249,15 +251,14 @@ def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod
         # indeks w bazie w raz z wyliczona odlegloscia
         c_addr_arr = addr_phrs_dict["ADDR_ARR"][int(curr_sekt[0]), int(curr_sekt[1])]
         gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids,
-                          crds_inds, pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist, pl_crds,
-                          world_crds)
+                          crds_inds, pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict)
 
 
 def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids, crds_inds,
-                      pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict, max_dist, pl_crds, world_crds):
+                      pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict):
     """ Function that finds closest buidling shape for given PRG point """
 
-    trans_szer, trans_dlug = convert_coords(c_coords, str(world_crds), str(pl_crds))
+    trans_szer, trans_dlug = convert_coords(c_coords, os.environ['WORLD_CRDS'], os.environ['PL_CRDS'])
     coords_pts = [ogr.Geometry(ogr.wkbPoint) for _ in range(c_len)]
     [c_point.AddPoint(trans_dlug[i], trans_szer[i]) for i, c_point in enumerate(coords_pts)]
     c_db_len = addr_phrs_dict["C_LEN"]
@@ -293,7 +294,7 @@ def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bd
 
         # Jeżeli najkrotszy znaleziony dystans jest krótszy niż maksymalna zakladana odleglosc punktu adresowego PRG od
         # budynku BDOT10k to przypisujemy dany budynek do punktu adresowego
-        if fin_dist < max_dist:
+        if fin_dist < os.environ['MAX_DIST']:
             bdot10k_dist[c_inds] = fin_dist
             bdot10k_ids[c_inds] = pow_bubd_arr[pow_bubd_ids, 0]
 
@@ -313,7 +314,7 @@ def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bd
 
 
 @lru_cache
-def get_corr_reg_name(curr_name):
+def get_corr_reg_name(curr_name: str) -> str:
     """ Function that corrects wrong regions names """
     # Specjalny wyjatek, bo w danych PRG jest powiat "JELENIOGORSKI", a od 2021 roku powiat ten nazywa sie "KARKONOSKI",
     # wiec trzeba to poprawic

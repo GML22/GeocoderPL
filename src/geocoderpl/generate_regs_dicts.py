@@ -61,7 +61,9 @@ def get_region_shapes() -> OrderedDict:
                         ("_gmin" in name or "_pow" in name or "_woj" in name or "_pan" in name)}.items()))
     except FileNotFoundError:
         raise Exception("Pod podanym adresem: '" + ja_path + "' nie ma pliku '00_jednostki_administracyjne.zip'. " +
-                        "Uzupełnij ten plik i uruchom program ponownie!")
+                        "Pobierz ten plik ze stronyu: 'https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-" +
+                        "powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515' i uruchom program " +
+                        "ponownie!")
     return regs_shps
 
 
