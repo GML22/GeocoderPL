@@ -1,7 +1,11 @@
+""" Module that defines SQL database classes """
+
 import sqlalchemy as sa
 
+from sqlalchemy.orm import declarative_base
+
 # Tworzymy bazowych schemat dla tabel
-Base = sa.orm.declarative_base()
+Base = declarative_base()
 
 
 class BDOT10K(Base):

@@ -3,6 +3,7 @@
 import functools
 import logging
 import os
+import re
 import time
 from functools import lru_cache
 
@@ -119,3 +120,36 @@ def convert_coords(all_coords: np.ndarray, in_system: str, out_system: str) -> p
     in_proj = Proj('epsg:' + in_system)
     out_proj = Proj('epsg:' + out_system)
     return transform(in_proj, out_proj, all_coords[:, 0], all_coords[:, 1])
+
+
+def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
+    """ Function that reduce decimal precision of coordinates in GeoJSON file
+        0 decimal places is a precision of about 111 km
+        1 decimal place is a precsion of about 11 km
+        2 decimal places is a precison of about 1.1 km
+        3 decimal places is a precison of about 111 m
+        4 decimal places is a precison of about 11 m
+        5 decimal places is a precison of about 1.1 m
+        6 decimal places is a precison of about 11 cm
+        7 decimal places is a precison of about 1.1 cm """
+
+    # Tworzymy pattern wyszukujacy liczby w ciagu znakow
+    num_patt = r'[-+]?\d*\.\d+|\d+'
+
+    # Wypisujemy wszystkie liczby z danego ciagu znaków i zmniejszamy im precyzje
+    all_nums = np.around(np.asarray(re.findall(num_patt, geojson_poly)).astype(float), decimals=precision)
+    all_nums_len = len(all_nums)
+
+    # Wypisujemy indesy wszystkich liczb (numery początku i końca liczby)
+    num_ids = np.array([(m.start(0), m.end(0)) for m in re.finditer(num_patt, geojson_poly)])
+
+    # Tworzymy macierz, która przechowuje indeksy poczatkowe i koncówe tekstów nie bedacych liczbami
+    text_ids = np.zeros((len(num_ids) + 1, 2), dtype=int)
+    text_ids[1:, 0] = num_ids[:, 1]
+    text_ids[:-1, 1] = num_ids[:, 0]
+    text_ids[-1, -1] = len(geojson_poly)
+
+    # Laczymy teksty nie bedace liczbami z liczbami ze zredukowana precyzja w jeden laczny ciag znakow
+    fin_geojson = "".join([geojson_poly[row[0]:row[1]] + str(all_nums[i]) if i < all_nums_len else
+                           geojson_poly[row[0]:row[1]] for i, row in enumerate(text_ids)])
+    return fin_geojson
