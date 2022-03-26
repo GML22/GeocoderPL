@@ -13,44 +13,36 @@ from folium.plugins import MousePosition
 from geo_utilities import *
 
 
-def create_gui_window():
-    """ Function that creates GUI window """
-
-    all_addrs_path = os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"])
-    assrt_msg = "W folderze '" + all_addrs_path + "' brakuje pliku 'all_address_phrases.obj'. Uzupełnij ten plik i " + \
-                "uruchom program ponownie!"
-    assert os.path.exists(all_addrs_path), assrt_msg
-
-    with open(all_addrs_path, 'rb') as file:
-        addr_phrases = pickle.load(file)
-
-    geo_app = QtWidgets.QApplication(sys.argv)
-    geo_app.setStyleSheet('''QWidget {background-color: rgb(255, 255, 255);}''')
-    my_geo_gui = MyGeoGUI(addr_phrases)
-    my_geo_gui.show()
-
-    try:
-        sys.exit(geo_app.exec_())
-    except SystemExit:
-        pass
-
-
 class MyGeoGUI(QtWidgets.QWidget):
     """ Class creating GUI window """
 
-    def __init__(self, addr_phrases):
+    def __init__(self) -> None:
         super().__init__()
+        self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
+
+        # Wczytyujemy string z adresami z pliku
+        all_addrs_path = os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"])
+
+        try:
+            with open(all_addrs_path, 'rb') as file:
+                addr_phrases = pickle.load(file)
+        except FileNotFoundError:
+            raise Exception("Pod podanym adresem: '" + all_addrs_path + "' nie ma pliku 'all_address_phrases.obj'. " +
+                            "Uzupełnij ten plik i uruchom program ponownie!")
+
         self.addr_uniq_words = addr_phrases["UNIQUES"]
         self.addr_arr = addr_phrases["ADDR_ARR"]
-        self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")
-        icon_path = os.path.join(self.fls_path, 'geo_icon.png')
-        assrt_msg = "W folderze '" + self.fls_path + "' brakuje pliku 'geo_icon.png'. Uzupełnij ten plik i uruchom " + \
-                    "program ponownie!"
-        assert os.path.exists(icon_path), assrt_msg
-        self.setWindowIcon(QIcon(QPixmap(icon_path)))
+        icon_path = os.environ["ICON_PATH"]
+
+        try:
+            self.setWindowIcon(QIcon(QPixmap(icon_path)))
+        except FileNotFoundError:
+            raise Exception("Pod podanym adresem: '" + icon_path + "' nie ma pliku 'geo_icon.png'. Uzupełnij ten " +
+                            "plik i uruchom program ponownie!")
+
         self.window_width, self.window_height = 1200, 900
         self.setMinimumSize(self.window_width, self.window_height)
         self.map_layout = QtWidgets.QVBoxLayout()
@@ -147,7 +139,7 @@ class MyGeoGUI(QtWidgets.QWidget):
         web_view.setHtml(data.getvalue().decode())
         self.map_layout.addWidget(web_view)
 
-    def on_text_changed(self):
+    def on_text_changed(self) -> None:
         """ Method that implements event on text change in QLineEdit """
 
         # Dodajemy spacje (" ") na początku wyszukiwanej frazy żeby rozróżniać miasta typu: "INNOWROCLAW" i "WROCLAW"
@@ -207,7 +199,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                                                   ' współrzędnym'])
             self.completer.popup().setStyleSheet("font-size: 18px; font-style: italic; color: gray;")
 
-    def change_sekts_order(self, c_sekt):
+    def change_sekts_order(self, c_sekt: np.ndarray) -> None:
         """ Method that changes order of sectors in adds_list """
 
         if np.abs(c_sekt - self.c_sekt).max() > self.max_sekts:
@@ -218,7 +210,7 @@ class MyGeoGUI(QtWidgets.QWidget):
             self.sekts_list = self.add_sekts[c_inds[:, 0], c_inds[:, 1]]
             self.c_sekt = c_sekt
 
-    def on_text_selected(self):
+    def on_text_selected(self) -> None:
         """ Methond that implements event on text select in QCompleter """
 
         c_row = tuple()
@@ -340,7 +332,7 @@ class MyGeoGUI(QtWidgets.QWidget):
             self.map_layout.addWidget(web_view)
 
 
-def get_addr_spiral_ids(addr_arr_shp, spiral_ids_arr):
+def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
     """ Function that returs indices of numpy array in spiral mode up to 'add_arr' shape starting from central point """
 
     spiral_ids_arr[0, :] = [0, 0]
@@ -377,7 +369,7 @@ def get_addr_spiral_ids(addr_arr_shp, spiral_ids_arr):
         add_list[c_ind] += c_sign[c_ind]
 
 
-def get_prg_ids(prg_num, c_addrs, curr_text, ids_row):
+def get_prg_ids(prg_num: int, c_addrs: str, curr_text: str, ids_row: list) -> bool:
     """ Function that generates indices of points in PRG table matching current text """
 
     c_start = 0

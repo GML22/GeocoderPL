@@ -93,7 +93,7 @@ def create_regs_dicts() -> dict:
         with open(regs_path, 'rb') as file:
             regs_dict = pickle.load(file)
     except FileNotFoundError:
-        raise Exception("Pod podanym adresem: '" + regs_path + "' nie ma pliku regs_dict.obj'. Uzupełnij ten plik i " +
+        raise Exception("Pod podanym adresem: '" + regs_path + "' nie ma pliku 'regs_dict.obj'. Uzupełnij ten plik i " +
                         "uruchom program ponownie!")
     return regs_dict
 

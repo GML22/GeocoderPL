@@ -46,7 +46,15 @@ def main() -> None:
         PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
 
     # Tworzmy GUI wyswietlajace mape
-    # create_gui_window()
+    # geo_app = QtWidgets.QApplication(sys.argv)
+    # geo_app.setStyleSheet('''QWidget {background-color: rgb(255, 255, 255);}''')
+    # my_geo_gui = MyGeoGUI()
+    # my_geo_gui.show()
+
+    # try:
+    #     sys.exit(geo_app.exec_())
+    # except SystemExit:
+    #     raise Exception("Przy zamykaniu okna aplikacji wystąpił błąd!")
 
 
 if __name__ == "__main__":
