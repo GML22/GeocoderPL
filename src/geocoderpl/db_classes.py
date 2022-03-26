@@ -6,19 +6,16 @@ import sqlalchemy as sa
 from dotenv import load_dotenv
 from sqlalchemy.orm import declarative_base
 
+# Tworzymy bazowy schemat dla tabel
+BASE = declarative_base()
+
 # Wczytujemy zmienne środowiskowe projektu
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 os.environ["PARENT_PATH"] = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
 
-# Tworzymy bazowy schemat dla tabel
-BASE = declarative_base()
-
 # Tworzymy silnik bazy danych
 SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
                               echo=False, future=True)
-
-# Tworzymy system koordynatów transformujący wspolrzedne geograficzne
-WRLD_PL_CRDS_TRNS = create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True)
 
 
 class BDOT10K(BASE):

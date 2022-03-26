@@ -23,7 +23,7 @@ from osgeo import osr
 from pyproj import Proj, transform
 from unidecode import unidecode
 
-from db_classes import SQL_ENGINE, BDOT10K, WRLD_PL_CRDS_TRNS
+from db_classes import SQL_ENGINE, BDOT10K
 from super_permutations import SuperPerms
 
 
@@ -388,7 +388,7 @@ def calc_pnt_dist(c_paths: list, x_val: str, y_val: str) -> float:
         [c_ring.AddPoint(row[0], row[1]) for row in pth.vertices]
         c_poly = ogr.Geometry(ogr.wkbPolygon)
         c_poly.AddGeometry(c_ring)
-        c_poly.Transform(WRLD_PL_CRDS_TRNS)
+        c_poly.Transform(create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True))
         c_dist = c_point.Distance(c_poly)
         min_dist = c_dist if c_dist < min_dist else min_dist
 
@@ -437,9 +437,8 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         sekt_centr_sz = plnd_min_szer + (float(curr_sekt[0]) + 0.5) * sekt_szer
         sekt_centr_dl = plnd_min_dl + (float(curr_sekt[1]) + 0.5) * sekt_dl
         pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_sz, sekt_centr_dl])
-        sekt_rad = float(os.environ["SEKT_RAD"])
-        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= sekt_rad * sekt_szer,
-                                      pow_centr_odl[:, 0] <= 0.52 * sekt_dl)
+        s_rad = float(os.environ["SEKT_RAD"])
+        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= s_rad * sekt_szer, pow_centr_odl[:, 0] <= s_rad * sekt_dl)
         pow_centr_smpl = pow_centr_smpl[pow_fin_mask, :]
         pow_bubd_arr = pow_bubd_arr[pow_fin_mask, :]
         pow_len = len(pow_bubd_arr)
@@ -517,7 +516,7 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top10_geojson: np.ndarra
 
         for j, geojson in enumerate(top10_geojson[i]):
             c_poly = ogr.CreateGeometryFromJson(geojson)
-            c_poly.Transform(WRLD_PL_CRDS_TRNS)
+            c_poly.Transform(create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True))
             c_dist = c_point.Distance(c_poly)
 
             if c_dist == 0.0:

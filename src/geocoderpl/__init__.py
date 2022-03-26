@@ -1,14 +1,7 @@
 """ __init_.py module """
 
-import logging
-import os
-import time
-
-import numpy as np
-import sqlalchemy as sa
-
-from db_classes import BASE, SQL_ENGINE
-from geo_utilities import create_logger, time_decorator, create_regs_dicts, get_super_permut_dict
+from db_classes import BASE
+from geo_utilities import *
 from xml_parsers import BDOT10kDataParser, PRGDataParser
 
 # Tworzymy domyślny obiekt loggera
@@ -35,15 +28,15 @@ def main() -> None:
         bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
-        # Tworzymy tabelę SQL z punktami adresowymi PRG
-        sekt_num = int(os.environ["SEKT_NUM"])
-        addr_arr = np.empty((sekt_num, sekt_num, 1), dtype=object)
-        addr_arr[...] = ''
-        addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
-        prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-        all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-        perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-        PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
+    # Tworzymy tabelę SQL z punktami adresowymi PRG
+    sekt_num = int(os.environ["SEKT_NUM"])
+    addr_arr = np.empty((sekt_num, sekt_num, 1), dtype=object)
+    addr_arr[...] = ''
+    addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
+    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+    all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+    PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)
