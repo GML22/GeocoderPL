@@ -117,8 +117,9 @@ class PRG(BASE):
         self.dodatkowy_opis = dodatkowy_opis
 
     def __repr__(self) -> str:
-        return "<PRG('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')>" % \
-               (self.wojewodztwo, self.powiat, self.gmina, self.miejscowosc, self.miejscowosc2, self.ulica, self.numer,
-                self.kod_pocztowy, self.status, self.szerokosc, self.dlugosc, self.zrodlo, self.czy_poprawny,
-                self.odleglosc_od_gminy, self.bdot10_bubd_id, self.odleglosc_od_budynku, self.kod_sektora,
-                self.dodatkowy_opis)
+        print_str = "<PRG('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'," + \
+                    " '%s', '%s', '%s')>"
+        return print_str % (self.wojewodztwo, self.powiat, self.gmina, self.miejscowosc, self.miejscowosc2, self.ulica,
+                            self.numer, self.kod_pocztowy, self.status, self.szerokosc, self.dlugosc, self.zrodlo,
+                            self.czy_poprawny, self.odleglosc_od_gminy, self.bdot10_bubd_id, self.odleglosc_od_budynku,
+                            self.kod_sektora, self.dodatkowy_opis)

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from io import BytesIO
 
+from db_classes import PRG
 from geo_utilities import *
 
 
