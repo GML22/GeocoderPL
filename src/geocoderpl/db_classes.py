@@ -17,6 +17,9 @@ BASE = declarative_base()
 SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
                               echo=False, future=True)
 
+# Tworzymy system koordynatów transformujący wspolrzedne geograficzne
+WRLD_PL_CRDS_TRNS = create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True)
+
 
 class BDOT10K(BASE):
     """ Class that defines columns of 'BDOT10K_TABLE' """

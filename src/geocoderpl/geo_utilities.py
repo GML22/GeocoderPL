@@ -23,7 +23,7 @@ from osgeo import osr
 from pyproj import Proj, transform
 from unidecode import unidecode
 
-from db_classes import SQL_ENGINE, BDOT10K
+from db_classes import SQL_ENGINE, BDOT10K, WRLD_PL_CRDS_TRNS
 from super_permutations import SuperPerms
 
 
@@ -57,7 +57,6 @@ def time_decorator(func):
 
         # Wykonujemy główną fukcję
         ret_vals = func(*args, **kwargs)
-
         time_passed = time.time() - start_time
         logger.info("1. Łączny czas wykonywania funkcji '" + func.__name__ + "' - {:.2f} sekundy".format(time_passed))
 
@@ -249,9 +248,10 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, trans_szer, points_arr, popraw_list,
-                          coord_trans, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                          dod_opis_list, addr_phrs_dict):
+def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_dlug: np.ndarray,
+                          trans_szer: np.ndarray, points_arr: np.ndarray, popraw_list: list, dists_list: list,
+                          zrodlo_list: list, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list,
+                          dod_opis_list: list, addr_phrs_dict: dict) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -294,12 +294,12 @@ def points_inside_polygon(grouped_regions, regs_dict, woj_name, trans_dlug, tran
                     elif c_ulica == '' and c_miejsc2 == '':
                         address = c_numer + ", " + c_miejsc + ", " + c_gmin + ", " + c_pow
 
-                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row, coord_trans,
-                                   dists_list, zrodlo_list)
+                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row, dists_list,
+                                   zrodlo_list)
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
             get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                           coord_trans, addr_phrs_dict)
+                           addr_phrs_dict)
 
 
 @lru_cache
@@ -334,7 +334,8 @@ def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
     return points_flags
 
 
-def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coord_trans, dists_list, zrodlo_list):
+def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int,
+                   c_row: np.ndarray, dists_list: list, zrodlo_list: list) -> None:
     """ Function that returns OSM coordinates of address point or distance from the district shapefile """
 
     status_code = 500
@@ -362,7 +363,7 @@ def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coo
 
             if not in_flag:
                 popraw_list[c_ind] = 0
-                max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], coord_trans)
+                max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1])
                 dists_list[c_ind] = max_dist
             else:
                 outside_pts[1] = x_val
@@ -370,11 +371,11 @@ def get_osm_coords(address, outside_pts, c_paths, popraw_list, c_ind, c_row, coo
                 zrodlo_list[c_ind] = "OSM"
         else:
             popraw_list[c_ind] = 0
-            max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], coord_trans)
+            max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1])
             dists_list[c_ind] = max_dist
 
 
-def calc_pnt_dist(c_paths, x_val, y_val, coord_trans):
+def calc_pnt_dist(c_paths: list, x_val: str, y_val: str) -> float:
     """ Function that calculates distances of point to given polygon """
 
     # Zaczynamy od dużej liczby
@@ -387,15 +388,15 @@ def calc_pnt_dist(c_paths, x_val, y_val, coord_trans):
         [c_ring.AddPoint(row[0], row[1]) for row in pth.vertices]
         c_poly = ogr.Geometry(ogr.wkbPolygon)
         c_poly.AddGeometry(c_ring)
-        c_poly.Transform(coord_trans)
+        c_poly.Transform(WRLD_PL_CRDS_TRNS)
         c_dist = c_point.Distance(c_poly)
         min_dist = c_dist if c_dist < min_dist else min_dist
 
     return min_dist
 
 
-def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, coord_trans,
-                   addr_phrs_dict):
+def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
+                   sekt_kod_list: list, dod_opis_list: list, addr_phrs_dict: dict) -> None:
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Ustalamy sektory dla wybranych przez naas punktow PRG
@@ -429,14 +430,16 @@ def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod
             pow_centr_smpl = pow_bubd_arr[:, 1:3].astype(np.float32)
 
         # Wyliczamy odleglosci budynkow od srodka biezacego sektora i wybieramy tylko te budynki, ktore znajduja sie
-        # w odleglosci 0,52 * szerokosc (dlugosc) sektora - w ten sposob mamy pewnosc, ze wlasciwie przypisane beda
+        # w odleglosci sekt_rad * szerokosc (dlugosc) sektora - w ten sposob mamy pewnosc, ze wlasciwie przypisane beda
         # budynki do punktow adresowych znajdujacych sie na krawedziach sektorow - unikamy sytuacji w ktorej punkt
         # adresowy znajduje sie na krawedzi jednego sektora a centroid budynku na krawedzi sasiedniego sektora
         curr_sekt = unq_sekt[4].split("_")  # biezacy sektor zawsze bedzie 5 na liscie unq_sekt
         sekt_centr_sz = plnd_min_szer + (float(curr_sekt[0]) + 0.5) * sekt_szer
         sekt_centr_dl = plnd_min_dl + (float(curr_sekt[1]) + 0.5) * sekt_dl
         pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_sz, sekt_centr_dl])
-        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= 0.52 * sekt_szer, pow_centr_odl[:, 0] <= 0.52 * sekt_dl)
+        sekt_rad = float(os.environ["SEKT_RAD"])
+        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= sekt_rad * sekt_szer,
+                                      pow_centr_odl[:, 0] <= 0.52 * sekt_dl)
         pow_centr_smpl = pow_centr_smpl[pow_fin_mask, :]
         pow_bubd_arr = pow_bubd_arr[pow_fin_mask, :]
         pow_len = len(pow_bubd_arr)
@@ -462,8 +465,8 @@ def get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod
         # wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi PRG i zapisujemy jego
         # indeks w bazie w raz z wyliczona odlegloscia
         c_addr_arr = addr_phrs_dict["ADDR_ARR"][int(curr_sekt[0]), int(curr_sekt[1])]
-        gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids,
-                          crds_inds, pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict)
+        gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, bdot10k_dist, bdot10k_ids, crds_inds, pow_bubd_arr,
+                          c_addr_arr, dod_opis_list, addr_phrs_dict)
 
 
 @lru_cache
@@ -496,8 +499,10 @@ def get_sector_codes(poly_centr_y: float, poly_centr_x: float) -> (int, int):
     return c_sekt_szer, c_sekt_dl
 
 
-def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bdot10k_dist, bdot10k_ids, crds_inds,
-                      pow_bubd_arr, c_addr_arr, dod_opis_list, addr_phrs_dict):
+def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top10_geojson: np.ndarray, top10_ids: np.ndarray,
+                      bdot10k_dist: np.ndarray, bdot10k_ids: np.ndarray, crds_inds: np.ndarray,
+                      pow_bubd_arr: np.ndarray, c_addr_arr: np.ndarray, dod_opis_list: list,
+                      addr_phrs_dict: dict) -> None:
     """ Function that finds closest buidling shape for given PRG point """
 
     trans_szer, trans_dlug = convert_coords(c_coords, os.environ['WORLD_CRDS'], os.environ['PL_CRDS'])
@@ -512,7 +517,7 @@ def gen_fin_bubds_ids(c_coords, c_len, top10_geojson, top10_ids, coord_trans, bd
 
         for j, geojson in enumerate(top10_geojson[i]):
             c_poly = ogr.CreateGeometryFromJson(geojson)
-            c_poly.Transform(coord_trans)
+            c_poly.Transform(WRLD_PL_CRDS_TRNS)
             c_dist = c_point.Distance(c_poly)
 
             if c_dist == 0.0:

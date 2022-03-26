@@ -13,11 +13,11 @@ from folium.plugins import MousePosition
 from geo_utilities import *
 
 
-def create_gui_window(fls_path, cursor, sekt_num, start_lat, start_long, max_sekts):
+def create_gui_window():
     """ Function that creates GUI window """
 
-    all_addrs_path = os.path.join(fls_path, "all_address_phrases.obj")
-    assrt_msg = "W folderze '" + fls_path + "' brakuje pliku 'all_address_phrases.obj'. Uzupełnij ten plik i " + \
+    all_addrs_path = os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"])
+    assrt_msg = "W folderze '" + all_addrs_path + "' brakuje pliku 'all_address_phrases.obj'. Uzupełnij ten plik i " + \
                 "uruchom program ponownie!"
     assert os.path.exists(all_addrs_path), assrt_msg
 
@@ -26,7 +26,7 @@ def create_gui_window(fls_path, cursor, sekt_num, start_lat, start_long, max_sek
 
     geo_app = QtWidgets.QApplication(sys.argv)
     geo_app.setStyleSheet('''QWidget {background-color: rgb(255, 255, 255);}''')
-    my_geo_gui = MyGeoGUI(fls_path, cursor, addr_phrases, sekt_num, start_lat, start_long, max_sekts)
+    my_geo_gui = MyGeoGUI(addr_phrases)
     my_geo_gui.show()
 
     try:
@@ -38,16 +38,10 @@ def create_gui_window(fls_path, cursor, sekt_num, start_lat, start_long, max_sek
 class MyGeoGUI(QtWidgets.QWidget):
     """ Class creating GUI window """
 
-    def __init__(self, fls_path, cursor, addr_phrases, sekt_num, start_lat, start_long, max_sekts):
+    def __init__(self, addr_phrases):
         super().__init__()
-        self.fls_path = fls_path
-        self.cursor = cursor
         self.addr_uniq_words = addr_phrases["UNIQUES"]
         self.addr_arr = addr_phrases["ADDR_ARR"]
-        self.sekt_num = sekt_num
-        self.start_lat = start_lat
-        self.start_long = start_long
-        self.max_sekts = max_sekts
         self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
 
         # Ustalamy najważniejsze parametry okna mapy

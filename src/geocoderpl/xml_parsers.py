@@ -307,18 +307,13 @@ class PRGDataParser(XmlParser):
 
         # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny
         # zawierajace przekonwertowane wspolrzedne
-        world_crds = os.environ['WORLD_CRDS']
-        pl_crds = os.environ['PL_CRDS']
-        trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], pl_crds, world_crds)
+        trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], os.environ['PL_CRDS'], os.environ['WORLD_CRDS'])
 
         # Grupujemy kolumny z nazwami powiatow oraz gmin i sprawdzamy czy punkty adresowe z bazy PRG znajduja sie
         # wewnatrz shapefili ich gmin
         df_regions = pd.DataFrame(points_arr[:, 1:3])
         df_regions.columns = ['POWIAT', 'GMINA']
         grouped_regions = df_regions.groupby(['POWIAT', 'GMINA'], as_index=False).groups
-
-        # Tworzymy system transformujący wspolrzedne geograficzne
-        coord_trans = create_coords_transform(int(world_crds), int(pl_crds), True)
 
         # Tworzymy inne przydatne obiekty
         woj_idx = woj_name.rfind("_") + 1
@@ -335,8 +330,8 @@ class PRGDataParser(XmlParser):
         # Dla każdej gminy i powiatu sprawdzamy czy punkty do nich przypisane znajduja sie wewnatrz wielokata danej
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
         points_inside_polygon(grouped_regions, self.regs_dict, woj_name, trans_dlug, trans_szer, points_arr,
-                              popraw_list, coord_trans, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist,
-                              sekt_kod_list, dod_opis_list, self.addr_phrs_d)
+                              popraw_list, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
+                              dod_opis_list, self.addr_phrs_d)
 
         # Tworzymy finalna macierz informacji, ktora zapiszemy w bazie
         fin_points_list = [PRG(*points_arr[i, :-2], trans_szer[i], trans_dlug[i], zrodlo_list[i], popraw_list[i],

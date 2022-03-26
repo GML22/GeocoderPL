@@ -1,6 +1,6 @@
 """ Class that calculates indices providing superpermutations for lists of strings with length of maximum 5 elements """
 
-import itertools
+import itertools.permutations as perms
 
 
 class SuperPerms(object):
@@ -8,9 +8,8 @@ class SuperPerms(object):
         self.max_v = max_v
         self.all_inds = list(range(self.max_v))
         self.base_vals = "".join([str(i) for i in self.all_inds])
-        self.all_perms = [[perm for perm in itertools.permutations(self.base_vals, i)] for i in self.all_inds[1:]]
-        self.c_perms = ["".join(perm) for perm in itertools.permutations(self.base_vals, self.max_v) if
-                        "".join(perm) != self.base_vals]
+        self.all_perms = [[prm for prm in perms(self.base_vals, i)] for i in self.all_inds[1:]]
+        self.c_perms = ["".join(prm) for prm in perms(self.base_vals, self.max_v) if "".join(prm) != self.base_vals]
         self.fin_super_perm_ids = self.get_super_perm()
 
     def get_super_perm(self, p_vals: str = None, c_perms: list = None) -> list:
