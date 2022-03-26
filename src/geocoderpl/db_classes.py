@@ -1,14 +1,24 @@
 """ Module that defines SQL database classes """
 
-import sqlalchemy as sa
+import os
 
+import sqlalchemy as sa
+from dotenv import load_dotenv
 from sqlalchemy.orm import declarative_base
 
-# Tworzymy bazowych schemat dla tabel
-Base = declarative_base()
+# Wczytujemy zmienne środowiskowe projektu
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+os.environ["PARENT_PATH"] = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
+
+# Tworzymy bazowy schemat dla tabel
+BASE = declarative_base()
+
+# Tworzymy silnik bazy danych
+SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
+                              echo=False, future=True)
 
 
-class BDOT10K(Base):
+class BDOT10K(BASE):
     """ Class that defines columns of 'BDOT10K_TABLE' """
 
     # Defniujemy nazwę tabeli
@@ -55,7 +65,7 @@ class BDOT10K(Base):
                 self.centr_long, self.bubd_geojson)
 
 
-class PRG(Base):
+class PRG(BASE):
     """ Class that defines columns of 'BDOT10K_TABLE' """
 
     # Defniujemy nazwę tabeli

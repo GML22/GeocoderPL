@@ -2,9 +2,6 @@
 
 import io
 import json
-import pickle
-import re
-import sys
 from itertools import cycle
 
 import folium
@@ -12,7 +9,6 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from folium.plugins import MousePosition
-from unidecode import unidecode
 
 from geo_utilities import *
 
@@ -52,8 +48,7 @@ class MyGeoGUI(QtWidgets.QWidget):
         self.start_lat = start_lat
         self.start_long = start_long
         self.max_sekts = max_sekts
-        self.c_ptrn = re.compile(r"^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))" +
-                                 r"(\.\d+)?)$")
+        self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")
