@@ -1,3 +1,4 @@
+import gc
 from abc import ABC, abstractmethod
 from io import BytesIO
 
@@ -218,13 +219,20 @@ class PRGDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        with zipfile.ZipFile(self.xml_path, "r") as zfile:
-            for woj_name in zfile.namelist():
-                xml_file = BytesIO(zfile.read(woj_name))
-                xml_contex = etree.iterparse(xml_file, events=(self.event_type,), tag=self.tags_tuple[:-1])
+        # Definiujemy podstawowe zmienne
+        f_path, f_name = os.path.split(self.xml_path)
+        zfile_names = []
+        cwd = os.getcwd()
+        os.chdir(f_path)
 
+        try:
+            with zipfile.ZipFile(self.xml_path, "r") as zfile:
+                zfile_names += zfile.namelist()
+                zfile.extractall()
+
+            for woj_name in zfile_names:
                 # Tworzymy listę punktów
-                points_arr = self.create_points_list(xml_contex)
+                points_arr = self.create_points_list(woj_name)
 
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
@@ -237,16 +245,21 @@ class PRGDataParser(XmlParser):
 
                 self.addr_phrs_d["C_LEN"] += len(fin_points_list)
                 self.addr_phrs_d["LIST"] = []
+        finally:
+            if zfile_names:
+                gc.collect()
+                [os.remove(f_name) for f_name in os.listdir() if f_name in zfile_names]
 
         # Usuwamy zbędne obiekty ze słownika
         self.addr_phrs_d.pop("LIST", None)
         self.addr_phrs_d.pop("C_LEN", None)
+        os.chdir(cwd)
 
         # Zapisujemy zbiór unikalnych adresow na dysku twardym
         with open(os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"]), 'wb') as f:
             pickle.dump(self.addr_phrs_d, f, pickle.HIGHEST_PROTOCOL)
 
-    def create_points_list(self, xml_contex: etree.iterparse) -> np.ndarray:
+    def create_points_list(self, woj_name: str) -> np.ndarray:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
@@ -255,6 +268,7 @@ class PRGDataParser(XmlParser):
         c_ind = 0
         coords_prec = int(os.environ["COORDS_PREC"])
         all_tags = self.tags_tuple
+        xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
         num_dict = {all_tags[1]: 3, all_tags[2]: 4, all_tags[3]: 5, all_tags[4]: 6, all_tags[5]: 7, all_tags[6]: 8}
         rep_dict = {"ul. ": "", "ulica ": "", "al.": "Aleja", "Al.": "Aleja", "pl.": "Plac", "Pl.": "Plac",
                     "wTrakcieBudowy": "w trakcie budowy"}
