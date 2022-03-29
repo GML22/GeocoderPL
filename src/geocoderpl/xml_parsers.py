@@ -105,8 +105,10 @@ class BDOT10kDataParser(XmlParser):
 
                 # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
                 with sa.orm.Session(SQL_ENGINE) as session:
-                    session.bulk_save_objects(bdot10k_woj_rows)
+                    [session.add(BDOT10K(*c_row)) for c_row in bdot10k_woj_rows]
                     session.commit()
+                    session.expunge_all()
+                    gc.collect()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -154,7 +156,7 @@ class BDOT10kDataParser(XmlParser):
                 c_sekt_dl = c_sekt_tpl[1]
                 kod_sektora = str(c_sekt_szer).zfill(3) + "_" + str(c_sekt_dl).zfill(3)
                 fin_row2 = [kod_sektora] + fin_row
-                bdot10k_pow_rows.append(BDOT10K(*fin_row2))
+                bdot10k_pow_rows.append(fin_row2)
                 fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
             elif c_tag == all_tags[5]:
                 fin_row[row_idx] = 1 if c_text == 'true' else 0
@@ -218,41 +220,21 @@ class PRGDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        # Definiujemy podstawowe parametry
-        x_path, x_filename = os.path.split(self.xml_path)
-        curr_dir = os.getcwd()
-        os.chdir(x_path)
-        woj_names = []
+        with zipfile.ZipFile(self.xml_path, "r") as zfile:
+            for woj_name in zfile.namelist():
+                # Wczytujemy dane z zipa
+                woj_xml = BytesIO(zfile.read(woj_name))
+                logging.info(woj_name)
 
-        try:
-            with zipfile.ZipFile(x_filename, "r") as zfile:
-                woj_names = zfile.namelist()
-                zfile.extractall()
-
-            for woj_name in woj_names:
                 # Wczytujemy dane XML dla danego wojewodztwa
-                xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
+                xml_contex = etree.iterparse(woj_xml, events=(self.event_type,), tag=self.tags_tuple[:-1])
 
                 # Tworzymy listę punktów
                 points_arr = self.create_points_arr(xml_contex)
 
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
-                fin_points_list = self.check_prg_points(points_arr, woj_name)
-
-                # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
-                with sa.orm.Session(SQL_ENGINE) as session:
-                    session.bulk_save_objects(fin_points_list)
-                    session.commit()
-
-                self.addr_phrs_d["C_LEN"] += len(fin_points_list)
-                self.addr_phrs_d["LIST"] = []
-        finally:
-            if woj_names:
-                gc.collect()
-                [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
-
-        os.chdir(curr_dir)
+                self.check_prg_pts_add_db(points_arr, woj_name)
 
         # Usuwamy zbędne obiekty ze słownika
         self.addr_phrs_d.pop("LIST", None)
@@ -262,7 +244,7 @@ class PRGDataParser(XmlParser):
         with open(os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"]), 'wb') as f:
             pickle.dump(self.addr_phrs_d, f, pickle.HIGHEST_PROTOCOL)
 
-    def create_points_arr(self, xml_contex: etree.iterparse) -> list:
+    def create_points_arr(self, xml_contex: etree.iterparse) -> np.ndarray:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
@@ -317,7 +299,7 @@ class PRGDataParser(XmlParser):
         return np.asarray(points_list)
 
     @time_decorator
-    def check_prg_points(self, points_arr: np.ndarray, woj_name: str) -> list:
+    def check_prg_pts_add_db(self, points_arr: np.ndarray, woj_name: str):
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
@@ -351,9 +333,14 @@ class PRGDataParser(XmlParser):
                               dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
                               self.addr_phrs_d)
 
-        # Tworzymy finalna macierz informacji, ktora zapiszemy w bazie
-        fin_points_list = [PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
-                               popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
-                               dod_opis_list[i]) for i in range(pts_arr_shp[0])]
+        # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+        with sa.orm.Session(SQL_ENGINE) as session:
+            [session.add(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
+                             popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
+                             dod_opis_list[i])) for i in range(pts_arr_shp[0])]
+            session.commit()
+            session.expunge_all()
+            gc.collect()
 
-        return fin_points_list
+        self.addr_phrs_d["C_LEN"] += pts_arr_shp[0]
+        self.addr_phrs_d["LIST"] = []
