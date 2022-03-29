@@ -248,10 +248,10 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_dlug: np.ndarray,
-                          trans_szer: np.ndarray, points_arr: np.ndarray, popraw_list: list, dists_list: list,
-                          zrodlo_list: list, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list,
-                          dod_opis_list: list, addr_phrs_dict: dict) -> None:
+def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_crds: np.ndarray,
+                          points_arr: np.ndarray, popraw_list: list, dists_list: list, zrodlo_list: list,
+                          bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list,
+                          addr_phrs_dict: dict) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -270,7 +270,7 @@ def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str,
             for gmn_code in gmin_codes:
                 c_paths += regs_dict[gmn_code][1]
 
-            curr_coords = np.column_stack((trans_dlug[coords_inds], trans_szer[coords_inds]))
+            curr_coords = trans_crds[coords_inds, ::-1]
             points_flags = points_in_shape(c_paths, curr_coords)
 
             # Dla punktow odresowych PRG, ktore znajduja sie poza granicami wielokatow swoich gmin przeprowadzamy

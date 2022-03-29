@@ -98,9 +98,8 @@ class BDOT10kDataParser(XmlParser):
                             for xml_file in zfile3.namelist():
                                 if "BUBD" in xml_file:
                                     # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
-                                    bubd_xml = BytesIO(zfile3.read(xml_file))
-                                    xml_contex = etree.iterparse(bubd_xml, events=(self.event_type,),
-                                                                 tag=self.tags_tuple)
+                                    bd_xml = BytesIO(zfile3.read(xml_file))
+                                    xml_contex = etree.iterparse(bd_xml, events=(self.event_type,), tag=self.tags_tuple)
                                     fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
                                     bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
 
@@ -219,20 +218,23 @@ class PRGDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        # Definiujemy podstawowe zmienne
-        f_path, f_name = os.path.split(self.xml_path)
-        zfile_names = []
-        cwd = os.getcwd()
-        os.chdir(f_path)
+        # Definiujemy podstawowe parametry
+        x_path, x_filename = os.path.split(self.xml_path)
+        curr_dir = os.getcwd()
+        os.chdir(x_path)
+        woj_names = []
 
         try:
-            with zipfile.ZipFile(self.xml_path, "r") as zfile:
-                zfile_names += zfile.namelist()
+            with zipfile.ZipFile(x_filename, "r") as zfile:
+                woj_names = zfile.namelist()
                 zfile.extractall()
 
-            for woj_name in zfile_names:
+            for woj_name in woj_names:
+                # Wczytujemy dane XML dla danego wojewodztwa
+                xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
+
                 # Tworzymy listę punktów
-                points_arr = self.create_points_list(woj_name)
+                points_arr = self.create_points_arr(xml_contex)
 
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
@@ -246,20 +248,21 @@ class PRGDataParser(XmlParser):
                 self.addr_phrs_d["C_LEN"] += len(fin_points_list)
                 self.addr_phrs_d["LIST"] = []
         finally:
-            if zfile_names:
+            if woj_names:
                 gc.collect()
-                [os.remove(f_name) for f_name in os.listdir() if f_name in zfile_names]
+                [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
+
+        os.chdir(curr_dir)
 
         # Usuwamy zbędne obiekty ze słownika
         self.addr_phrs_d.pop("LIST", None)
         self.addr_phrs_d.pop("C_LEN", None)
-        os.chdir(cwd)
 
         # Zapisujemy zbiór unikalnych adresow na dysku twardym
         with open(os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"]), 'wb') as f:
             pickle.dump(self.addr_phrs_d, f, pickle.HIGHEST_PROTOCOL)
 
-    def create_points_list(self, woj_name: str) -> np.ndarray:
+    def create_points_arr(self, xml_contex: etree.iterparse) -> list:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
@@ -268,7 +271,6 @@ class PRGDataParser(XmlParser):
         c_ind = 0
         coords_prec = int(os.environ["COORDS_PREC"])
         all_tags = self.tags_tuple
-        xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
         num_dict = {all_tags[1]: 3, all_tags[2]: 4, all_tags[3]: 5, all_tags[4]: 6, all_tags[5]: 7, all_tags[6]: 8}
         rep_dict = {"ul. ": "", "ulica ": "", "al.": "Aleja", "Al.": "Aleja", "pl.": "Plac", "Pl.": "Plac",
                     "wTrakcieBudowy": "w trakcie budowy"}
@@ -321,7 +323,9 @@ class PRGDataParser(XmlParser):
 
         # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny
         # zawierajace przekonwertowane wspolrzedne
-        trans_szer, trans_dlug = convert_coords(points_arr[:, -2:], os.environ['PL_CRDS'], os.environ['WORLD_CRDS'])
+        trans_crds = np.zeros((2, len(points_arr)), dtype=np.float64)
+        trans_crds[:] = convert_coords(points_arr[:, -2:], os.environ['PL_CRDS'], os.environ['WORLD_CRDS'])
+        trans_crds = trans_crds.T
 
         # Grupujemy kolumny z nazwami powiatow oraz gmin i sprawdzamy czy punkty adresowe z bazy PRG znajduja sie
         # wewnatrz shapefili ich gmin
@@ -343,12 +347,13 @@ class PRGDataParser(XmlParser):
 
         # Dla każdej gminy i powiatu sprawdzamy czy punkty do nich przypisane znajduja sie wewnatrz wielokata danej
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
-        points_inside_polygon(grouped_regions, self.regs_dict, woj_name, trans_dlug, trans_szer, points_arr,
-                              popraw_list, dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                              dod_opis_list, self.addr_phrs_d)
+        points_inside_polygon(grouped_regions, self.regs_dict, woj_name, trans_crds, points_arr, popraw_list,
+                              dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
+                              self.addr_phrs_d)
 
         # Tworzymy finalna macierz informacji, ktora zapiszemy w bazie
-        fin_points_list = [PRG(*points_arr[i, :-2], trans_szer[i], trans_dlug[i], zrodlo_list[i], popraw_list[i],
-                               dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i], dod_opis_list[i])
-                           for i in range(pts_arr_shp[0])]
+        fin_points_list = [PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
+                               popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
+                               dod_opis_list[i]) for i in range(pts_arr_shp[0])]
+
         return fin_points_list

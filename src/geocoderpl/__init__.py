@@ -30,8 +30,7 @@ def main() -> None:
 
     # Tworzymy tabelę SQL z punktami adresowymi PRG
     sekt_num = int(os.environ["SEKT_NUM"])
-    addr_arr = np.empty((sekt_num, sekt_num, 1), dtype=object)
-    addr_arr[...] = ''
+    addr_arr = np.full((sekt_num, sekt_num, 1), fill_value='', dtype=object)
     addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
     prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
     all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
