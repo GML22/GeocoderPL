@@ -104,9 +104,22 @@ class BDOT10kDataParser(XmlParser):
                                     bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
 
                 # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+                bdot10k_rows = []
+                db_save_freq = int(os.environ['DB_SAVE_FREQ'])
+
                 with sa.orm.Session(SQL_ENGINE) as session:
-                    [session.add(BDOT10K(*c_row)) for c_row in bdot10k_woj_rows]
-                    session.commit()
+                    for i, c_row in enumerate(bdot10k_woj_rows):
+                        bdot10k_rows.append(BDOT10K(*c_row))
+
+                        if i % db_save_freq == 0:
+                            session.bulk_save_objects(bdot10k_rows)
+                            session.commit()
+                            bdot10k_rows = []
+
+                    if bdot10k_rows:
+                        session.bulk_save_objects(bdot10k_rows)
+                        session.commit()
+
                     session.expunge_all()
                     gc.collect()
 
@@ -220,14 +233,20 @@ class PRGDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        with zipfile.ZipFile(self.xml_path, "r") as zfile:
-            for woj_name in zfile.namelist():
-                # Wczytujemy dane z zipa
-                woj_xml = BytesIO(zfile.read(woj_name))
-                logging.info(woj_name)
+        # Definiujemy podstawowe parametry
+        x_path, x_filename = os.path.split(self.xml_path)
+        curr_dir = os.getcwd()
+        os.chdir(x_path)
+        woj_names = []
 
+        try:
+            with zipfile.ZipFile(x_filename, "r") as zfile:
+                woj_names = zfile.namelist()
+                zfile.extractall()
+
+            for woj_name in woj_names:
                 # Wczytujemy dane XML dla danego wojewodztwa
-                xml_contex = etree.iterparse(woj_xml, events=(self.event_type,), tag=self.tags_tuple[:-1])
+                xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
 
                 # Tworzymy listę punktów
                 points_arr = self.create_points_arr(xml_contex)
@@ -236,7 +255,13 @@ class PRGDataParser(XmlParser):
                 # wewnątrz shapefile'a swojej gminy
                 self.check_prg_pts_add_db(points_arr, woj_name)
 
+        finally:
+            if woj_names:
+                gc.collect()
+                [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
+
         # Usuwamy zbędne obiekty ze słownika
+        os.chdir(curr_dir)
         self.addr_phrs_d.pop("LIST", None)
         self.addr_phrs_d.pop("C_LEN", None)
 
@@ -334,11 +359,23 @@ class PRGDataParser(XmlParser):
                               self.addr_phrs_d)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+        prg_rows = []
+        db_save_freq = int(os.environ['DB_SAVE_FREQ'])
+
         with sa.orm.Session(SQL_ENGINE) as session:
-            [session.add(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
-                             popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
-                             dod_opis_list[i])) for i in range(pts_arr_shp[0])]
-            session.commit()
+            for i in range(pts_arr_shp[0]):
+                prg_rows.append(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
+                                    popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
+                                    dod_opis_list[i]))
+                if i % db_save_freq == 0:
+                    session.bulk_save_objects(prg_rows)
+                    session.commit()
+                    prg_rows = []
+
+            if prg_rows:
+                session.bulk_save_objects(prg_rows)
+                session.commit()
+
             session.expunge_all()
             gc.collect()
 

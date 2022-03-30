@@ -335,6 +335,7 @@ class MyGeoGUI(QtWidgets.QWidget):
 def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
     """ Function that returs indices of numpy array in spiral mode up to 'add_arr' shape starting from central point """
 
+    # Definiujemy podstawowe parametry
     spiral_ids_arr[0, :] = [0, 0]
     add_list = [1, 0]
     c_sign = [1, 1]
@@ -345,6 +346,7 @@ def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
     c_sum = 0
 
     while 1:
+        # Mnożymy razy 8, bo każdy sektor jest otoczony zawsze 8 sąsiadami
         if arr_licz <= c_sum + 8 * i:
             spiral_ids_arr[arr_licz, :] = add_list
             arr_licz += 1
@@ -372,6 +374,7 @@ def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
 def get_prg_ids(prg_num: int, c_addrs: str, curr_text: str, ids_row: list) -> bool:
     """ Function that generates indices of points in PRG table matching current text """
 
+    # Definiujemy podstawowe parametry
     c_start = 0
     found_flag = False
     empty_idx = ids_row.index('')
