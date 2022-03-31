@@ -249,7 +249,7 @@ def csv_to_dict(c_path: str) -> dict:
 
 
 def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_crds: np.ndarray,
-                          points_arr: np.ndarray, popraw_list: list, dists_list: list, zrodlo_list: list,
+                          points_arr: np.memmap, popraw_list: list, dists_list: list, zrodlo_list: list,
                           bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list,
                           addr_phrs_dict: dict) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
@@ -335,7 +335,7 @@ def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
 
 
 def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int,
-                   c_row: np.ndarray, dists_list: list, zrodlo_list: list) -> None:
+                   c_row: np.memmap, dists_list: list, zrodlo_list: list) -> None:
     """ Function that returns OSM coordinates of address point or distance from the district shapefile """
 
     status_code = 500

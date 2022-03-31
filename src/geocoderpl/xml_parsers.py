@@ -120,8 +120,7 @@ class BDOT10kDataParser(XmlParser):
                         session.bulk_save_objects(bdot10k_rows)
                         session.commit()
 
-                    session.expunge_all()
-                    gc.collect()
+                gc.collect()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -238,6 +237,8 @@ class PRGDataParser(XmlParser):
         curr_dir = os.getcwd()
         os.chdir(x_path)
         woj_names = []
+        points_arr = None
+        temp_path = os.path.join(os.environ["PARENT_PATH"], os.environ['TEMP_PATH'])
 
         try:
             with zipfile.ZipFile(x_filename, "r") as zfile:
@@ -249,16 +250,24 @@ class PRGDataParser(XmlParser):
                 xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
 
                 # Tworzymy listę punktów
-                points_arr = self.create_points_arr(xml_contex)
+                points_list = self.create_points_list(xml_contex)
+                points_arr = np.memmap(temp_path, dtype=object, mode='w+', shape=(len(points_list), 11))
+                points_arr[:] = points_list
 
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
                 self.check_prg_pts_add_db(points_arr, woj_name)
 
         finally:
-            if woj_names:
+            if points_arr is not None:
+                points_arr.__mmap.close()
+                del points_arr
                 gc.collect()
+                os.remove(temp_path)
+
+            if woj_names:
                 [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
+                gc.collect()
 
         # Usuwamy zbędne obiekty ze słownika
         os.chdir(curr_dir)
@@ -269,7 +278,7 @@ class PRGDataParser(XmlParser):
         with open(os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"]), 'wb') as f:
             pickle.dump(self.addr_phrs_d, f, pickle.HIGHEST_PROTOCOL)
 
-    def create_points_arr(self, xml_contex: etree.iterparse) -> np.ndarray:
+    def create_points_list(self, xml_contex: etree.iterparse) -> list:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
@@ -321,10 +330,10 @@ class PRGDataParser(XmlParser):
             # Czyscimy przetworzone obiekty wezlow XML z pamieci
             clear_xml_node(curr_node)
 
-        return np.asarray(points_list)
+        return points_list
 
     @time_decorator
-    def check_prg_pts_add_db(self, points_arr: np.ndarray, woj_name: str):
+    def check_prg_pts_add_db(self, points_arr: np.memmap, woj_name: str):
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
@@ -376,8 +385,7 @@ class PRGDataParser(XmlParser):
                 session.bulk_save_objects(prg_rows)
                 session.commit()
 
-            session.expunge_all()
-            gc.collect()
+        gc.collect()
 
         self.addr_phrs_d["C_LEN"] += pts_arr_shp[0]
         self.addr_phrs_d["LIST"] = []
