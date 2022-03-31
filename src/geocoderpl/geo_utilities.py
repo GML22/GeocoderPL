@@ -10,6 +10,7 @@ import time
 import zipfile
 from collections import OrderedDict
 from functools import lru_cache
+from typing import overload
 
 import geocoder
 import numpy as np
@@ -249,7 +250,7 @@ def csv_to_dict(c_path: str) -> dict:
 
 
 def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_crds: np.ndarray,
-                          points_arr: np.memmap, popraw_list: list, dists_list: list, zrodlo_list: list,
+                          points_list: list, popraw_list: list, dists_list: list, zrodlo_list: list,
                           bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list,
                           addr_phrs_dict: dict) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
@@ -280,7 +281,7 @@ def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str,
                 outside_inds = coords_inds[~points_flags]
 
                 for i, c_ind in enumerate(outside_inds):
-                    c_row = points_arr[c_ind]
+                    c_row = [lst[c_ind] for lst in points_list]
                     c_pow, c_gmin, c_miejsc, c_miejsc2, c_ulica, c_numer = c_row[1:7]
                     address = ""
 
@@ -335,7 +336,7 @@ def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
 
 
 def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int,
-                   c_row: np.memmap, dists_list: list, zrodlo_list: list) -> None:
+                   c_row: list, dists_list: list, zrodlo_list: list) -> None:
     """ Function that returns OSM coordinates of address point or distance from the district shapefile """
 
     status_code = 500
@@ -375,7 +376,7 @@ def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_
             dists_list[c_ind] = max_dist
 
 
-def calc_pnt_dist(c_paths: list, x_val: str, y_val: str) -> float:
+def calc_pnt_dist(c_paths: list, x_val: float, y_val: float) -> float:
     """ Function that calculates distances of point to given polygon """
 
     # Zaczynamy od dużej liczby
@@ -383,7 +384,7 @@ def calc_pnt_dist(c_paths: list, x_val: str, y_val: str) -> float:
 
     for pth in c_paths:
         c_point = ogr.Geometry(ogr.wkbPoint)
-        c_point.AddPoint(float(y_val), float(x_val))
+        c_point.AddPoint(y_val, x_val)
         c_ring = ogr.Geometry(ogr.wkbLinearRing)
         [c_ring.AddPoint(row[0], row[1]) for row in pth.vertices]
         c_poly = ogr.Geometry(ogr.wkbPolygon)
@@ -559,9 +560,23 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top10_geojson: np.ndarra
     c_addr_arr[0] += c_adr_phr
 
 
+@overload
+def convert_coords(all_coords: list, in_system: str, out_system: str) -> pyproj.Transformer:
+    ...
+
+
+@overload
 def convert_coords(all_coords: np.ndarray, in_system: str, out_system: str) -> pyproj.Transformer:
+    ...
+
+
+def convert_coords(all_coords, in_system, out_system) -> pyproj.Transformer:
     """ Function that converts multiple coordinates between given systems """
 
     in_proj = Proj('epsg:' + in_system)
     out_proj = Proj('epsg:' + out_system)
-    return transform(in_proj, out_proj, all_coords[:, 0], all_coords[:, 1])
+
+    if isinstance(all_coords, list):
+        return transform(in_proj, out_proj, all_coords[0], all_coords[1])
+    else:
+        return transform(in_proj, out_proj, all_coords[:, 0], all_coords[:, 1])

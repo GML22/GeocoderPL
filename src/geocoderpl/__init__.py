@@ -28,14 +28,14 @@ def main() -> None:
         bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
-        # Tworzymy tabelę SQL z punktami adresowymi PRG
-        sekt_num = int(os.environ["SEKT_NUM"])
-        addr_arr = np.full((sekt_num, sekt_num, 1), fill_value='', dtype=object)
-        addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
-        prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-        all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-        perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-        PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
+    # Tworzymy tabelę SQL z punktami adresowymi PRG
+    sekt_num = int(os.environ["SEKT_NUM"])
+    addr_arr = np.full((sekt_num, sekt_num, 1), fill_value='', dtype=object)
+    addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
+    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+    all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+    PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)
