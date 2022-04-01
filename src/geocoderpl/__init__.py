@@ -2,7 +2,7 @@
 
 from db_classes import BASE
 from geo_utilities import *
-from xml_parsers import BDOT10kDataParser, PRGDataParser
+from xml_parsers import BDOT10kDataParser
 
 # Tworzymy domyślny obiekt loggera
 create_logger('root')
@@ -20,6 +20,12 @@ def main() -> None:
         # Tworzymy domyslne obiekty tabel BDOT10K i PRG
         BASE.metadata.create_all(SQL_ENGINE)
 
+        # Tworzymy tabele z macierza addresow oraz unikalnych fraz
+        with sa.orm.Session(SQL_ENGINE) as session:
+            session.bulk_save_objects([AddrArr() for _ in range(int(os.environ["SEKT_NUM"]))])
+            session.add(UniqPhrs())
+            session.commit()
+
         # Tworzymy tabelę 'BDOT10K_TABLE' z danymi o budynkach
         m_tags = os.environ['BDOT10K_TAGS'].split(";")
         all_tags = (m_tags[0], m_tags[1], m_tags[2], m_tags[3], m_tags[4], m_tags[5], m_tags[6], m_tags[7])
@@ -29,13 +35,10 @@ def main() -> None:
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
     # Tworzymy tabelę SQL z punktami adresowymi PRG
-    sekt_num = int(os.environ["SEKT_NUM"])
-    addr_arr = np.full((sekt_num, sekt_num, 1), fill_value='', dtype=object)
-    addr_phrs_d = {"LIST": [], "ADDR_ARR": addr_arr, "C_LEN": 0, "UNIQUES": ""}
-    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-    all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-    PRGDataParser(prg_path, all_tags1, 'end', perms_dict, addr_phrs_d, regs_dict)
+    # prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+    # all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+    # perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+    # PRGDataParser(prg_path, all_tags1, 'end', perms_dict, regs_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)

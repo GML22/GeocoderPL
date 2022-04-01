@@ -212,13 +212,13 @@ def read_bdot10k_dicts() -> dict:
 
 
 class PRGDataParser(XmlParser):
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict, addr_phrs_d: dict,
-                 regs_dict: dict) -> None:
+    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict, regs_dict: dict) -> None:
         super().__init__(xml_path, tags_tuple, event_type)
         self.perms_dict = perms_dict
-        self.addr_phrs_d = addr_phrs_d
         self.regs_dict = regs_dict
         self.check_path()
+        self.addr_phrs_list = []
+        self.addr_phrs_len = 0
         self.parse_xml()
 
     def check_path(self) -> None:
@@ -252,20 +252,13 @@ class PRGDataParser(XmlParser):
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
                 self.check_prg_pts_add_db(points_list, woj_name)
+                break
 
         finally:
+            os.chdir(curr_dir)
+
             if woj_names:
                 [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
-                gc.collect()
-
-        # Usuwamy zbędne obiekty ze słownika
-        os.chdir(curr_dir)
-        self.addr_phrs_d.pop("LIST", None)
-        self.addr_phrs_d.pop("C_LEN", None)
-
-        # Zapisujemy zbiór unikalnych adresow na dysku twardym
-        with open(os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"]), 'wb') as f:
-            pickle.dump(self.addr_phrs_d, f, pickle.HIGHEST_PROTOCOL)
 
     def create_points_list(self, xml_contex: etree.iterparse) -> list:
         """ Creating list of data points """
@@ -308,11 +301,17 @@ class PRGDataParser(XmlParser):
                     uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
                                                                 if c_row[i] != ""]), return_index=True)
                     addr_arr = uniq_addr[np.argsort(uniq_ids)]
-                    self.addr_phrs_d["LIST"].append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
+                    self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
 
-                    for el in addr_arr:
-                        if el not in self.addr_phrs_d["UNIQUES"]:
-                            self.addr_phrs_d["UNIQUES"] += el + " "
+                    with sa.orm.Session(SQL_ENGINE) as session:
+                        addr_phrs_uniq = session.query(UniqPhrs).all()[0].uniq_phrs
+
+                        for el in addr_arr:
+                            if el not in addr_phrs_uniq:
+                                addr_phrs_uniq += el + " "
+
+                        session.query(UniqPhrs).all()[0].uniq_phrs = addr_phrs_uniq
+                        session.commit()
 
                 c_ind = 0
                 c_row = [''] * 11
@@ -354,7 +353,7 @@ class PRGDataParser(XmlParser):
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
         points_inside_polygon(grouped_regions, self.regs_dict, woj_name, trans_crds, points_list, popraw_list,
                               dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                              self.addr_phrs_d)
+                              self.addr_phrs_list, self.addr_phrs_len)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []
@@ -374,6 +373,5 @@ class PRGDataParser(XmlParser):
                 session.bulk_save_objects(prg_rows)
                 session.commit()
 
-        self.addr_phrs_d["C_LEN"] += pts_lst_len
-        self.addr_phrs_d["LIST"] = []
-        gc.collect()
+        self.addr_phrs_len += pts_lst_len
+        self.addr_phrs_list = []

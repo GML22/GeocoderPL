@@ -66,7 +66,7 @@ class BDOT10K(BASE):
 
 
 class PRG(BASE):
-    """ Class that defines columns of 'BDOT10K_TABLE' """
+    """ Class that defines columns of 'PRG_TABLE' """
 
     # Defniujemy nazwę tabeli
     __tablename__ = "PRG_TABLE"
@@ -123,3 +123,27 @@ class PRG(BASE):
                             self.numer, self.kod_pocztowy, self.status, self.szerokosc, self.dlugosc, self.zrodlo,
                             self.czy_poprawny, self.odleglosc_od_gminy, self.bdot10_bubd_id, self.odleglosc_od_budynku,
                             self.kod_sektora, self.dodatkowy_opis)
+
+
+class UniqPhrs(BASE):
+    """ Class that defines Unique Phrases """
+
+    # Defniujemy nazwę tabeli
+    __tablename__ = 'UNIQ_TABLE'
+
+    # Definiujemy kolumny tabeli
+    uniq_phrs = sa.Column('UNIQ_PHRS', sa.String, primary_key=True, default='')
+
+
+class AddrArr(BASE):
+    """ Class that defines Unique Phrases """
+
+    # Defniujemy nazwę tabeli
+    __tablename__ = 'ADDR_TABLE'
+
+    # Definiujemy kolumny tabeli
+    addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
+
+    for i in range(int(os.environ["SEKT_NUM"])):
+        vars()["COL_" + str(i).zfill(3)] = sa.Column("COL_" + str(i).zfill(3), sa.Integer, primary_key=False,
+                                                     default='')
