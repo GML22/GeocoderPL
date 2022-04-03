@@ -1,4 +1,3 @@
-import gc
 from abc import ABC, abstractmethod
 from io import BytesIO
 
@@ -119,7 +118,6 @@ class BDOT10kDataParser(XmlParser):
                     if bdot10k_rows:
                         session.bulk_save_objects(bdot10k_rows)
                         session.commit()
-                gc.collect()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -212,10 +210,9 @@ def read_bdot10k_dicts() -> dict:
 
 
 class PRGDataParser(XmlParser):
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict, regs_dict: dict) -> None:
+    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict) -> None:
         super().__init__(xml_path, tags_tuple, event_type)
         self.perms_dict = perms_dict
-        self.regs_dict = regs_dict
         self.check_path()
         self.addr_phrs_list = []
         self.addr_phrs_len = 0
@@ -252,7 +249,6 @@ class PRGDataParser(XmlParser):
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
                 self.check_prg_pts_add_db(points_list, woj_name)
-                break
 
         finally:
             os.chdir(curr_dir)
@@ -273,6 +269,9 @@ class PRGDataParser(XmlParser):
         rep_dict = {"ul. ": "", "ulica ": "", "al.": "Aleja", "Al.": "Aleja", "pl.": "Plac", "Pl.": "Plac",
                     "wTrakcieBudowy": "w trakcie budowy"}
         rep_dict_keys = np.asarray(list(rep_dict.keys()))
+
+        with sa.orm.Session(SQL_ENGINE) as session:
+            addr_phrs_uniq = session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
         for _, curr_node in xml_contex:
             c_val = curr_node.text
@@ -303,21 +302,19 @@ class PRGDataParser(XmlParser):
                     addr_arr = uniq_addr[np.argsort(uniq_ids)]
                     self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
 
-                    with sa.orm.Session(SQL_ENGINE) as session:
-                        addr_phrs_uniq = session.query(UniqPhrs).all()[0].uniq_phrs
-
-                        for el in addr_arr:
-                            if el not in addr_phrs_uniq:
-                                addr_phrs_uniq += el + " "
-
-                        session.query(UniqPhrs).all()[0].uniq_phrs = addr_phrs_uniq
-                        session.commit()
+                    for el in addr_arr:
+                        if el not in addr_phrs_uniq:
+                            addr_phrs_uniq += el + " "
 
                 c_ind = 0
                 c_row = [''] * 11
 
             # Czyscimy przetworzone obiekty wezlow XML z pamieci
             clear_xml_node(curr_node)
+
+        with sa.orm.Session(SQL_ENGINE) as session:
+            session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
+            session.commit()
 
         return points_list
 
@@ -351,9 +348,9 @@ class PRGDataParser(XmlParser):
 
         # Dla każdej gminy i powiatu sprawdzamy czy punkty do nich przypisane znajduja sie wewnatrz wielokata danej
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
-        points_inside_polygon(grouped_regions, self.regs_dict, woj_name, trans_crds, points_list, popraw_list,
-                              dists_list, zrodlo_list, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                              self.addr_phrs_list, self.addr_phrs_len)
+        points_inside_polygon(grouped_regions, woj_name, trans_crds, points_list, popraw_list, dists_list, zrodlo_list,
+                              bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, self.addr_phrs_list,
+                              self.addr_phrs_len)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []

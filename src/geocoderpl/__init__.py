@@ -2,7 +2,7 @@
 
 from db_classes import BASE
 from geo_utilities import *
-from xml_parsers import BDOT10kDataParser
+from xml_parsers import BDOT10kDataParser, PRGDataParser
 
 # Tworzymy domyślny obiekt loggera
 create_logger('root')
@@ -12,9 +12,6 @@ create_logger('root')
 def main() -> None:
     """ Main function """
 
-    # Tworzymy słownik kształtów
-    regs_dict = create_regs_dicts()
-
     # Sprawdzamy w bazie czy tablica 'BDOT10K_TABLE' istnieje
     if not sa.inspect(SQL_ENGINE).has_table("BDOT10K_TABLE"):
         # Tworzymy domyslne obiekty tabel BDOT10K i PRG
@@ -22,9 +19,14 @@ def main() -> None:
 
         # Tworzymy tabele z macierza addresow oraz unikalnych fraz
         with sa.orm.Session(SQL_ENGINE) as session:
-            session.bulk_save_objects([AddrArr() for _ in range(int(os.environ["SEKT_NUM"]))])
-            session.add(UniqPhrs())
+            sekt_num = int(os.environ["SEKT_NUM"])
+            session.bulk_save_objects([AddrArr(**{"COL_" + str(i + 1).zfill(3): '' for i in range(sekt_num)})
+                                       for _ in range(sekt_num)])
+            session.add(UniqPhrs(''))
             session.commit()
+
+        # Wypełniamy tablice zwiazane z parametrami regionow
+        fill_regs_tables()
 
         # Tworzymy tabelę 'BDOT10K_TABLE' z danymi o budynkach
         m_tags = os.environ['BDOT10K_TAGS'].split(";")
@@ -34,11 +36,11 @@ def main() -> None:
         bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
-    # Tworzymy tabelę SQL z punktami adresowymi PRG
-    # prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-    # all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-    # perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-    # PRGDataParser(prg_path, all_tags1, 'end', perms_dict, regs_dict)
+        # Tworzymy tabelę SQL z punktami adresowymi PRG
+        prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+        all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+        perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+        PRGDataParser(prg_path, all_tags1, 'end', perms_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)

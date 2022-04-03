@@ -3,7 +3,6 @@
 import functools
 import logging
 import os
-import pickle
 import re
 import sys
 import time
@@ -24,7 +23,7 @@ from osgeo import osr
 from pyproj import Proj, transform
 from unidecode import unidecode
 
-from db_classes import SQL_ENGINE, BDOT10K, UniqPhrs, AddrArr
+from db_classes import SQL_ENGINE, BDOT10K, UniqPhrs, AddrArr, TerytCodes, RegJSON
 from super_permutations import SuperPerms
 
 
@@ -67,8 +66,8 @@ def time_decorator(func):
 
 
 @time_decorator
-def create_regs_dicts() -> dict:
-    """ Function that creates dictionary containing regions shapes """
+def fill_regs_tables() -> None:
+    """ Function that fills tables with parameters of regions shapes """
 
     # Sciezka na dysku z zapisanym slownikiem regionow
     regs_path = os.path.join(os.environ["PARENT_PATH"], os.environ['REGS_PATH'])
@@ -87,16 +86,7 @@ def create_regs_dicts() -> dict:
         crds_trans = osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
 
         # Wypelniamy słownik ze sciezkami regionow
-        fill_regs_dict(regs_shps, crds_trans)
-
-    try:
-        # Wczytyujemy z dysku zapisany słownik
-        with open(regs_path, 'rb') as file:
-            regs_dict = pickle.load(file)
-    except FileNotFoundError:
-        raise Exception("Pod podanym adresem: '" + regs_path + "' nie ma pliku 'regs_dict.obj'. Uzupełnij ten plik i " +
-                        "uruchom program ponownie!")
-    return regs_dict
+        f_regs_tables(regs_shps, crds_trans)
 
 
 @time_decorator
@@ -120,51 +110,63 @@ def get_region_shapes() -> OrderedDict:
     return regs_shps
 
 
-def fill_regs_dict(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> None:
+def f_regs_tables(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> None:
     """ Function that returns dictionairies with shapes paths """
 
     # Tworzymy słownik regionow i ich ksztaltow
-    regs_dict = {}
+    name_list = []
+    teryt_list = []
 
     # Dla każdego podfolderu w pliku granice administracyjne spisujemy
     for reg_name, reg_file in regs_shps.items():
         shapes = reg_file.GetLayer(0)
 
-        for feature in shapes:
-            feat_itms = feature.items()
-            name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
-            teryt = feat_itms['JPT_KOD_JE']
-            geom = feature.geometry()
-            geom.Transform(crds_trans)
-            path_l = []
+        # Ustalamy finalną nazwę regionu
+        with sa.orm.Session(SQL_ENGINE) as session:
+            for feature in shapes:
+                feat_itms = feature.items()
+                name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
+                teryt = feat_itms['JPT_KOD_JE']
+                geom = feature.geometry()
+                geom.Transform(crds_trans)
 
-            if geom.GetGeometryName() == "POLYGON":
-                geom_ref = geom.GetGeometryRef(0)
-                path_l += [path.Path(np.asarray(geom_ref.GetPoints()), readonly=True, closed=True)]
-            else:
-                geom_count = geom.GetGeometryCount()
-                path_l += [path.Path(np.asarray(geom.GetGeometryRef(i).GetGeometryRef(0).GetPoints()),
-                                     readonly=True, closed=True) for i in range(geom_count)]
+                if geom.GetGeometryName() == "POLYGON":
+                    geom_ref = geom.GetGeometryRef(0)
+                    geom_json = geom_ref.ExportToJson()
+                else:
+                    geom_cnt = geom.GetGeometryCount()
+                    geom_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson()
+                                          for i in range(geom_cnt)])
 
-            # Ustalamy finalną nazwę regionu
-            fin_name = name if len(teryt) < 3 else regs_dict[teryt[:2]][0] + ";" + name if len(teryt) < 5 else \
-                regs_dict[teryt[:4]][0] + ";" + name
+                # Ustalamy finalna nazwe regionu TERYT
+                if len(teryt) < 3:
+                    fin_name = name
+                elif len(teryt) < 5:
+                    json_name = session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:2]).all()[0][0]
+                    fin_name = json_name + ";" + name
+                else:
+                    json_name = session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:4]).all()[0][0]
+                    fin_name = json_name + ";" + name
 
-            # Uzupełniamy słownik numerami TERYT
-            if fin_name not in regs_dict:
-                regs_dict[fin_name] = [teryt]
-            else:
-                regs_dict[fin_name] += [teryt]
+                # Uzupełniamy tabele TERYT_TABLE
+                if fin_name not in name_list:
+                    name_list.append(fin_name)
+                    session.add(TerytCodes(fin_name, teryt))
+                else:
+                    c_teryt = session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name == fin_name).all()[0][0]
+                    n_teryt = c_teryt + ";" + teryt
+                    session.query(TerytCodes).filter(TerytCodes.teryt_name == fin_name).update({'teryt_code': n_teryt})
 
-            # Uzupełniamy słownik obrysami regionów
-            if teryt not in regs_dict:
-                regs_dict[teryt] = [fin_name, path_l]
-            else:
-                regs_dict[teryt][1] += path_l
+                # Uzupełniamy tabele JSON_TABLE
+                if teryt not in teryt_list:
+                    teryt_list.append(teryt)
+                    session.add(RegJSON(fin_name, teryt, geom_json))
+                else:
+                    c_json = session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
+                    n_json = c_json + ";" + geom_json
+                    session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
 
-    # Zapisujemy regs_dict na dysku
-    with open(os.path.join(os.environ["PARENT_PATH"], os.environ['REGS_PATH']), 'wb') as f:
-        pickle.dump(regs_dict, f, pickle.HIGHEST_PROTOCOL)
+            session.commit()
 
 
 def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: bool = False) -> \
@@ -249,14 +251,14 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str, trans_crds: np.ndarray,
-                          points_list: list, popraw_list: list, dists_list: list, zrodlo_list: list,
-                          bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list,
-                          addr_phrs_list: list, addr_phrs_len: int) -> None:
+def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_list: list,
+                          popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
+                          bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list,
+                          addr_phrs_len: int) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
-    for regions, coords_inds in grouped_regions.items():
+    for i, regions, coords_inds in enumerate(grouped_regions.items()):
         pow_name, gmin_name = regions
         if pow_name != '' and gmin_name != '':
             logging.info(gmin_name)
@@ -264,12 +266,20 @@ def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str,
             gmin_name = get_corr_reg_name(unidecode(gmin_name.upper()))
 
             # Pobieramy kody TERYT danej gminy
-            gmin_codes = regs_dict[woj_name + ";" + pow_name + ";" + gmin_name]
+            with sa.orm.Session(SQL_ENGINE) as session:
+                t_code = woj_name + ";" + pow_name + ";" + gmin_name
+                gmin_codes = session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name == t_code).all()[0][0]
+
+            gmin_codes = gmin_codes.split(";")
             c_paths = []
 
             # Dla kazdego kodu TERYT gminy pobieramy sciezki wielokatow tej gminy
             for gmn_code in gmin_codes:
-                c_paths += regs_dict[gmn_code][1]
+                with sa.orm.Session(SQL_ENGINE) as session:
+                    c_json = session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == gmn_code).all()[0][0]
+
+                pth = path.Path(np.asarray(ogr.CreateGeometryFromJson(c_json).GetPoints()), readonly=True, closed=True)
+                c_paths += pth
 
             curr_coords = trans_crds[coords_inds, ::-1]
             points_flags = points_in_shape(c_paths, curr_coords)
@@ -280,7 +290,7 @@ def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str,
                 outside_pts = curr_coords[~points_flags]
                 outside_inds = coords_inds[~points_flags]
 
-                for i, c_ind in enumerate(outside_inds):
+                for j, c_ind in enumerate(outside_inds):
                     c_row = [lst[c_ind] for lst in points_list]
                     c_pow, c_gmin, c_miejsc, c_miejsc2, c_ulica, c_numer = c_row[1:7]
                     address = ""
@@ -295,7 +305,7 @@ def points_inside_polygon(grouped_regions: dict, regs_dict: dict, woj_name: str,
                     elif c_ulica == '' and c_miejsc2 == '':
                         address = c_numer + ", " + c_miejsc + ", " + c_gmin + ", " + c_pow
 
-                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row, dists_list,
+                    get_osm_coords(address, outside_pts[j, :], c_paths, popraw_list, c_ind, c_row, dists_list,
                                    zrodlo_list)
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
@@ -510,6 +520,9 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top10_geojson: np.ndarra
     c_db_len = addr_phrs_len
     c_adr_phr = ""
 
+    with sa.orm.Session(SQL_ENGINE) as session:
+        addr_phrs_uniq = session.query(UniqPhrs.uniq_phrs).all()[0][0]
+
     for i, c_point in enumerate(coords_pts):
         fin_dist = 10 ** 6
         fin_idx = 0
@@ -549,22 +562,22 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top10_geojson: np.ndarra
                 c_dod_str = unidecode(c_dod_inf).upper()
                 c_adr_phr += " " + str(c_pts_sp[0]) + " " + c_dod_str + " " + str(c_pts_sp[1])
 
-                with sa.orm.Session(SQL_ENGINE) as session:
-                    addr_phrs_uniq = session.query(UniqPhrs).all()[0].uniq_phrs
-
-                    for inf in c_dod_str.replace(", ", " ").split(" "):
-                        if inf not in addr_phrs_uniq:
-                            addr_phrs_uniq += inf + " "
-
-                    session.query(UniqPhrs).all()[0].uniq_phrs = addr_phrs_uniq
-                    session.commit()
+                for inf in c_dod_str.replace(", ", " ").split(" "):
+                    if inf not in addr_phrs_uniq:
+                        addr_phrs_uniq += inf + " "
 
         c_adr_phr += " [" + str(c_db_len + c_inds + 1) + "]\n"
 
-    # Uzupelniamy liste podstawowych i dodatkowych informacji o adresie
+    # Uzupelniamy baze danych ciagami slow adresowych
     with sa.orm.Session(SQL_ENGINE) as session:
-        c_str = session.query(AddrArr).all()[int(curr_sekt[0])].__getattribute__('COL_' + curr_sekt[1]) + c_adr_phr
-        session.query(AddrArr).all()[int(curr_sekt[0])].__setattr__('COL_' + curr_sekt[1], c_str)
+        # Zapisujemy do bazy unikalne frazy
+        session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
+
+        # Zapisujemy do bazy ciagi adresow
+        c_col = 'COL_' + curr_sekt[1]
+        c_row = int(curr_sekt[0])
+        c_str = session.query(AddrArr.__table__.c[c_col]).filter(AddrArr.addr_id == c_row).all()[0][0] + c_adr_phr
+        session.query(AddrArr).filter(AddrArr.addr_id == c_row).update({c_col: c_str})
         session.commit()
 
 

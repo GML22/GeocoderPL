@@ -132,11 +132,18 @@ class UniqPhrs(BASE):
     __tablename__ = 'UNIQ_TABLE'
 
     # Definiujemy kolumny tabeli
-    uniq_phrs = sa.Column('UNIQ_PHRS', sa.String, primary_key=True, default='')
+    uniq_id = sa.Column('UNIQ_ID', sa.Integer, primary_key=True)
+    uniq_phrs = sa.Column('UNIQ_PHRS', sa.String, primary_key=False)
+
+    def __init__(self, uniq_phrs: str) -> None:
+        self.uniq_phrs = uniq_phrs
+
+    def __repr__(self) -> str:
+        return "<PRG('%s')>" % self.uniq_phrs
 
 
 class AddrArr(BASE):
-    """ Class that defines Unique Phrases """
+    """ Class that defines Addreess Array """
 
     # Defniujemy nazwę tabeli
     __tablename__ = 'ADDR_TABLE'
@@ -145,5 +152,47 @@ class AddrArr(BASE):
     addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
 
     for i in range(int(os.environ["SEKT_NUM"])):
-        vars()["COL_" + str(i).zfill(3)] = sa.Column("COL_" + str(i).zfill(3), sa.Integer, primary_key=False,
-                                                     default='')
+        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.String, primary_key=False)
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class TerytCodes(BASE):
+    """ Class that defines TERYT Codes """
+
+    # Defniujemy nazwę tabeli
+    __tablename__ = 'TERYT_TABLE'
+
+    # Definiujemy kolumny tabeli
+    teryt_id = sa.Column('TERYT_ID', sa.Integer, primary_key=True)
+    teryt_name = sa.Column('TERYT_NAME', sa.String, primary_key=False)
+    teryt_code = sa.Column('TERYT_CODE', sa.String, primary_key=False)
+
+    def __init__(self, teryt_name: str, teryt_code: str) -> None:
+        self.teryt_name = teryt_name
+        self.teryt_code = teryt_code
+
+    def __repr__(self) -> str:
+        return "<PRG('%s', '%s')>" % (self.teryt_name, self.teryt_code)
+
+
+class RegJSON(BASE):
+    """ Class that defines regional JSON files """
+
+    # Defniujemy nazwę tabeli
+    __tablename__ = 'JSON_TABLE'
+
+    # Definiujemy kolumny tabeli
+    json_id = sa.Column('JSON_ID', sa.Integer, primary_key=True)
+    json_name = sa.Column('JSON_NAME', sa.String, primary_key=False)
+    json_teryt = sa.Column('JSON_TERYT', sa.String, primary_key=False)
+    json_shape = sa.Column('JSON_SHAPE', sa.String, primary_key=False)
+
+    def __init__(self, json_name: str, json_teryt: str, json_shape: str) -> None:
+        self.json_name = json_name
+        self.json_teryt = json_teryt
+        self.json_shape = json_shape
+
+    def __repr__(self) -> str:
+        return "<PRG('%s', '%s', '%s')>" % (self.json_name, self.json_teryt, self.json_shape)
