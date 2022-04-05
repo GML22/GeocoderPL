@@ -75,39 +75,7 @@ def fill_regs_tables() -> None:
     # Transformujemy wspolrzednie do ukladu 4326 (przy okazji korygujemy kolejność współrzędnych)
     f_shp = next(iter(regs_shps.values())).GetLayer(0)
     curr_epsg = int(f_shp.GetSpatialRef().GetAttrValue("AUTHORITY", 1))
-    in_sp_ref = osr.SpatialReference()
-    in_sp_ref.ImportFromEPSG(curr_epsg)
-    out_sp_ref = osr.SpatialReference()
-    out_sp_ref.ImportFromEPSG(int(os.environ['WORLD_CRDS']))
-    crds_trans = osr.CoordinateTransformation(in_sp_ref, out_sp_ref)
-
-    # Wypelniamy słownik ze sciezkami regionow
-    f_regs_tables(regs_shps, crds_trans)
-
-
-@time_decorator
-def get_region_shapes() -> OrderedDict:
-    """ Function that creates shapes for each regions """
-
-    # Scieżka do pliku z jednostkami administracyjnymi
-    ja_path = os.path.join(os.environ["PARENT_PATH"], os.environ['JA_PATH'])
-
-    try:
-        with zipfile.ZipFile(ja_path, "r") as zfile:
-            regs_shps = OrderedDict(
-                sorted({os.path.basename(os.path.normpath(name)): ogr.Open(r'/vsizip/' + ja_path + '/' + name)
-                        for name in zfile.namelist() if name[-4:] == ".shp" and
-                        ("_gmin" in name or "_pow" in name or "_woj" in name or "_pan" in name)}.items()))
-    except FileNotFoundError:
-        raise Exception("Pod podanym adresem: '" + ja_path + "' nie ma pliku '00_jednostki_administracyjne.zip'. " +
-                        "Pobierz ten plik ze stronyu: 'https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-" +
-                        "powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515' i uruchom program " +
-                        "ponownie!")
-    return regs_shps
-
-
-def f_regs_tables(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> None:
-    """ Function that returns dictionairies with shapes paths """
+    pl_wrld_trans = create_coords_transform(curr_epsg, int(os.environ['WORLD_CRDS']), True)
 
     # Tworzymy słownik regionow i ich ksztaltow
     name_list = []
@@ -124,15 +92,14 @@ def f_regs_tables(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> 
                 name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
                 teryt = feat_itms['JPT_KOD_JE']
                 geom = feature.geometry()
-                geom.Transform(crds_trans)
+                geom.Transform(pl_wrld_trans)
 
                 if geom.GetGeometryName() == "POLYGON":
                     geom_ref = geom.GetGeometryRef(0)
-                    geom_json = geom_ref.ExportToJson()
+                    g_json = geom_ref.ExportToJson()
                 else:
-                    geom_cnt = geom.GetGeometryCount()
-                    geom_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson()
-                                          for i in range(geom_cnt)])
+                    geom_c = geom.GetGeometryCount()
+                    g_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson() for i in range(geom_c)])
 
                 # Ustalamy finalna nazwe regionu TERYT
                 if len(teryt) < 3:
@@ -156,13 +123,34 @@ def f_regs_tables(regs_shps: dict, crds_trans: osr.CoordinateTransformation) -> 
                 # Uzupełniamy tabele JSON_TABLE
                 if teryt not in teryt_list:
                     teryt_list.append(teryt)
-                    session.add(RegJSON(fin_name, teryt, geom_json))
+                    session.add(RegJSON(fin_name, teryt, g_json))
                 else:
                     c_json = session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
-                    n_json = c_json + ";" + geom_json
+                    n_json = c_json + ";" + g_json
                     session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
 
             session.commit()
+
+
+@time_decorator
+def get_region_shapes() -> OrderedDict:
+    """ Function that creates shapes for each regions """
+
+    # Scieżka do pliku z jednostkami administracyjnymi
+    ja_path = os.path.join(os.environ["PARENT_PATH"], os.environ['JA_PATH'])
+
+    try:
+        with zipfile.ZipFile(ja_path, "r") as zfile:
+            regs_shps = OrderedDict(
+                sorted({os.path.basename(os.path.normpath(name)): ogr.Open(r'/vsizip/' + ja_path + '/' + name)
+                        for name in zfile.namelist() if name[-4:] == ".shp" and
+                        ("_gmin" in name or "_pow" in name or "_woj" in name or "_pan" in name)}.items()))
+    except FileNotFoundError:
+        raise Exception("Pod podanym adresem: '" + ja_path + "' nie ma pliku '00_jednostki_administracyjne.zip'. " +
+                        "Pobierz ten plik ze stronyu: 'https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-" +
+                        "powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515' i uruchom program " +
+                        "ponownie!")
+    return regs_shps
 
 
 def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: bool = False) -> \
@@ -270,9 +258,11 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
 
             # Dla kazdego kodu TERYT gminy pobieramy sciezki wielokatow tej gminy
             for gmn_code in gmin_codes:
-                c_json = json_arr[json_arr[:, 0] == gmn_code, -1][0]
-                c_paths += [path.Path(np.asarray(ogr.CreateGeometryFromJson(c_json).GetPoints())[:, ::-1],
-                                      readonly=True, closed=True)]
+                curr_json = json_arr[json_arr[:, 0] == gmn_code, -1][0]
+
+                for c_json in curr_json.split(";"):
+                    c_paths += [path.Path(np.asarray(ogr.CreateGeometryFromJson(c_json).GetPoints()), readonly=True,
+                                          closed=True)]
 
             curr_coords = trans_crds[coords_inds, ::-1]
             points_flags = points_in_shape(c_paths, curr_coords)
