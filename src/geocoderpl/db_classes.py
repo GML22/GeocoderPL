@@ -14,8 +14,8 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 os.environ["PARENT_PATH"] = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
 
 # Tworzymy silnik bazy danych
-SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
-                              echo=False, future=True)
+SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]), echo=False,
+                              future=True)
 
 
 class BDOT10K(BASE):
@@ -37,7 +37,7 @@ class BDOT10K(BASE):
     powierzchnia = sa.Column('POWIERZCHNIA', sa.Float, nullable=False)
     centr_lat = sa.Column('CENTROID_LAT', sa.Float, nullable=False)
     centr_long = sa.Column('CENTROID_LONG', sa.Float, nullable=False)
-    bubd_geojson = sa.Column('BUBD_GEOJSON', sa.String, nullable=False)
+    bubd_geojson = sa.Column('BUBD_GEOJSON', sa.Text, nullable=False)
 
     # Definiujemy połaczenie do klasy PRG
     children = sa.orm.relationship("PRG")
@@ -133,7 +133,7 @@ class UniqPhrs(BASE):
 
     # Definiujemy kolumny tabeli
     uniq_id = sa.Column('UNIQ_ID', sa.Integer, primary_key=True)
-    uniq_phrs = sa.Column('UNIQ_PHRS', sa.String, primary_key=False)
+    uniq_phrs = sa.Column('UNIQ_PHRS', sa.Text(4294000000), primary_key=False)
 
     def __init__(self, uniq_phrs: str) -> None:
         self.uniq_phrs = uniq_phrs
@@ -152,7 +152,8 @@ class AddrArr(BASE):
     addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
 
     for i in range(int(os.environ["SEKT_NUM"])):
-        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.String, primary_key=False)
+        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.Text(4294000000),
+                                                         primary_key=False)
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -187,7 +188,7 @@ class RegJSON(BASE):
     json_id = sa.Column('JSON_ID', sa.Integer, primary_key=True)
     json_name = sa.Column('JSON_NAME', sa.String, primary_key=False)
     json_teryt = sa.Column('JSON_TERYT', sa.String, primary_key=False)
-    json_shape = sa.Column('JSON_SHAPE', sa.String, primary_key=False)
+    json_shape = sa.Column('JSON_SHAPE', sa.Text(4294000000), primary_key=False)
 
     def __init__(self, json_name: str, json_teryt: str, json_shape: str) -> None:
         self.json_name = json_name

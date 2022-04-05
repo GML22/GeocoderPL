@@ -234,10 +234,14 @@ class PRGDataParser(XmlParser):
         os.chdir(x_path)
         woj_names = []
 
+        with sa.orm.Session(SQL_ENGINE) as session:
+            teryt_arr = np.asarray(session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
+            json_arr = np.asarray(session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
+
         try:
             with zipfile.ZipFile(x_filename, "r") as zfile:
                 woj_names = zfile.namelist()
-                zfile.extractall()
+                # zfile.extractall()
 
             for woj_name in woj_names:
                 # Wczytujemy dane XML dla danego wojewodztwa
@@ -248,7 +252,7 @@ class PRGDataParser(XmlParser):
 
                 # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
                 # wewnątrz shapefile'a swojej gminy
-                self.check_prg_pts_add_db(points_list, woj_name)
+                self.check_prg_pts_add_db(points_list, woj_name, teryt_arr, json_arr)
 
         finally:
             os.chdir(curr_dir)
@@ -319,7 +323,7 @@ class PRGDataParser(XmlParser):
         return points_list
 
     @time_decorator
-    def check_prg_pts_add_db(self, points_list: list, woj_name: str):
+    def check_prg_pts_add_db(self, points_list: list, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray):
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
@@ -350,7 +354,7 @@ class PRGDataParser(XmlParser):
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
         points_inside_polygon(grouped_regions, woj_name, trans_crds, points_list, popraw_list, dists_list, zrodlo_list,
                               bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, self.addr_phrs_list,
-                              self.addr_phrs_len)
+                              self.addr_phrs_len, teryt_arr, json_arr)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []
