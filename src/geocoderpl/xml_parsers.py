@@ -1,11 +1,8 @@
 import gc
-import os
-
 from abc import ABC, abstractmethod
 from io import BytesIO
 
-import numpy as np
-from db_classes import PRG, SQL_ENGINE
+from db_classes import PRG
 from geo_utilities import *
 
 
@@ -88,43 +85,43 @@ class BDOT10kDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        db_session = sa.orm.Session(SQL_ENGINE)
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            with zipfile.ZipFile(self.xml_path, "r") as zfile:
+                for woj_name in zfile.namelist():
+                    woj_zip = BytesIO(zfile.read(woj_name))
+                    logging.info(woj_name)
+                    bdot10k_woj_rows = []
 
-        with zipfile.ZipFile(self.xml_path, "r") as zfile:
-            for woj_name in zfile.namelist():
-                woj_zip = BytesIO(zfile.read(woj_name))
-                logging.info(woj_name)
-                bdot10k_woj_rows = []
+                    with zipfile.ZipFile(woj_zip, "r") as zfile2:
+                        for pow_name in zfile2.namelist():
+                            pow_zip = BytesIO(zfile2.read(pow_name))
+                            with zipfile.ZipFile(pow_zip, "r") as zfile3:
+                                for xml_file in zfile3.namelist():
+                                    if "BUBD" in xml_file:
+                                        # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
+                                        bd_xml = BytesIO(zfile3.read(xml_file))
+                                        xml_contex = etree.iterparse(bd_xml, events=(self.event_type,),
+                                                                     tag=self.tags_tuple)
+                                        fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
+                                        bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
 
-                with zipfile.ZipFile(woj_zip, "r") as zfile2:
-                    for pow_name in zfile2.namelist():
-                        pow_zip = BytesIO(zfile2.read(pow_name))
-                        with zipfile.ZipFile(pow_zip, "r") as zfile3:
-                            for xml_file in zfile3.namelist():
-                                if "BUBD" in xml_file:
-                                    # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
-                                    bd_xml = BytesIO(zfile3.read(xml_file))
-                                    xml_contex = etree.iterparse(bd_xml, events=(self.event_type,), tag=self.tags_tuple)
-                                    fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
-                                    bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
+                    # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+                    bdot10k_rows = []
+                    db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-                # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
-                bdot10k_rows = []
-                db_save_freq = int(os.environ['DB_SAVE_FREQ'])
+                    for i, c_row in enumerate(bdot10k_woj_rows):
+                        bdot10k_rows.append(BDOT10K(*c_row))
 
-                for i, c_row in enumerate(bdot10k_woj_rows):
-                    bdot10k_rows.append(BDOT10K(*c_row))
+                        if i % db_save_freq == 0:
+                            db_session.bulk_save_objects(bdot10k_rows)
+                            db_session.commit()
+                            bdot10k_rows = []
 
-                    if i % db_save_freq == 0:
+                    if bdot10k_rows:
                         db_session.bulk_save_objects(bdot10k_rows)
                         db_session.commit()
-                        bdot10k_rows = []
 
-                if bdot10k_rows:
-                    db_session.bulk_save_objects(bdot10k_rows)
-                    db_session.commit()
-
-        db_session.close()
+        SQL_ENGINE.dispose()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -243,9 +240,11 @@ class PRGDataParser(XmlParser):
         wrld_pl_trans = create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True)
 
         # Definiujemy sesję sql engine
-        db_session = sa.orm.Session(SQL_ENGINE)
-        teryt_arr = np.asarray(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
-        json_arr = np.asarray(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            teryt_arr = np.asarray(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
+            json_arr = np.asarray(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
+
+        SQL_ENGINE.dispose()
 
         with zipfile.ZipFile(x_filename, "r") as zfile:
             woj_names = zfile.namelist()
@@ -258,9 +257,8 @@ class PRGDataParser(XmlParser):
             xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
 
             # Tworzymy listę punktów adresowych PRG
-            points_list = self.create_points_list(xml_contex, db_session)
-            temp_arr_path = os.path.join(os.environ["PARENT_PATH"], os.environ['TEMP_ARR'])
-            points_arr = np.memmap(temp_arr_path, mode="w+", dtype=object, shape=(len(points_list), 11))
+            points_list = self.create_points_list(xml_contex)
+            points_arr = np.empty(shape=(len(points_list), 11), dtype=object)
             points_arr[:] = points_list[:]
             xml_contex.root.clear()
             del xml_contex
@@ -269,17 +267,9 @@ class PRGDataParser(XmlParser):
 
             # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
             # wewnątrz shapefile'a swojej gminy
-            self.check_prg_pts_add_db(points_arr, woj_name, teryt_arr, json_arr, wrld_pl_trans, db_session)
+            self.check_prg_pts_add_db(points_arr, woj_name, teryt_arr, json_arr, wrld_pl_trans)
 
-            # Zamykamy i usuwamy memmap
-            points_arr.__mmap.close()
-            del points_arr
-            gc.collect()
-            os.remove(temp_arr_path)
-
-        db_session.close()
-
-    def create_points_list(self, xml_contex: etree.iterparse, db_session: sa.orm.Session) -> list:
+    def create_points_list(self, xml_contex: etree.iterparse) -> list:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
@@ -292,54 +282,57 @@ class PRGDataParser(XmlParser):
         rep_dict = {"ul. ": "", "ulica ": "", "al.": "Aleja", "Al.": "Aleja", "pl.": "Plac", "Pl.": "Plac",
                     "wTrakcieBudowy": "w trakcie budowy"}
         rep_dict_keys = np.asarray(list(rep_dict.keys()))
-        addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
-        for _, curr_node in xml_contex:
-            c_val = curr_node.text
-            c_tag = curr_node.tag
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
-            if c_tag == all_tags[0] and c_val != "Polska":
-                c_row[c_ind] = c_val
-                c_ind += 1
-            elif c_tag in [all_tags[1], all_tags[2], all_tags[3], all_tags[4], all_tags[5], all_tags[6]]:
-                c_val = c_val if c_val is not None else ""
-                sub_in = [substring in c_val for substring in rep_dict_keys]
+            for _, curr_node in xml_contex:
+                c_val = curr_node.text
+                c_tag = curr_node.tag
 
-                if sum(sub_in) > 0:
-                    c_key = rep_dict_keys[sub_in][0]
-                    c_val = c_val.replace(c_key, rep_dict[c_key])
+                if c_tag == all_tags[0] and c_val != "Polska":
+                    c_row[c_ind] = c_val
+                    c_ind += 1
+                elif c_tag in [all_tags[1], all_tags[2], all_tags[3], all_tags[4], all_tags[5], all_tags[6]]:
+                    c_val = c_val if c_val is not None else ""
+                    sub_in = [substring in c_val for substring in rep_dict_keys]
 
-                c_row[num_dict[c_tag]] = c_val
-                c_ind = 0
-            elif c_tag == all_tags[7] or c_tag == all_tags[8]:
-                c_val = c_val.split()
-                c_row[-2:] = [round(float(c_val[0]), coords_prec), round(float(c_val[1]), coords_prec)]
+                    if sum(sub_in) > 0:
+                        c_key = rep_dict_keys[sub_in][0]
+                        c_val = c_val.replace(c_key, rep_dict[c_key])
 
-                if c_row[0] != '' and c_row[1] != '' and c_row[2] != '':
-                    points_list.append(c_row)
-                    uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
-                                                                if c_row[i] != ""]), return_index=True)
-                    addr_arr = uniq_addr[np.argsort(uniq_ids)]
-                    self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
+                    c_row[num_dict[c_tag]] = c_val
+                    c_ind = 0
+                elif c_tag == all_tags[7] or c_tag == all_tags[8]:
+                    c_val = c_val.split()
+                    c_row[-2:] = [round(float(c_val[0]), coords_prec), round(float(c_val[1]), coords_prec)]
 
-                    for el in addr_arr:
-                        if el not in addr_phrs_uniq:
-                            addr_phrs_uniq += el + " "
+                    if c_row[0] != '' and c_row[1] != '' and c_row[2] != '':
+                        points_list.append(c_row)
+                        uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
+                                                                    if c_row[i] != ""]), return_index=True)
+                        addr_arr = uniq_addr[np.argsort(uniq_ids)]
+                        self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
 
-                c_ind = 0
-                c_row = [''] * 11
+                        for el in addr_arr:
+                            if el not in addr_phrs_uniq:
+                                addr_phrs_uniq += el + " "
 
-            # Czyscimy przetworzone obiekty wezlow XML z pamieci
-            clear_xml_node(curr_node)
+                    c_ind = 0
+                    c_row = [''] * 11
 
-        db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
-        db_session.commit()
+                # Czyscimy przetworzone obiekty wezlow XML z pamieci
+                clear_xml_node(curr_node)
 
+            db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
+            db_session.commit()
+
+        SQL_ENGINE.dispose()
         return points_list
 
     @time_decorator
-    def check_prg_pts_add_db(self, points_arr: np.memmap, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                             wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session) -> None:
+    def check_prg_pts_add_db(self, points_arr: np.ndarray, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
+                             wrld_pl_trans: osr.CoordinateTransformation) -> None:
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
@@ -370,23 +363,26 @@ class PRGDataParser(XmlParser):
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
         points_inside_polygon(grouped_regions, woj_name, trans_crds, points_arr, popraw_list, dists_list, zrodlo_list,
                               bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, self.addr_phrs_list,
-                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans, db_session)
+                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []
         db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-        for i in range(pts_lst_len):
-            prg_rows.append(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i], popraw_list[i],
-                                dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i], dod_opis_list[i]))
-            if i % db_save_freq == 0:
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            for i in range(pts_lst_len):
+                prg_rows.append(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
+                                    popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
+                                    dod_opis_list[i]))
+                if i % db_save_freq == 0:
+                    db_session.bulk_save_objects(prg_rows)
+                    db_session.commit()
+                    prg_rows = []
+
+            if prg_rows:
                 db_session.bulk_save_objects(prg_rows)
                 db_session.commit()
-                prg_rows = []
 
-        if prg_rows:
-            db_session.bulk_save_objects(prg_rows)
-            db_session.commit()
-
+        SQL_ENGINE.dispose()
         self.addr_phrs_len += pts_lst_len
         self.addr_phrs_list = []

@@ -82,56 +82,57 @@ def fill_regs_tables() -> None:
     teryt_list = []
 
     # Dla każdego podfolderu w pliku granice administracyjne spisujemy
-    db_session = sa.orm.Session(SQL_ENGINE)
+    with sa.orm.Session(SQL_ENGINE) as db_session:
+        for reg_name, reg_file in regs_shps.items():
+            shapes = reg_file.GetLayer(0)
 
-    for reg_name, reg_file in regs_shps.items():
-        shapes = reg_file.GetLayer(0)
+            for feature in shapes:
+                feat_itms = feature.items()
+                name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
+                teryt = feat_itms['JPT_KOD_JE']
+                geom = feature.geometry()
+                geom.Transform(pl_wrld_trans)
 
-        for feature in shapes:
-            feat_itms = feature.items()
-            name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
-            teryt = feat_itms['JPT_KOD_JE']
-            geom = feature.geometry()
-            geom.Transform(pl_wrld_trans)
+                if geom.GetGeometryName() == "POLYGON":
+                    geom_ref = geom.GetGeometryRef(0)
+                    g_json = geom_ref.ExportToJson()
+                else:
+                    geom_c = geom.GetGeometryCount()
+                    g_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson() for i in range(geom_c)])
 
-            if geom.GetGeometryName() == "POLYGON":
-                geom_ref = geom.GetGeometryRef(0)
-                g_json = geom_ref.ExportToJson()
-            else:
-                geom_c = geom.GetGeometryCount()
-                g_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson() for i in range(geom_c)])
+                # Ustalamy finalna nazwe regionu TERYT
+                if len(teryt) < 3:
+                    fin_name = name
+                elif len(teryt) < 5:
+                    json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:2]).all()[0][0]
+                    fin_name = json_name + ";" + name
+                else:
+                    json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:4]).all()[0][0]
+                    fin_name = json_name + ";" + name
 
-            # Ustalamy finalna nazwe regionu TERYT
-            if len(teryt) < 3:
-                fin_name = name
-            elif len(teryt) < 5:
-                json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:2]).all()[0][0]
-                fin_name = json_name + ";" + name
-            else:
-                json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:4]).all()[0][0]
-                fin_name = json_name + ";" + name
+                # Uzupełniamy tabele TERYT_TABLE
+                if fin_name not in name_list:
+                    name_list.append(fin_name)
+                    db_session.add(TerytCodes(fin_name, teryt))
+                else:
+                    c_teryt = db_session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name ==
+                                                                             fin_name).all()[0][0]
+                    n_teryt = c_teryt + ";" + teryt
+                    db_session.query(TerytCodes).filter(TerytCodes.teryt_name ==
+                                                        fin_name).update({'teryt_code': n_teryt})
 
-            # Uzupełniamy tabele TERYT_TABLE
-            if fin_name not in name_list:
-                name_list.append(fin_name)
-                db_session.add(TerytCodes(fin_name, teryt))
-            else:
-                c_teryt = db_session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name == fin_name).all()[0][0]
-                n_teryt = c_teryt + ";" + teryt
-                db_session.query(TerytCodes).filter(TerytCodes.teryt_name == fin_name).update({'teryt_code': n_teryt})
+                # Uzupełniamy tabele JSON_TABLE
+                if teryt not in teryt_list:
+                    teryt_list.append(teryt)
+                    db_session.add(RegJSON(fin_name, teryt, g_json))
+                else:
+                    c_json = db_session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
+                    n_json = c_json + ";" + g_json
+                    db_session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
 
-            # Uzupełniamy tabele JSON_TABLE
-            if teryt not in teryt_list:
-                teryt_list.append(teryt)
-                db_session.add(RegJSON(fin_name, teryt, g_json))
-            else:
-                c_json = db_session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
-                n_json = c_json + ";" + g_json
-                db_session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
+                db_session.commit()
 
-            db_session.commit()
-
-    db_session.close()
+    SQL_ENGINE.dispose()
 
 
 @time_decorator
@@ -237,11 +238,11 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_arr: np.memmap,
+def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_arr: np.ndarray,
                           popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
                           bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list,
                           addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                          wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session) -> None:
+                          wrld_pl_trans: osr.CoordinateTransformation) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -289,19 +290,20 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                     elif c_ulica == '' and c_miejsc2 == '':
                         address = c_numer + ", " + c_miejsc + ", " + c_gmin + ", " + c_pow
 
-                    coord1 = float(c_row[-2][0])
-                    coord2 = float(c_row[-1][0])
-                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, coord1, coord2, dists_list,
-                                   zrodlo_list, wrld_pl_trans)
+                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row[-2], c_row[-1],
+                                   dists_list, zrodlo_list, wrld_pl_trans)
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
-            addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
-            fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                                           dod_opis_list, addr_phrs_list, addr_phrs_len, wrld_pl_trans, db_session,
-                                           addr_phrs_uniq)
+            with sa.orm.Session(SQL_ENGINE) as db_session:
+                addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
+                fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list,
+                                               dod_opis_list, addr_phrs_list, addr_phrs_len, wrld_pl_trans,
+                                               addr_phrs_uniq)
 
-            db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_phrs})
-            db_session.commit()
+                db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_phrs})
+                db_session.commit()
+
+            SQL_ENGINE.dispose()
 
 
 @lru_cache
@@ -348,7 +350,7 @@ def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_
         g = geocoder.osm(address)
         geo_addr = g.osm
         status_code = g.status_code
-        time.sleep(5)
+        time.sleep(2)
 
     if geo_addr is not None:
         # Specjalnie oznaczamy 'x' z adresu jako 'y_val' i 'y' jako "x_val", bo notacja stosowana w geocoderze jest
@@ -400,8 +402,7 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
                    sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
-                   wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session,
-                   addr_phrs_uniq: str) -> str:
+                   wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Ustalamy sektory dla wybranych przez naas punktow PRG
@@ -423,7 +424,11 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_lat,
                      BDOT10K.centr_long]
         bubd_cond = sa.or_(BDOT10K.kod_sektora == v for v in unq_sekt)
-        pow_bubd_arr = np.array(db_session.query(*bubd_cols).filter(bubd_cond).all(), dtype=object)
+
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            pow_bubd_arr = pd.read_sql(db_session.query(*bubd_cols).filter(bubd_cond).statement, SQL_ENGINE).to_numpy()
+
+        SQL_ENGINE.dispose()
         pow_centr_smpl = pow_bubd_arr[:, -2:].astype(np.float32)
         pow_bubd_arr = pow_bubd_arr[:, :-2]
 
@@ -496,9 +501,13 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
         c_sekt = 'COL_' + curr_sekt[1]
         r_sekt = int(curr_sekt[0])
-        addr_phrs_sekt = db_session.query(AddrArr.__table__.c[c_sekt]).filter(AddrArr.addr_id == r_sekt).all()[0][0]
-        fic_addr_sekt = "".join((addr_phrs_sekt, c_addr_phrs))
-        db_session.query(AddrArr).filter(AddrArr.addr_id == r_sekt).update({c_sekt: fic_addr_sekt})
+
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            addr_phrs_sekt = db_session.query(AddrArr.__table__.c[c_sekt]).filter(AddrArr.addr_id == r_sekt).all()[0][0]
+            fic_addr_sekt = "".join((addr_phrs_sekt, c_addr_phrs))
+            db_session.query(AddrArr).filter(AddrArr.addr_id == r_sekt).update({c_sekt: fic_addr_sekt})
+
+        SQL_ENGINE.dispose()
 
     return addr_phrs_uniq
 

@@ -14,8 +14,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 os.environ["PARENT_PATH"] = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
 
 # Deklarujemy silnik SQL
-SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
-                              echo=False, future=True)
+SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]), echo=False)
 
 
 class BDOT10K(BASE):
