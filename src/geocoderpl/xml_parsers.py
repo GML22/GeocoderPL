@@ -1,7 +1,11 @@
+import gc
+import os
+
 from abc import ABC, abstractmethod
 from io import BytesIO
 
-from db_classes import PRG
+import numpy as np
+from db_classes import PRG, SQL_ENGINE
 from geo_utilities import *
 
 
@@ -84,6 +88,8 @@ class BDOT10kDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
+        db_session = sa.orm.Session(SQL_ENGINE)
+
         with zipfile.ZipFile(self.xml_path, "r") as zfile:
             for woj_name in zfile.namelist():
                 woj_zip = BytesIO(zfile.read(woj_name))
@@ -106,18 +112,19 @@ class BDOT10kDataParser(XmlParser):
                 bdot10k_rows = []
                 db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-                with sa.orm.Session(SQL_ENGINE) as session:
-                    for i, c_row in enumerate(bdot10k_woj_rows):
-                        bdot10k_rows.append(BDOT10K(*c_row))
+                for i, c_row in enumerate(bdot10k_woj_rows):
+                    bdot10k_rows.append(BDOT10K(*c_row))
 
-                        if i % db_save_freq == 0:
-                            session.bulk_save_objects(bdot10k_rows)
-                            session.commit()
-                            bdot10k_rows = []
+                    if i % db_save_freq == 0:
+                        db_session.bulk_save_objects(bdot10k_rows)
+                        db_session.commit()
+                        bdot10k_rows = []
 
-                    if bdot10k_rows:
-                        session.bulk_save_objects(bdot10k_rows)
-                        session.commit()
+                if bdot10k_rows:
+                    db_session.bulk_save_objects(bdot10k_rows)
+                    db_session.commit()
+
+        db_session.close()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -230,55 +237,62 @@ class PRGDataParser(XmlParser):
 
         # Definiujemy podstawowe parametry
         x_path, x_filename = os.path.split(self.xml_path)
-        curr_dir = os.getcwd()
         os.chdir(x_path)
-        woj_names = []
 
         # Tworzymy transformacje wspolrzednych
         wrld_pl_trans = create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True)
 
-        with sa.orm.Session(SQL_ENGINE) as session:
-            teryt_arr = np.asarray(session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
-            json_arr = np.asarray(session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
+        # Definiujemy sesję sql engine
+        db_session = sa.orm.Session(SQL_ENGINE)
+        teryt_arr = np.asarray(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
+        json_arr = np.asarray(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
 
-        try:
-            with zipfile.ZipFile(x_filename, "r") as zfile:
-                woj_names = zfile.namelist()
-                # zfile.extractall()
+        with zipfile.ZipFile(x_filename, "r") as zfile:
+            woj_names = zfile.namelist()
 
-            for woj_name in woj_names:
-                # Wczytujemy dane XML dla danego wojewodztwa
-                xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
+            if len(list(os.listdir(x_path))) < 3:
+                zfile.extractall()
 
-                # Tworzymy listę punktów adresowych PRG
-                points_list = self.create_points_list(xml_contex)
+        for woj_name in woj_names:
+            # Wczytujemy dane XML dla danego wojewodztwa
+            xml_contex = etree.iterparse(woj_name, events=(self.event_type,), tag=self.tags_tuple[:-1])
 
-                # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
-                # wewnątrz shapefile'a swojej gminy
-                self.check_prg_pts_add_db(points_list, woj_name, teryt_arr, json_arr, wrld_pl_trans)
+            # Tworzymy listę punktów adresowych PRG
+            points_list = self.create_points_list(xml_contex, db_session)
+            temp_arr_path = os.path.join(os.environ["PARENT_PATH"], os.environ['TEMP_ARR'])
+            points_arr = np.memmap(temp_arr_path, mode="w+", dtype=object, shape=(len(points_list), 11))
+            points_arr[:] = points_list[:]
+            xml_contex.root.clear()
+            del xml_contex
+            del points_list
+            gc.collect()
 
-        finally:
-            os.chdir(curr_dir)
+            # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
+            # wewnątrz shapefile'a swojej gminy
+            self.check_prg_pts_add_db(points_arr, woj_name, teryt_arr, json_arr, wrld_pl_trans, db_session)
 
-            if woj_names:
-                [os.remove(file1) for file1 in os.listdir('.') if file1 in woj_names]
+            # Zamykamy i usuwamy memmap
+            points_arr.__mmap.close()
+            del points_arr
+            gc.collect()
+            os.remove(temp_arr_path)
 
-    def create_points_list(self, xml_contex: etree.iterparse) -> list:
+        db_session.close()
+
+    def create_points_list(self, xml_contex: etree.iterparse, db_session: sa.orm.Session) -> list:
         """ Creating list of data points """
 
         # Definiujemy podstawowe parametry
         c_ind = 0
         c_row = [''] * 11
-        points_list = [list() for _ in range(len(c_row))]
+        points_list = []
         coords_prec = int(os.environ["COORDS_PREC"])
         all_tags = self.tags_tuple
         num_dict = {all_tags[1]: 3, all_tags[2]: 4, all_tags[3]: 5, all_tags[4]: 6, all_tags[5]: 7, all_tags[6]: 8}
         rep_dict = {"ul. ": "", "ulica ": "", "al.": "Aleja", "Al.": "Aleja", "pl.": "Plac", "Pl.": "Plac",
                     "wTrakcieBudowy": "w trakcie budowy"}
         rep_dict_keys = np.asarray(list(rep_dict.keys()))
-
-        with sa.orm.Session(SQL_ENGINE) as session:
-            addr_phrs_uniq = session.query(UniqPhrs.uniq_phrs).all()[0][0]
+        addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
         for _, curr_node in xml_contex:
             c_val = curr_node.text
@@ -302,8 +316,7 @@ class PRGDataParser(XmlParser):
                 c_row[-2:] = [round(float(c_val[0]), coords_prec), round(float(c_val[1]), coords_prec)]
 
                 if c_row[0] != '' and c_row[1] != '' and c_row[2] != '':
-                    [points_list[i].append(el) for i, el in enumerate(c_row)]
-
+                    points_list.append(c_row)
                     uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
                                                                 if c_row[i] != ""]), return_index=True)
                     addr_arr = uniq_addr[np.argsort(uniq_ids)]
@@ -319,33 +332,32 @@ class PRGDataParser(XmlParser):
             # Czyscimy przetworzone obiekty wezlow XML z pamieci
             clear_xml_node(curr_node)
 
-        with sa.orm.Session(SQL_ENGINE) as session:
-            session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
-            session.commit()
+        db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
+        db_session.commit()
 
         return points_list
 
     @time_decorator
-    def check_prg_pts_add_db(self, points_list: list, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                             wrld_pl_trans: osr.CoordinateTransformation) -> None:
+    def check_prg_pts_add_db(self, points_arr: np.memmap, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
+                             wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session) -> None:
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
         # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny
         # zawierajace przekonwertowane wspolrzedne
-        trans_crds = np.zeros((2, len(points_list[0])), dtype=np.float64)
-        trans_crds[:] = convert_coords(points_list[-2:], os.environ['PL_CRDS'], os.environ['WORLD_CRDS'])
+        trans_crds = np.zeros((2, len(points_arr)), dtype=np.float64)
+        trans_crds[:] = convert_coords(points_arr[:, -2:], os.environ['PL_CRDS'], os.environ['WORLD_CRDS'])
         trans_crds = trans_crds.T
 
         # Grupujemy kolumny z nazwami powiatow oraz gmin i sprawdzamy czy punkty adresowe z bazy PRG znajduja sie
         # wewnatrz shapefili ich gmin
-        df_regions = pd.DataFrame({'POWIAT': points_list[1], 'GMINA': points_list[2]})
+        df_regions = pd.DataFrame({'POWIAT': points_arr[:, 1], 'GMINA': points_arr[:, 2]})
         grouped_regions = df_regions.groupby(['POWIAT', 'GMINA'], as_index=False).groups
 
         # Tworzymy inne przydatne obiekty
         woj_idx = woj_name.rfind("_") + 1
         woj_name = unidecode(woj_name[woj_idx:-4].upper())
-        pts_lst_len = len(points_list[0])
+        pts_lst_len = len(points_arr)
         zrodlo_list = ['PRG'] * pts_lst_len
         popraw_list = [1] * pts_lst_len
         dists_list = [0.0] * pts_lst_len
@@ -356,27 +368,25 @@ class PRGDataParser(XmlParser):
 
         # Dla każdej gminy i powiatu sprawdzamy czy punkty do nich przypisane znajduja sie wewnatrz wielokata danej
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
-        points_inside_polygon(grouped_regions, woj_name, trans_crds, points_list, popraw_list, dists_list, zrodlo_list,
+        points_inside_polygon(grouped_regions, woj_name, trans_crds, points_arr, popraw_list, dists_list, zrodlo_list,
                               bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, self.addr_phrs_list,
-                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans)
+                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans, db_session)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []
         db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-        with sa.orm.Session(SQL_ENGINE) as session:
-            for i in range(pts_lst_len):
-                prg_rows.append(PRG(*[lst[i] for lst in points_list[:-2]], trans_crds[i, 0], trans_crds[i, 1],
-                                    zrodlo_list[i], popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i],
-                                    sekt_kod_list[i], dod_opis_list[i]))
-                if i % db_save_freq == 0:
-                    session.bulk_save_objects(prg_rows)
-                    session.commit()
-                    prg_rows = []
+        for i in range(pts_lst_len):
+            prg_rows.append(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i], popraw_list[i],
+                                dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i], dod_opis_list[i]))
+            if i % db_save_freq == 0:
+                db_session.bulk_save_objects(prg_rows)
+                db_session.commit()
+                prg_rows = []
 
-            if prg_rows:
-                session.bulk_save_objects(prg_rows)
-                session.commit()
+        if prg_rows:
+            db_session.bulk_save_objects(prg_rows)
+            db_session.commit()
 
         self.addr_phrs_len += pts_lst_len
         self.addr_phrs_list = []

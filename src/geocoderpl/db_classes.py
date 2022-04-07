@@ -13,9 +13,9 @@ BASE = declarative_base()
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 os.environ["PARENT_PATH"] = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
 
-# Tworzymy silnik bazy danych
-SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]), echo=False,
-                              future=True)
+# Deklarujemy silnik SQL
+SQL_ENGINE = sa.create_engine("sqlite:///" + os.path.join(os.environ["PARENT_PATH"], os.environ["DB_PATH"]),
+                              echo=False, future=True)
 
 
 class BDOT10K(BASE):
@@ -126,24 +126,24 @@ class PRG(BASE):
 
 
 class UniqPhrs(BASE):
-    """ Class that defines Unique Phrases """
+    """ Class that defines unique phrases """
 
     # Defniujemy nazwę tabeli
     __tablename__ = 'UNIQ_TABLE'
 
     # Definiujemy kolumny tabeli
     uniq_id = sa.Column('UNIQ_ID', sa.Integer, primary_key=True)
-    uniq_phrs = sa.Column('UNIQ_PHRS', sa.Text(4294000000), primary_key=False)
+    uniq_phrs = sa.Column('UNIQ_PHRS', sa.Text, primary_key=False)
 
     def __init__(self, uniq_phrs: str) -> None:
         self.uniq_phrs = uniq_phrs
 
     def __repr__(self) -> str:
-        return "<PRG('%s')>" % self.uniq_phrs
+        return "<UniqPhrs('%s')>" % self.uniq_phrs
 
 
 class AddrArr(BASE):
-    """ Class that defines Addreess Array """
+    """ Class that defines addresses array """
 
     # Defniujemy nazwę tabeli
     __tablename__ = 'ADDR_TABLE'
@@ -152,15 +152,14 @@ class AddrArr(BASE):
     addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
 
     for i in range(int(os.environ["SEKT_NUM"])):
-        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.Text(4294000000),
-                                                         primary_key=False)
+        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.Text, primary_key=False)
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 
 class TerytCodes(BASE):
-    """ Class that defines TERYT Codes """
+    """ Class that defines TERYT codes """
 
     # Defniujemy nazwę tabeli
     __tablename__ = 'TERYT_TABLE'
@@ -175,7 +174,7 @@ class TerytCodes(BASE):
         self.teryt_code = teryt_code
 
     def __repr__(self) -> str:
-        return "<PRG('%s', '%s')>" % (self.teryt_name, self.teryt_code)
+        return "<TerytCodes('%s', '%s')>" % (self.teryt_name, self.teryt_code)
 
 
 class RegJSON(BASE):
@@ -188,7 +187,7 @@ class RegJSON(BASE):
     json_id = sa.Column('JSON_ID', sa.Integer, primary_key=True)
     json_name = sa.Column('JSON_NAME', sa.String, primary_key=False)
     json_teryt = sa.Column('JSON_TERYT', sa.String, primary_key=False)
-    json_shape = sa.Column('JSON_SHAPE', sa.Text(4294000000), primary_key=False)
+    json_shape = sa.Column('JSON_SHAPE', sa.Text, primary_key=False)
 
     def __init__(self, json_name: str, json_teryt: str, json_shape: str) -> None:
         self.json_name = json_name
@@ -196,4 +195,4 @@ class RegJSON(BASE):
         self.json_shape = json_shape
 
     def __repr__(self) -> str:
-        return "<PRG('%s', '%s', '%s')>" % (self.json_name, self.json_teryt, self.json_shape)
+        return "<RegJSON('%s', '%s', '%s')>" % (self.json_name, self.json_teryt, self.json_shape)

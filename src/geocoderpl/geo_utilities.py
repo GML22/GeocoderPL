@@ -23,7 +23,7 @@ from osgeo import osr
 from pyproj import Proj, transform
 from unidecode import unidecode
 
-from db_classes import SQL_ENGINE, BDOT10K, UniqPhrs, AddrArr, TerytCodes, RegJSON
+from db_classes import BDOT10K, UniqPhrs, AddrArr, TerytCodes, RegJSON, SQL_ENGINE
 from super_permutations import SuperPerms
 
 
@@ -82,54 +82,56 @@ def fill_regs_tables() -> None:
     teryt_list = []
 
     # Dla każdego podfolderu w pliku granice administracyjne spisujemy
+    db_session = sa.orm.Session(SQL_ENGINE)
+
     for reg_name, reg_file in regs_shps.items():
         shapes = reg_file.GetLayer(0)
 
-        # Ustalamy finalną nazwę regionu
-        with sa.orm.Session(SQL_ENGINE) as session:
-            for feature in shapes:
-                feat_itms = feature.items()
-                name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
-                teryt = feat_itms['JPT_KOD_JE']
-                geom = feature.geometry()
-                geom.Transform(pl_wrld_trans)
+        for feature in shapes:
+            feat_itms = feature.items()
+            name = unidecode(feat_itms['JPT_NAZWA_'].upper()).replace("POWIAT ", "")
+            teryt = feat_itms['JPT_KOD_JE']
+            geom = feature.geometry()
+            geom.Transform(pl_wrld_trans)
 
-                if geom.GetGeometryName() == "POLYGON":
-                    geom_ref = geom.GetGeometryRef(0)
-                    g_json = geom_ref.ExportToJson()
-                else:
-                    geom_c = geom.GetGeometryCount()
-                    g_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson() for i in range(geom_c)])
+            if geom.GetGeometryName() == "POLYGON":
+                geom_ref = geom.GetGeometryRef(0)
+                g_json = geom_ref.ExportToJson()
+            else:
+                geom_c = geom.GetGeometryCount()
+                g_json = ";".join([geom.GetGeometryRef(i).GetGeometryRef(0).ExportToJson() for i in range(geom_c)])
 
-                # Ustalamy finalna nazwe regionu TERYT
-                if len(teryt) < 3:
-                    fin_name = name
-                elif len(teryt) < 5:
-                    json_name = session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:2]).all()[0][0]
-                    fin_name = json_name + ";" + name
-                else:
-                    json_name = session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:4]).all()[0][0]
-                    fin_name = json_name + ";" + name
+            # Ustalamy finalna nazwe regionu TERYT
+            if len(teryt) < 3:
+                fin_name = name
+            elif len(teryt) < 5:
+                json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:2]).all()[0][0]
+                fin_name = json_name + ";" + name
+            else:
+                json_name = db_session.query(RegJSON.json_name).filter(RegJSON.json_teryt == teryt[:4]).all()[0][0]
+                fin_name = json_name + ";" + name
 
-                # Uzupełniamy tabele TERYT_TABLE
-                if fin_name not in name_list:
-                    name_list.append(fin_name)
-                    session.add(TerytCodes(fin_name, teryt))
-                else:
-                    c_teryt = session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name == fin_name).all()[0][0]
-                    n_teryt = c_teryt + ";" + teryt
-                    session.query(TerytCodes).filter(TerytCodes.teryt_name == fin_name).update({'teryt_code': n_teryt})
+            # Uzupełniamy tabele TERYT_TABLE
+            if fin_name not in name_list:
+                name_list.append(fin_name)
+                db_session.add(TerytCodes(fin_name, teryt))
+            else:
+                c_teryt = db_session.query(TerytCodes.teryt_code).filter(TerytCodes.teryt_name == fin_name).all()[0][0]
+                n_teryt = c_teryt + ";" + teryt
+                db_session.query(TerytCodes).filter(TerytCodes.teryt_name == fin_name).update({'teryt_code': n_teryt})
 
-                # Uzupełniamy tabele JSON_TABLE
-                if teryt not in teryt_list:
-                    teryt_list.append(teryt)
-                    session.add(RegJSON(fin_name, teryt, g_json))
-                else:
-                    c_json = session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
-                    n_json = c_json + ";" + g_json
-                    session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
+            # Uzupełniamy tabele JSON_TABLE
+            if teryt not in teryt_list:
+                teryt_list.append(teryt)
+                db_session.add(RegJSON(fin_name, teryt, g_json))
+            else:
+                c_json = db_session.query(RegJSON.json_shape).filter(RegJSON.json_teryt == teryt).all()[0][0]
+                n_json = c_json + ";" + g_json
+                db_session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
 
-            session.commit()
+            db_session.commit()
+
+    db_session.close()
 
 
 @time_decorator
@@ -235,11 +237,11 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_list: list,
+def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_arr: np.memmap,
                           popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
                           bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list,
                           addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                          wrld_pl_trans: osr.CoordinateTransformation) -> None:
+                          wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -253,11 +255,10 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
             # Pobieramy kody TERYT danej gminy
             t_code = woj_name + ";" + pow_name + ";" + gmin_name
             gmin_codes = teryt_arr[teryt_arr[:, 0] == t_code, -1][0]
-            gmin_codes = gmin_codes.split(";")
             c_paths = []
 
             # Dla kazdego kodu TERYT gminy pobieramy sciezki wielokatow tej gminy
-            for gmn_code in gmin_codes:
+            for gmn_code in gmin_codes.split(";"):
                 curr_json = json_arr[json_arr[:, 0] == gmn_code, -1][0]
 
                 for c_json in curr_json.split(";"):
@@ -274,7 +275,7 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                 outside_inds = coords_inds[~points_flags]
 
                 for i, c_ind in enumerate(outside_inds):
-                    c_row = [lst[c_ind] for lst in points_list]
+                    c_row = points_arr[c_ind, :]
                     c_pow, c_gmin, c_miejsc, c_miejsc2, c_ulica, c_numer = c_row[1:7]
                     address = ""
 
@@ -288,16 +289,19 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                     elif c_ulica == '' and c_miejsc2 == '':
                         address = c_numer + ", " + c_miejsc + ", " + c_gmin + ", " + c_pow
 
-                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row, dists_list,
+                    coord1 = float(c_row[-2][0])
+                    coord2 = float(c_row[-1][0])
+                    get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, coord1, coord2, dists_list,
                                    zrodlo_list, wrld_pl_trans)
 
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
-            with sa.orm.Session(SQL_ENGINE) as db_session:
-                addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
-                get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list,
-                               addr_phrs_list, addr_phrs_len, db_session, addr_phrs_uniq, wrld_pl_trans)
-                db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
-                db_session.commit()
+            addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
+            fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list,
+                                           dod_opis_list, addr_phrs_list, addr_phrs_len, wrld_pl_trans, db_session,
+                                           addr_phrs_uniq)
+
+            db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_phrs})
+            db_session.commit()
 
 
 @lru_cache
@@ -332,8 +336,8 @@ def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
     return points_flags
 
 
-def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int,
-                   c_row: list, dists_list: list, zrodlo_list: list,
+def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int, coord1: float,
+                   coord2: float, dists_list: list, zrodlo_list: list,
                    wrld_pl_trans: osr.CoordinateTransformation) -> None:
     """ Function that returns OSM coordinates of address point or distance from the district shapefile """
 
@@ -362,7 +366,7 @@ def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_
 
             if not in_flag:
                 popraw_list[c_ind] = 0
-                max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], wrld_pl_trans)
+                max_dist = calc_pnt_dist(c_paths, coord1, coord2, wrld_pl_trans)
                 dists_list[c_ind] = max_dist
             else:
                 outside_pts[1] = x_val
@@ -370,7 +374,7 @@ def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_
                 zrodlo_list[c_ind] = "OSM"
         else:
             popraw_list[c_ind] = 0
-            max_dist = calc_pnt_dist(c_paths, c_row[-2], c_row[-1], wrld_pl_trans)
+            max_dist = calc_pnt_dist(c_paths, coord1, coord2, wrld_pl_trans)
             dists_list[c_ind] = max_dist
 
 
@@ -396,8 +400,8 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
                    sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
-                   db_session: sa.orm.Session, addr_phrs_uniq: str,
-                   wrld_pl_trans: osr.CoordinateTransformation) -> None:
+                   wrld_pl_trans: osr.CoordinateTransformation, db_session: sa.orm.Session,
+                   addr_phrs_uniq: str) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Ustalamy sektory dla wybranych przez naas punktow PRG
@@ -415,14 +419,6 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
 
     # Dla każdej unikalnej kombinacji sektorow przeprowadzamy wyszukiwanie obrysow budynkow
     for x, unq_sekt in enumerate(unique_sekts):
-        # Wybieramy koordynaty dla biezacych sektorow
-        curr_uniqs = sekts_ids == x
-        c_coords = curr_coords[curr_uniqs, :]
-        crds_inds = coords_inds[curr_uniqs]
-        c_coords = c_coords[:, [1, 0]]
-        c_coords_smpl = c_coords.astype(np.float32)
-        c_len = len(c_coords)
-
         # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
         bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_lat,
                      BDOT10K.centr_long]
@@ -445,38 +441,66 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         pow_bubd_arr = pow_bubd_arr[pow_fin_mask, :]
         pow_len = len(pow_bubd_arr)
 
-        # Upraszczamy precyzje liczb do formatu float32, bo przy ukladzie współrzednych EPSG 4326, taka precyzja jest
-        # wystarczajaca - liczby zaookraglane sa do 6 miejsc po przecinku co daje precyzje koordynatow na poziomie
-        # około 11 cm
-        on1 = np.ones((pow_len, 1), dtype=np.float32)
-        on2 = np.ones((c_len, 1), dtype=np.float32)
+        # Wybieramy koordynaty dla biezacych sektorow
+        c_addr_phrs = ""
+        curr_uniqs = sekts_ids == x
+        curr_crds = curr_coords[curr_uniqs, :]
+        coords_inds2 = coords_inds[curr_uniqs]
+        crds_l = len(curr_crds)
+        p_num = int(os.environ['PARTS_NUM'])
+        p_thrs = int(os.environ['PARTS_THRES'])
+        p_len = crds_l / p_num
+        part_inds = [(int(i * p_len), int((i + 1) * p_len)) for i in range(p_num)] if crds_l > p_thrs else [(0, crds_l)]
 
-        # Dla uproszczenia wyliczamy odleglosc euklidesowa pomiedzy punktami PRG a centroidami budynkow BUBD
-        # Dla obszaru wielkosci powiatu odleglosc euklidesowa niewiele sie będzie różnic od dokladnej odleglosci
-        # (na sferze)
-        eukl_dists = np.sqrt(((np.kron(c_coords_smpl, on1) -
-                               np.kron(on2, pow_centr_smpl)) ** 2).sum(1)).reshape((c_len, pow_len))
+        for p_ids in part_inds:
+            c_coords = curr_crds[p_ids[0]:p_ids[1], :]
+            crds_inds = coords_inds2[p_ids[0]:p_ids[1]]
+            c_coords = c_coords[:, [1, 0]]
+            c_coords_smpl = c_coords.astype(np.float32)
+            c_len = len(c_coords)
 
-        # Wybieramy top 'top_num' najblizszych budynkow (w mierze euklidesowej) dla wszystkich punktow PRG,
-        # np.argpartition jest 10 razy szybsze niż argsort(), ale zwraca top indeksy nieposortowane od najwiekszego do
-        # najmniejszego
-        top_num = int(os.environ["TOP_NUM"])
-        temp_top_ids = np.argpartition(eukl_dists, top_num)[:, :top_num]
+            # Upraszczamy precyzje liczb do formatu float32, bo przy ukladzie współrzednych EPSG 4326, taka precyzja
+            # jest wystarczajaca - liczby zaookraglane sa do 6 miejsc po przecinku co daje precyzje koordynatow na
+            # poziomie około 11 cm
+            on1 = np.ones((pow_len, 1), dtype=np.float32)
+            on2 = np.ones((c_len, 1), dtype=np.float32)
 
-        # Macierz indeksow sortujacych top najblizszych bundynkow
-        srtd_top_ids = eukl_dists[np.arange(eukl_dists.shape[0])[:, None], temp_top_ids].argsort()
+            # Dla uproszczenia wyliczamy odleglosc euklidesowa pomiedzy punktami PRG a centroidami budynkow BUBD
+            # Dla obszaru wielkosci powiatu odleglosc euklidesowa niewiele sie będzie różnic od dokladnej odleglosci
+            # (na sferze)
+            eukl_dists = np.sqrt(((np.kron(c_coords_smpl, on1) -
+                                   np.kron(on2, pow_centr_smpl)) ** 2).sum(1)).reshape((c_len, pow_len))
 
-        # Posortowane indeksy najblizszych budynkow oraz posortowane geojsony tych budynkow
-        top_ids = temp_top_ids[np.arange(temp_top_ids.shape[0])[:, None], srtd_top_ids]
-        top_geojson = pow_bubd_arr[top_ids, -1]
+            # Wybieramy top 'top_num' najblizszych budynkow (w mierze euklidesowej) dla wszystkich punktow PRG,
+            # np.argpartition jest 10 razy szybsze niż argsort(), ale zwraca top indeksy nieposortowane od najwiekszego
+            # do najmniejszego
+            top_num = int(os.environ["TOP_NUM"])
+            temp_top_ids = np.argpartition(eukl_dists, top_num)[:, :top_num]
 
-        # Dla kazdego z punktow adresowych PRG wybieramy 10 najblizszych mu budynkow (pod katem odleglosci euklidesowej
-        # od centroidow tych budynkow) i dla tych 10 budynkow znajdujemy dokladna odleglosc punktu adresowego od
-        # wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi PRG i zapisujemy jego
-        # indeks w bazie w raz z wyliczona odlegloscia
-        gen_fin_bubds_ids(c_coords, c_len, top_geojson, top_ids, bdot10k_dist, bdot10k_ids, crds_inds, pow_bubd_arr,
-                          dod_opis_list, curr_sekt, addr_phrs_list, addr_phrs_len, db_session, addr_phrs_uniq,
-                          wrld_pl_trans)
+            # Macierz indeksow sortujacych top najblizszych bundynkow
+            srtd_top_ids = eukl_dists[np.arange(eukl_dists.shape[0])[:, None], temp_top_ids].argsort()
+
+            # Posortowane indeksy najblizszych budynkow oraz posortowane geojsony tych budynkow
+            top_ids = temp_top_ids[np.arange(temp_top_ids.shape[0])[:, None], srtd_top_ids]
+            top_geojson = pow_bubd_arr[top_ids, -1]
+
+            # Dla kazdego z punktow adresowych PRG wybieramy 'taop_num' najblizszych mu budynkow (pod katem odleglosci
+            # euklidesowej od centroidow tych budynkow) i dla tych 10 budynkow znajdujemy dokladna odleglosc punktu
+            # adresowego od wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi PRG
+            # i zapisujemy jego indeks w bazie w raz z wyliczona odlegloscia
+            c_addr, addr_phrs_uniq = gen_fin_bubds_ids(c_coords, c_len, top_geojson, top_ids, bdot10k_dist, bdot10k_ids,
+                                                       crds_inds, pow_bubd_arr, dod_opis_list, addr_phrs_list,
+                                                       addr_phrs_len, addr_phrs_uniq, wrld_pl_trans)
+            c_addr_phrs += c_addr
+
+        # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
+        c_sekt = 'COL_' + curr_sekt[1]
+        r_sekt = int(curr_sekt[0])
+        addr_phrs_sekt = db_session.query(AddrArr.__table__.c[c_sekt]).filter(AddrArr.addr_id == r_sekt).all()[0][0]
+        fic_addr_sekt = "".join((addr_phrs_sekt, c_addr_phrs))
+        db_session.query(AddrArr).filter(AddrArr.addr_id == r_sekt).update({c_sekt: fic_addr_sekt})
+
+    return addr_phrs_uniq
 
 
 @lru_cache
@@ -511,9 +535,8 @@ def get_sector_codes(poly_centr_y: float, poly_centr_x: float) -> (int, int):
 
 def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray, top_ids: np.ndarray,
                       bdot10k_dist: np.ndarray, bdot10k_ids: np.ndarray, crds_inds: np.ndarray,
-                      pow_bubd_arr: np.ndarray, dod_opis_list: list, curr_sekt: int, addr_phrs_list: list,
-                      addr_phrs_len: int, db_session: sa.orm.Session, addr_phrs_uniq: str,
-                      wrld_pl_trans: osr.CoordinateTransformation) -> None:
+                      pow_bubd_arr: np.ndarray, dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
+                      c_addr_phrs_uniq: str, wrld_pl_trans: osr.CoordinateTransformation) -> (str, str):
     """ Function that finds closest buidling shape for given PRG point """
 
     c_adr_phr = ""
@@ -565,16 +588,13 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
                 c_adr_phr += " " + str(c_pts_sp[0]) + " " + c_dod_str + " " + str(c_pts_sp[1])
 
                 for inf in c_dod_str.replace(", ", " ").split(" "):
-                    if inf not in addr_phrs_uniq:
-                        addr_phrs_uniq += inf + " "
+                    if inf not in c_addr_phrs_uniq:
+                        c_addr_phrs_uniq += inf + " "
 
         c_adr_phr += " [" + str(addr_phrs_len + c_inds + 1) + "]\n"
 
-    # Zapisujemy do bazy ciagi adresow
-    c_col = 'COL_' + curr_sekt[1]
-    c_row = int(curr_sekt[0])
-    c_str = db_session.query(AddrArr.__table__.c[c_col]).filter(AddrArr.addr_id == c_row).all()[0][0] + c_adr_phr
-    db_session.query(AddrArr).filter(AddrArr.addr_id == c_row).update({c_col: c_str})
+    # Zwracamy uzyskany ciag adresow
+    return c_adr_phr, c_addr_phrs_uniq
 
 
 @overload
