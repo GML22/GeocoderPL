@@ -36,11 +36,11 @@ def main() -> None:
         bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
-    # Tworzymy tabelę SQL z punktami adresowymi PRG
-    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-    all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-    PRGDataParser(prg_path, all_tags1, 'end', perms_dict)
+        # Tworzymy tabelę SQL z punktami adresowymi PRG
+        prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+        all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+        perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+        PRGDataParser(prg_path, all_tags1, 'end', perms_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)

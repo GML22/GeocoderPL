@@ -85,30 +85,30 @@ class BDOT10kDataParser(XmlParser):
     def parse_xml(self) -> None:
         """ Method that parses xml file and saves data to SQL database """
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
-            with zipfile.ZipFile(self.xml_path, "r") as zfile:
-                for woj_name in zfile.namelist():
-                    woj_zip = BytesIO(zfile.read(woj_name))
-                    logging.info(woj_name)
-                    bdot10k_woj_rows = []
+        with zipfile.ZipFile(self.xml_path, "r") as zfile:
+            for woj_name in zfile.namelist():
+                woj_zip = BytesIO(zfile.read(woj_name))
+                logging.info(woj_name)
+                bdot10k_woj_rows = []
 
-                    with zipfile.ZipFile(woj_zip, "r") as zfile2:
-                        for pow_name in zfile2.namelist():
-                            pow_zip = BytesIO(zfile2.read(pow_name))
-                            with zipfile.ZipFile(pow_zip, "r") as zfile3:
-                                for xml_file in zfile3.namelist():
-                                    if "BUBD" in xml_file:
-                                        # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
-                                        bd_xml = BytesIO(zfile3.read(xml_file))
-                                        xml_contex = etree.iterparse(bd_xml, events=(self.event_type,),
-                                                                     tag=self.tags_tuple)
-                                        fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
-                                        bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
+                with zipfile.ZipFile(woj_zip, "r") as zfile2:
+                    for pow_name in zfile2.namelist():
+                        pow_zip = BytesIO(zfile2.read(pow_name))
+                        with zipfile.ZipFile(pow_zip, "r") as zfile3:
+                            for xml_file in zfile3.namelist():
+                                if "BUBD" in xml_file:
+                                    # Wyciągamy interesujące nas informacje z pliku xml i zapisujemy je w tablicy
+                                    bd_xml = BytesIO(zfile3.read(xml_file))
+                                    xml_contex = etree.iterparse(bd_xml, events=(self.event_type,),
+                                                                 tag=self.tags_tuple)
+                                    fin_row = ['', '', '', '', 0, 0, '', 0.0, 0.0, 0.0, '']
+                                    bdot10k_woj_rows += self.parse_bdot10k_xml(xml_contex, fin_row)
 
-                    # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
-                    bdot10k_rows = []
-                    db_save_freq = int(os.environ['DB_SAVE_FREQ'])
+                # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
+                bdot10k_rows = []
+                db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
+                with sa.orm.Session(SQL_ENGINE) as db_session:
                     for i, c_row in enumerate(bdot10k_woj_rows):
                         bdot10k_rows.append(BDOT10K(*c_row))
 
@@ -120,8 +120,6 @@ class BDOT10kDataParser(XmlParser):
                     if bdot10k_rows:
                         db_session.bulk_save_objects(bdot10k_rows)
                         db_session.commit()
-
-        SQL_ENGINE.dispose()
 
     def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
         """ Method that exctrats data from BDOT10k XML file """
@@ -241,10 +239,10 @@ class PRGDataParser(XmlParser):
 
         # Definiujemy sesję sql engine
         with sa.orm.Session(SQL_ENGINE) as db_session:
-            teryt_arr = np.asarray(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).all(), dtype=object)
-            json_arr = np.asarray(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).all(), dtype=object)
-
-        SQL_ENGINE.dispose()
+            teryt_arr = pd.read_sql(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).statement,
+                                    SQL_ENGINE).to_numpy()
+            json_arr = pd.read_sql(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).statement,
+                                   SQL_ENGINE).to_numpy()
 
         with zipfile.ZipFile(x_filename, "r") as zfile:
             woj_names = zfile.namelist()
@@ -286,48 +284,48 @@ class PRGDataParser(XmlParser):
         with sa.orm.Session(SQL_ENGINE) as db_session:
             addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
-            for _, curr_node in xml_contex:
-                c_val = curr_node.text
-                c_tag = curr_node.tag
+        for _, curr_node in xml_contex:
+            c_val = curr_node.text
+            c_tag = curr_node.tag
 
-                if c_tag == all_tags[0] and c_val != "Polska":
-                    c_row[c_ind] = c_val
-                    c_ind += 1
-                elif c_tag in [all_tags[1], all_tags[2], all_tags[3], all_tags[4], all_tags[5], all_tags[6]]:
-                    c_val = c_val if c_val is not None else ""
-                    sub_in = [substring in c_val for substring in rep_dict_keys]
+            if c_tag == all_tags[0] and c_val != "Polska":
+                c_row[c_ind] = c_val
+                c_ind += 1
+            elif c_tag in [all_tags[1], all_tags[2], all_tags[3], all_tags[4], all_tags[5], all_tags[6]]:
+                c_val = c_val if c_val is not None else ""
+                sub_in = [substring in c_val for substring in rep_dict_keys]
 
-                    if sum(sub_in) > 0:
-                        c_key = rep_dict_keys[sub_in][0]
-                        c_val = c_val.replace(c_key, rep_dict[c_key])
+                if sum(sub_in) > 0:
+                    c_key = rep_dict_keys[sub_in][0]
+                    c_val = c_val.replace(c_key, rep_dict[c_key])
 
-                    c_row[num_dict[c_tag]] = c_val
-                    c_ind = 0
-                elif c_tag == all_tags[7] or c_tag == all_tags[8]:
-                    c_val = c_val.split()
-                    c_row[-2:] = [round(float(c_val[0]), coords_prec), round(float(c_val[1]), coords_prec)]
+                c_row[num_dict[c_tag]] = c_val
+                c_ind = 0
+            elif c_tag == all_tags[7] or c_tag == all_tags[8]:
+                c_val = c_val.split()
+                c_row[-2:] = [round(float(c_val[0]), coords_prec), round(float(c_val[1]), coords_prec)]
 
-                    if c_row[0] != '' and c_row[1] != '' and c_row[2] != '':
-                        points_list.append(c_row)
-                        uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
-                                                                    if c_row[i] != ""]), return_index=True)
-                        addr_arr = uniq_addr[np.argsort(uniq_ids)]
-                        self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
+                if c_row[0] != '' and c_row[1] != '' and c_row[2] != '':
+                    points_list.append(c_row)
+                    uniq_addr, uniq_ids = np.unique(np.asarray([unidecode(c_row[i]).upper() for i in (3, 4, 5, 6, 7)
+                                                                if c_row[i] != ""]), return_index=True)
+                    addr_arr = uniq_addr[np.argsort(uniq_ids)]
+                    self.addr_phrs_list.append(addr_arr[self.perms_dict[len(addr_arr)]].tolist())
 
-                        for el in addr_arr:
-                            if el not in addr_phrs_uniq:
-                                addr_phrs_uniq += el + " "
+                    for el in addr_arr:
+                        if el not in addr_phrs_uniq:
+                            addr_phrs_uniq += el + " "
 
-                    c_ind = 0
-                    c_row = [''] * 11
+                c_ind = 0
+                c_row = [''] * 11
 
-                # Czyscimy przetworzone obiekty wezlow XML z pamieci
-                clear_xml_node(curr_node)
+            # Czyscimy przetworzone obiekty wezlow XML z pamieci
+            clear_xml_node(curr_node)
 
+        with sa.orm.Session(SQL_ENGINE) as db_session:
             db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
             db_session.commit()
 
-        SQL_ENGINE.dispose()
         return points_list
 
     @time_decorator
@@ -383,6 +381,5 @@ class PRGDataParser(XmlParser):
                 db_session.bulk_save_objects(prg_rows)
                 db_session.commit()
 
-        SQL_ENGINE.dispose()
         self.addr_phrs_len += pts_lst_len
         self.addr_phrs_list = []
