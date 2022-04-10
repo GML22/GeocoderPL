@@ -149,12 +149,15 @@ class AddrArr(BASE):
 
     # Definiujemy kolumny tabeli
     addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
+    kod_sektora = sa.Column('KOD_SEKTORA', sa.String, nullable=False)
+    sekt_addr_phrs = sa.Column('SEKT_ADDR_PHRS', sa.Text, nullable=False)
 
-    for i in range(int(os.environ["SEKT_NUM"])):
-        vars()["COL_" + str(i + 1).zfill(3)] = sa.Column("COL_" + str(i + 1).zfill(3), sa.Text, primary_key=False)
+    def __init__(self, kod_sektora: str, sekt_addr_phrs: str) -> None:
+        self.kod_sektora = kod_sektora
+        self.sekt_addr_phrs = sekt_addr_phrs
 
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+    def __repr__(self) -> str:
+        return "<AddrArr('%s', '%s')>" % (self.kod_sektora, self.sekt_addr_phrs)
 
 
 class TerytCodes(BASE):

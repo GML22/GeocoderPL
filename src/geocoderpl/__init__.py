@@ -19,9 +19,6 @@ def main() -> None:
 
         # Tworzymy tabele z macierza addresow oraz unikalnych fraz
         with sa.orm.Session(SQL_ENGINE) as db_session:
-            sekt_num = int(os.environ["SEKT_NUM"])
-            db_session.bulk_save_objects([AddrArr(**{"COL_" + str(i + 1).zfill(3): '' for i in range(sekt_num)})
-                                          for _ in range(sekt_num)])
             db_session.add(UniqPhrs(''))
             db_session.commit()
 
@@ -36,18 +33,18 @@ def main() -> None:
         bdot10k_path = os.path.join(os.environ["PARENT_PATH"], os.environ['BDOT10K_PATH'])
         BDOT10kDataParser(bdot10k_path, all_tags, 'end', dicts_tags, tags_dict)
 
-        # Tworzymy tabelę SQL z punktami adresowymi PRG
-        prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
-        all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
-        perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
-        PRGDataParser(prg_path, all_tags1, 'end', perms_dict)
+    # Tworzymy tabelę SQL z punktami adresowymi PRG
+    prg_path = os.path.join(os.environ["PARENT_PATH"], os.environ['PRG_PATH'])
+    all_tags1 = tuple(os.environ['PRG_TAGS'].split(";"))
+    perms_dict = get_super_permut_dict(int(os.environ['SUPPERM_MAX']))
+    PRGDataParser(prg_path, all_tags1, 'end', perms_dict)
 
     # Tworzmy GUI wyswietlajace mape
     # geo_app = QtWidgets.QApplication(sys.argv)
     # geo_app.setStyleSheet('''QWidget {background-color: rgb(255, 255, 255);}''')
     # my_geo_gui = MyGeoGUI()
     # my_geo_gui.show()
-
+    #
     # try:
     #     sys.exit(geo_app.exec_())
     # except SystemExit:

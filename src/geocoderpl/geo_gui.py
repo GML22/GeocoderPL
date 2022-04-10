@@ -10,6 +10,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from folium.plugins import MousePosition
 
+from db_classes import AddrArr, PRG
 from geo_utilities import *
 
 
@@ -18,20 +19,15 @@ class MyGeoGUI(QtWidgets.QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        # Ustalamy patern przeszukiwania
         self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
+        self.sekt_num = int(os.environ["SEKT_NUM"])
+        self.max_sekts = int(os.environ["MAX_SEKTS"])
 
-        # Wczytyujemy string z adresami z pliku
-        all_addrs_path = os.path.join(os.environ["PARENT_PATH"], os.environ["ALL_ADDS_PATH"])
-
-        try:
-            with open(all_addrs_path, 'rb') as file:
-                addr_phrases = pickle.load(file)
-        except FileNotFoundError:
-            raise Exception("Pod podanym adresem: '" + all_addrs_path + "' nie ma pliku 'all_address_phrases.obj'. " +
-                            "Uzupełnij ten plik i uruchom program ponownie!")
-
-        self.addr_uniq_words = addr_phrases["UNIQUES"]
-        self.addr_arr = addr_phrases["ADDR_ARR"]
+        # Pobieramy z bazy danych unikalne ciagi znakow i adressy
+        with sa.orm.Session(SQL_ENGINE) as db_session:
+            self.addr_uniq_words = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
+            self.addr_arr = pd.read_sql(db_session.query(AddrArr).statement, SQL_ENGINE).to_numpy()
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")
@@ -56,7 +52,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                            "<b>Funkcja budynku: </b>", "<b>Liczba kondygnacji: </b>", "<b>Zabytek: </b>",
                            "<b>Szacunkowa powierzchnia: </b>"]
         self.res_coords = {}
-        self.start_coords = np.asarray((self.start_lat, self.start_long))
+        self.start_coords = np.asarray((float(os.environ["START_LAT"]), float(os.environ["START_LONG"])))
         self.c_map = folium.Map(title="GEO PYTHON", zoom_start=19, location=self.start_coords, control_scale=True,
                                 tiles=None)
         form_lat = "function(num) {return L.Util.formatNum(num, 3) + 'º N';};"
@@ -117,13 +113,12 @@ class MyGeoGUI(QtWidgets.QWidget):
         self.map_layout.addLayout(ne_layout)
 
         # Ustalamy indeksy sektorow zgodnie z algorytmem spirali
-        self.c_sekt = get_sector_codes(*self.start_coords, self.sekt_num)
-        self.a_arr_shp = self.addr_arr.shape[0]
-        self.spiral_ids_arr = np.zeros(((2 * self.a_arr_shp - 1) ** 2, 2), dtype=np.int16)
+        self.c_sekt = get_sector_codes(*self.start_coords)
+        self.spiral_ids_arr = np.zeros(((2 * self.sekt_num - 1) ** 2, 2), dtype=np.int16)
         self.prev_val = tuple()
-        get_addr_spiral_ids(self.a_arr_shp, self.spiral_ids_arr)
+        get_addr_spiral_ids(self.sekt_num, self.spiral_ids_arr)
         c_inds_spiral = self.spiral_ids_arr + self.c_sekt
-        c_inds = c_inds_spiral[np.logical_and((c_inds_spiral >= 0).prod(1), (c_inds_spiral < self.a_arr_shp).prod(1))]
+        c_inds = c_inds_spiral[np.logical_and((c_inds_spiral >= 0).prod(1), (c_inds_spiral < self.sekt_num).prod(1))]
 
         # Tworzymy listę sektorów posortowaną według odległosci od sektora poczatkowego zgodnie z algorytmem spirali
         self.adds_list = self.addr_arr[c_inds[:, 0], c_inds[:, 1]].flatten()
@@ -172,13 +167,16 @@ class MyGeoGUI(QtWidgets.QWidget):
                     break
 
             if prg_ids != "":
-                self.cursor.execute("""SELECT MIEJSCOWOSC, ULICA, NUMER, KOD_POCZTOWY, GMINA, POWIAT, WOJEWODZTWO, 
-                                    DODATKOWY_OPIS, SZEROKOSC, DLUGOSC, BDOT10K_BUBD_ID FROM PRG_TABLE WHERE
-                                    PRG_POINT_ID in (""" + prg_ids + ")")
+                prg_cols = [PRG.miejscowosc, PRG.ulica, PRG.numer, PRG.kod_pocztowy, PRG.gmina, PRG.powiat,
+                            PRG.wojewodztwo, PRG.dodatkowy_opis, PRG.szerokosc, PRG.dlugosc, PRG.bdot10_bubd_id]
+                prg_cond = sa.or_(PRG.prg_point_id == int(v) for v in prg_ids.split(", "))
+
+                with sa.orm.Session(SQL_ENGINE) as db_session:
+                    c_res = pd.read_sql(db_session.query(*prg_cols).filter(prg_cond).statement, SQL_ENGINE).to_numpy()
+
                 res_list = np.array([(", ".join(["ul. " + el if i == 1 else "gmina: " + el if i == 4 else el
                                                  for i, el in enumerate(row) if el not in self.na_strings
-                                                 and (i < 5 or i == 7)]), row)
-                                     for row in self.cursor.fetchall()], dtype=object)
+                                                 and (i < 5 or i == 7)]), row) for row in c_res], dtype=object)
                 self.completer.model().setStringList(res_list[:, 0])
                 self.res_coords.update(dict(zip(res_list[:, 0], res_list[:, 1])))
             elif prg_ids == "" and not self.c_ptrn.match(start_text):
@@ -205,7 +203,7 @@ class MyGeoGUI(QtWidgets.QWidget):
         if np.abs(c_sekt - self.c_sekt).max() > self.max_sekts:
             c_ids_spl = self.spiral_ids_arr + c_sekt
             c_inds = c_ids_spl[np.logical_and((c_ids_spl >= 0).prod(1),
-                                              (c_ids_spl < self.a_arr_shp).prod(1))]
+                                              (c_ids_spl < self.sekt_num).prod(1))]
             self.adds_list = self.addr_arr[c_inds[:, 0], c_inds[:, 1]].flatten()
             self.sekts_list = self.add_sekts[c_inds[:, 0], c_inds[:, 1]]
             self.c_sekt = c_sekt
@@ -213,41 +211,46 @@ class MyGeoGUI(QtWidgets.QWidget):
     def on_text_selected(self) -> None:
         """ Methond that implements event on text select in QCompleter """
 
-        c_row = tuple()
+        c_row = list()
         c_text = self.line_edit.text()
 
         # Ustalamy które dane ze slownika danych adresowych mamy pobrac
         if c_text in self.res_coords:
-            c_row = self.res_coords[c_text]
+            c_row = self.res_coords[c_text].tolist()
         # Szukamy po koordynatach
         elif self.c_ptrn.match(c_text):
             # Wybieramy współrzędne
             c_coords = np.asarray(c_text.split(",")).astype(float)
 
             # Ustalamy sektory dla wybranych wspołrzędnych
-            szer, dlug = get_sector_codes(*c_coords, self.sekt_num)
+            szer, dlug = get_sector_codes(*c_coords)
 
             # Dla ustalonego sektora dobieramy sektory, ktore go otaczaja, w ten sposob uzyskujac 9 sektorow dla
             # kazdego punktu PRG, z których wybieramy unikalne kombinacje sektorow
-            jnd_sekts = '", "'.join([str(max(i, 0)).zfill(3) + "_" + str(min(j, self.sekt_num - 1)).zfill(3)
-                                     for i in range(szer - 1, szer + 2) for j in range(dlug - 9, dlug + 10)])
-            jnd_sekts = '"' + jnd_sekts + '"'
+            jnd_sekts = [str(max(i, 0)).zfill(3) + "_" + str(min(j, self.sekt_num - 1)).zfill(3)
+                         for i in range(szer - 1, szer + 2) for j in range(dlug - 9, dlug + 10)]
 
             # Pobieramy wszystkie współrzędne dla danego sektora
-            self.cursor.execute('SELECT PRG_POINT_ID, SZEROKOSC, DLUGOSC FROM PRG_TABLE WHERE KOD_SEKTORA IN (' +
-                                jnd_sekts + ')')
-            sekts_coords = np.asarray(self.cursor.fetchall())
+            prg_cols = [PRG.prg_point_id, PRG.szerokosc, PRG.dlugosc]
+            prg_cond = sa.or_(PRG.kod_sektora == v for v in jnd_sekts)
+
+            with sa.orm.Session(SQL_ENGINE) as db_session:
+                sekts_coords = pd.read_sql(db_session.query(*prg_cols).filter(prg_cond).statement,
+                                           SQL_ENGINE).to_numpy()
 
             if len(sekts_coords) > 0:
                 # Wyliczamy odleglosci euklidesowe
-                eukl_dists = np.sqrt((sekts_coords[:, 1] - c_coords[0]) ** 2 + (sekts_coords[:, 2] -
-                                                                                c_coords[1]) ** 2)
+                eukl_dists = np.sqrt((sekts_coords[:, 1] - c_coords[0]) ** 2 + (sekts_coords[:, 2] - c_coords[1]) ** 2)
 
                 # Pobieramy dane dla najbliższego punktu adresowego od podanych przez użytkownika wspołrzędnych
-                self.cursor.execute("""SELECT MIEJSCOWOSC, ULICA, NUMER, KOD_POCZTOWY, GMINA, POWIAT, WOJEWODZTWO,
-                                    DODATKOWY_OPIS, SZEROKOSC, DLUGOSC, BDOT10K_BUBD_ID FROM PRG_TABLE WHERE 
-                                    PRG_POINT_ID == """ + str(int(sekts_coords[eukl_dists.argmin(), 0])))
-                c_row = self.cursor.fetchone()
+                prg_cols = [PRG.miejscowosc, PRG.ulica, PRG.numer, PRG.kod_pocztowy, PRG.gmina, PRG.powiat,
+                            PRG.wojewodztwo, PRG.dodatkowy_opis, PRG.szerokosc, PRG.dlugosc, PRG.bdot10_bubd_id]
+                prg_cond = PRG.prg_point_id == int(sekts_coords[eukl_dists.argmin(), 0])
+
+                with sa.orm.Session(SQL_ENGINE) as db_session:
+                    c_row = pd.read_sql(db_session.query(*prg_cols).filter(prg_cond).statement,
+                                        SQL_ENGINE).to_numpy().tolist()
+
                 self.change_sekts_order(np.asarray([szer, dlug]))
             else:
                 self.completer.popup().show()
@@ -258,7 +261,7 @@ class MyGeoGUI(QtWidgets.QWidget):
 
             for k, v in self.res_coords.items():
                 if uni_text in unidecode(k.replace(",", "")).upper():
-                    c_row = v
+                    c_row = v.tolist()
                     self.line_edit.setText(k)
                     break
 
@@ -280,10 +283,15 @@ class MyGeoGUI(QtWidgets.QWidget):
             if bdot10k_bubd_id > 0:
                 # Pobieramy dane z tabeli budynków
                 f_info += ["", "<font size='4'><b>Dane dotyczące budynku:</b></font>"]
-                self.cursor.execute("""SELECT KATEGORIA_BUDYNKU, NAZWA_KARTOGRAFICZNA, STAN_BUDYNKU, FUNKCJA_BUDYNKU,
-                                    LICZBA_KONDYGNACJI, CZY_ZABYTEK, POWIERZCHNIA, OPIS_BUDYNKU, BUBD_GEOJSON FROM
-                                    BDOT10K_TABLE WHERE BDOT10K_BUBD_ID == """ + str(bdot10k_bubd_id) + "")
-                bubd_row = self.cursor.fetchone()
+                bdot10k_cols = [BDOT10K.kat_budynku, BDOT10K.nazwa_kart, BDOT10K.stan_budynku, BDOT10K.funkcja_budynku,
+                                BDOT10K.liczba_kond, BDOT10K.czy_zabytek, BDOT10K.powierzchnia, BDOT10K.opis_budynku,
+                                BDOT10K.bubd_geojson]
+                bdot10k_cond = BDOT10K.bdot10k_bubd_id == bdot10k_bubd_id
+
+                with sa.orm.Session(SQL_ENGINE) as db_session:
+                    bubd_row = pd.read_sql(db_session.query(*bdot10k_cols).filter(bdot10k_cond).statement,
+                                           SQL_ENGINE).to_numpy()
+
                 c_geojson = json.loads(bubd_row[-1])
                 dod_info = bubd_row[-2]
                 f_info += [self.bubd_names[i] + str(int(el)) if i == 4 else
