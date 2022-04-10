@@ -501,6 +501,7 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
                 db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
         else:
             db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
+            db_session.commit()
 
     return addr_phrs_uniq
 
