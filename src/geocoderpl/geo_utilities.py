@@ -130,7 +130,7 @@ def fill_regs_tables() -> None:
                     n_json = c_json + ";" + g_json
                     db_session.query(RegJSON).filter(RegJSON.json_teryt == teryt).update({'json_shape': n_json})
 
-                db_session.commit()
+            db_session.commit()
 
 
 @time_decorator
@@ -291,13 +291,32 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                     get_osm_coords(address, outside_pts[i, :], c_paths, popraw_list, c_ind, c_row[-2], c_row[-1],
                                    dists_list, zrodlo_list, wrld_pl_trans)
 
+            # Ustalamy sektory dla wybranych przez naas punktow PRG
+            coords_sekts = np.asarray(get_sector_codes(curr_coords[:, 1], curr_coords[:, 0])).T
+            coords_sekts_zfill = np.char.chararray.zfill(coords_sekts.astype(str), 3)
+            sekt_kod_list[coords_inds] = np.char.add(np.char.add(coords_sekts_zfill[:, 0], '_'),
+                                                     coords_sekts_zfill[:, 1])
+
+            # Dla każdego wybranego sektora dobieramy sektory, ktore go otaczaja, w ten sposob uzyskujac 9 sektorow dla
+            # kazdego punktu PRG, z których wybieramy unikalne kombinacje sektorow
+            sekt_num = int(os.environ["SEKT_NUM"])
+            sekts_arr, sekts_ids = np.unique([[str(max(i, 0)).zfill(3) + "_" + str(min(j, sekt_num - 1)).zfill(3)
+                                               for i in range(szer - 1, szer + 2) for j in range(dlug - 1, dlug + 2)]
+                                              for szer, dlug in coords_sekts], axis=0, return_inverse=True)
+
+            # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
+            bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_long,
+                         BDOT10K.centr_lat]
+
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
             with sa.orm.Session(SQL_ENGINE) as db_session:
+                pow_bubd_sekts = {sekt_name: pd.read_sql(db_session.query(*bubd_cols).filter(
+                    BDOT10K.kod_sektora == sekt_name).statement, SQL_ENGINE).values.tolist()
+                                  for sekt_name in np.unique(sekts_arr)}
                 addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
-                fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, sekt_kod_list,
-                                               dod_opis_list, addr_phrs_list, addr_phrs_len, wrld_pl_trans,
-                                               addr_phrs_uniq)
-
+                fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, dod_opis_list,
+                                               addr_phrs_list, addr_phrs_len, wrld_pl_trans, addr_phrs_uniq,
+                                               sekts_arr, sekts_ids, pow_bubd_sekts, db_session)
                 db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_phrs})
                 db_session.commit()
 
@@ -397,33 +416,21 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 
 
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
-                   sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
-                   wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str) -> str:
+                   dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
+                   wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str, sekts_arr: np.ndarray,
+                   sekts_ids: np.ndarray, pow_bubd_sekts: dict, db_session: sa.orm.Session) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
 
-    # Ustalamy sektory dla wybranych przez naas punktow PRG
-    coords_sekts = np.asarray(get_sector_codes(curr_coords[:, 1], curr_coords[:, 0])).T
-    coords_sekts_zfill = np.char.chararray.zfill(coords_sekts.astype(str), 3)
-    sekt_kod_list[coords_inds] = np.char.add(np.char.add(coords_sekts_zfill[:, 0], '_'), coords_sekts_zfill[:, 1])
-
-    # Dla każdego wybranego sektora dobieramy sektory, ktore go otaczaja, w ten sposob uzyskujac 9 sektorow dla kazdego
-    # punktu PRG, z których wybieramy unikalne kombinacje sektorow
-    sekt_num = int(os.environ["SEKT_NUM"])
-    unique_sekts, sekts_ids = np.unique([[str(max(i, 0)).zfill(3) + "_" + str(min(j, sekt_num - 1)).zfill(3)
-                                          for i in range(szer - 1, szer + 2) for j in range(dlug - 1, dlug + 2)]
-                                         for szer, dlug in coords_sekts], axis=0, return_inverse=True)
     sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params()
 
     # Dla każdej unikalnej kombinacji sektorow przeprowadzamy wyszukiwanie obrysow budynkow
-    for x, unq_sekt in enumerate(unique_sekts):
-        # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
-        bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_lat,
-                     BDOT10K.centr_long]
-        bubd_cond = sa.or_(BDOT10K.kod_sektora == v for v in unq_sekt)
+    for x, c_sekts in enumerate(sekts_arr):
+        pow_bubd_list = []
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
-            pow_bubd_arr = pd.read_sql(db_session.query(*bubd_cols).filter(bubd_cond).statement, SQL_ENGINE).to_numpy()
+        for c_sekt in c_sekts:
+            pow_bubd_list += pow_bubd_sekts[c_sekt]
 
+        pow_bubd_arr = np.asarray(pow_bubd_list)
         pow_centr_smpl = pow_bubd_arr[:, -2:].astype(np.float32)
         pow_bubd_arr = pow_bubd_arr[:, :-2]
 
@@ -431,10 +438,10 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         # w odleglosci sekt_rad * szerokosc (dlugosc) sektora - w ten sposob mamy pewnosc, ze wlasciwie przypisane beda
         # budynki do punktow adresowych znajdujacych sie na krawedziach sektorow - unikamy sytuacji w ktorej punkt
         # adresowy znajduje sie na krawedzi jednego sektora a centroid budynku na krawedzi sasiedniego sektora
-        curr_sekt = unq_sekt[4].split("_")  # biezacy sektor zawsze bedzie 5 na liscie unq_sekt
+        curr_sekt = c_sekts[4].split("_")
         sekt_centr_sz = plnd_min_szer + (float(curr_sekt[0]) + 0.5) * sekt_szer
         sekt_centr_dl = plnd_min_dl + (float(curr_sekt[1]) + 0.5) * sekt_dl
-        pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_sz, sekt_centr_dl])
+        pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_dl, sekt_centr_sz])
         s_rad = float(os.environ["SEKT_RAD"])
         pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= s_rad * sekt_szer, pow_centr_odl[:, 0] <= s_rad * sekt_dl)
         pow_centr_smpl = pow_centr_smpl[pow_fin_mask, :]
@@ -473,8 +480,8 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         top_ids = temp_top_ids[np.arange(temp_top_ids.shape[0])[:, None], srtd_top_ids]
         top_geojson = pow_bubd_arr[top_ids, -1]
 
-        # Dla kazdego z punktow adresowych PRG wybieramy 'taop_num' najblizszych mu budynkow (pod katem odleglosci
-        # euklidesowej od centroidow tych budynkow) i dla tych 10 budynkow znajdujemy dokladna odleglosc punktu
+        # Dla kazdego z punktow adresowych PRG wybieramy 'top_num' najblizszych mu budynkow (pod katem odleglosci
+        # euklidesowej od centroidow tych budynkow) i dla tych 'top_num' budynkow znajdujemy dokladna odleglosc punktu
         # adresowego od wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi PRG
         # i zapisujemy jego indeks w bazie w raz z wyliczona odlegloscia
         c_addr_phrs, addr_phrs_uniq = gen_fin_bubds_ids(c_coords, c_len, top_geojson, top_ids, bdot10k_dist,
@@ -482,14 +489,18 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
                                                         addr_phrs_list, addr_phrs_len, addr_phrs_uniq, wrld_pl_trans)
 
         # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
-        c_sekt = 'COL_' + curr_sekt[1]
-        r_sekt = int(curr_sekt[0])
+        if db_session.query(AddrArr).first() is not None:
+            c_cond = AddrArr.kod_sektora == c_sekts[4]
+            addr_phrs_query = db_session.query(AddrArr.sekt_addr_phrs).filter(c_cond)
+            addr_phrs_sekt = addr_phrs_query.first()
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
-            addr_phrs_sekt = db_session.query(AddrArr.__table__.c[c_sekt]).filter(AddrArr.addr_id == r_sekt).all()[0][0]
-            fic_addr_sekt = "".join((addr_phrs_sekt, c_addr_phrs))
-            db_session.query(AddrArr).filter(AddrArr.addr_id == r_sekt).update({c_sekt: fic_addr_sekt})
-            db_session.commit()
+            if addr_phrs_sekt is not None:
+                fin_addr_sekt = "".join((addr_phrs_sekt[0], c_addr_phrs))
+                db_session.query(AddrArr).filter(c_cond).update({'sekt_addr_phrs': fin_addr_sekt})
+            else:
+                db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
+        else:
+            db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
 
     return addr_phrs_uniq
 
@@ -535,7 +546,7 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
     for i in range(c_len):
         fin_dist = sys.maxsize
         c_point = ogr.Geometry(ogr.wkbPoint)
-        c_point.AddPoint(c_coords[i, 1], c_coords[i, 0])
+        c_point.AddPoint(c_coords[i, 0], c_coords[i, 1])
         fin_idx = 0
         trans_flag = False
 
