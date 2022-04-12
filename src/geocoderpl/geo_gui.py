@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from folium.plugins import MousePosition
 
-from db_classes import AddrArr, PRG
+from db_classes import PRG
 from geo_utilities import *
 
 
@@ -312,7 +312,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                            " od bieżącego punktu adresowego</font>"]
 
             # Dodajemy finalny marker do mapy
-            f_info += ["", "", '<font size="2"><i>Dane pobrane dnia 20. października 2021 roku ze stron ' +
+            f_info += ["", "", '<font size="2"><i>Dane pobrane dnia 21. marca 2022 roku ze stron ' +
                        'internetowych:<br>' + '<a href="https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic' +
                        '-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538/table">https://dane.' +
                        'gov.pl</a><br><a href="https://mapy.geoportal.gov.pl">https://mapy.geoportal.gov.pl</a>' +

@@ -304,20 +304,17 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                                                for i in range(szer - 1, szer + 2) for j in range(dlug - 1, dlug + 2)]
                                               for szer, dlug in coords_sekts], axis=0, return_inverse=True)
 
-            # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
-            bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_long,
-                         BDOT10K.centr_lat]
-
             # Dla każdego punktu PRG wyszukujemy najbliższy mu wielokat z bazy BDOT10K
             with sa.orm.Session(SQL_ENGINE) as db_session:
-                pow_bubd_sekts = {sekt_name: pd.read_sql(db_session.query(*bubd_cols).filter(
-                    BDOT10K.kod_sektora == sekt_name).statement, SQL_ENGINE).values.tolist()
-                                  for sekt_name in np.unique(sekts_arr)}
                 addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
-                fin_addr_phrs = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, dod_opis_list,
-                                               addr_phrs_list, addr_phrs_len, wrld_pl_trans, addr_phrs_uniq,
-                                               sekts_arr, sekts_ids, pow_bubd_sekts, db_session)
-                db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_phrs})
+                bubd_cols = [BDOT10K.bdot10k_bubd_id, BDOT10K.opis_budynku, BDOT10K.bubd_geojson, BDOT10K.centr_long,
+                             BDOT10K.centr_lat, BDOT10K.kod_sektora]
+                pow_bubd_all = pd.read_sql(db_session.query(*bubd_cols).filter(
+                    sa.or_(BDOT10K.kod_sektora == v for v in np.unique(sekts_arr))).statement, SQL_ENGINE).to_numpy()
+                fin_addr_uniq = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, dod_opis_list,
+                                               addr_phrs_list, addr_phrs_len, wrld_pl_trans, addr_phrs_uniq, sekts_arr,
+                                               sekts_ids, pow_bubd_all, db_session)
+                db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_uniq})
                 db_session.commit()
 
 
@@ -418,19 +415,15 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
                    dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
                    wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str, sekts_arr: np.ndarray,
-                   sekts_ids: np.ndarray, pow_bubd_sekts: dict, db_session: sa.orm.Session) -> str:
+                   sekts_ids: np.ndarray, pow_bubd_all: np.ndarray, db_session: sa.orm.Session) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
 
+    # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
     sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params()
 
-    # Dla każdej unikalnej kombinacji sektorow przeprowadzamy wyszukiwanie obrysow budynkow
-    for x, c_sekts in enumerate(sekts_arr):
-        pow_bubd_list = []
-
-        for c_sekt in c_sekts:
-            pow_bubd_list += pow_bubd_sekts[c_sekt]
-
-        pow_bubd_arr = np.asarray(pow_bubd_list)
+    for x, s_names in enumerate(sekts_arr):
+        # Dla każdej unikalnej kombinacji sektorow przeprowadzamy wyszukiwanie obrysow budynkow
+        pow_bubd_arr = pow_bubd_all[np.isin(pow_bubd_all[:, -1], s_names), :-1]
         pow_centr_smpl = pow_bubd_arr[:, -2:].astype(np.float32)
         pow_bubd_arr = pow_bubd_arr[:, :-2]
 
@@ -438,12 +431,12 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         # w odleglosci sekt_rad * szerokosc (dlugosc) sektora - w ten sposob mamy pewnosc, ze wlasciwie przypisane beda
         # budynki do punktow adresowych znajdujacych sie na krawedziach sektorow - unikamy sytuacji w ktorej punkt
         # adresowy znajduje sie na krawedzi jednego sektora a centroid budynku na krawedzi sasiedniego sektora
-        curr_sekt = c_sekts[4].split("_")
+        curr_sekt = sekts_arr[x, 4].split("_")
         sekt_centr_sz = plnd_min_szer + (float(curr_sekt[0]) + 0.5) * sekt_szer
         sekt_centr_dl = plnd_min_dl + (float(curr_sekt[1]) + 0.5) * sekt_dl
         pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_dl, sekt_centr_sz])
         s_rad = float(os.environ["SEKT_RAD"])
-        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= s_rad * sekt_szer, pow_centr_odl[:, 0] <= s_rad * sekt_dl)
+        pow_fin_mask = np.logical_and(pow_centr_odl[:, 0] <= s_rad * sekt_dl, pow_centr_odl[:, 1] <= s_rad * sekt_szer)
         pow_centr_smpl = pow_centr_smpl[pow_fin_mask, :]
         pow_bubd_arr = pow_bubd_arr[pow_fin_mask, :]
         pow_len = len(pow_bubd_arr)
@@ -455,53 +448,48 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         crds_inds = coords_inds[curr_uniqs]
         c_len = len(c_coords)
 
-        # Upraszczamy precyzje liczb do formatu float32, bo przy ukladzie współrzednych EPSG 4326, taka precyzja
-        # jest wystarczajaca - liczby zaookraglane sa do 6 miejsc po przecinku co daje precyzje koordynatow na
-        # poziomie około 11 cm
-        on1 = np.ones((pow_len, 1), dtype=np.float32)
-        on2 = np.ones((c_len, 1), dtype=np.float32)
+        if pow_len > 0:
+            # Upraszczamy precyzje liczb do formatu float32, bo przy ukladzie współrzednych EPSG 4326, taka precyzja
+            # jest wystarczajaca - liczby zaookraglane sa do 6 miejsc po przecinku co daje precyzje koordynatow na
+            # poziomie około 11 cm
+            on1 = np.ones((pow_len, 1), dtype=np.float32)
+            on2 = np.ones((c_len, 1), dtype=np.float32)
 
-        # Dla uproszczenia wyliczamy odleglosc euklidesowa pomiedzy punktami PRG a centroidami budynkow BUBD
-        # Dla obszaru wielkosci powiatu odleglosc euklidesowa niewiele sie będzie różnic od dokladnej odleglosci
-        # (na sferze)
-        eukl_dists = np.sqrt(((np.kron(c_coords_smpl, on1) -
-                               np.kron(on2, pow_centr_smpl)) ** 2).sum(1)).reshape((c_len, pow_len))
+            # Dla uproszczenia wyliczamy odleglosc euklidesowa pomiedzy punktami PRG a centroidami budynkow BUBD
+            # Dla obszaru wielkosci powiatu odleglosc euklidesowa niewiele sie będzie różnic od dokladnej odleglosci
+            # (na sferze)
+            eukl_dists = np.sqrt(((np.kron(c_coords_smpl, on1) -
+                                   np.kron(on2, pow_centr_smpl)) ** 2).sum(1)).reshape((c_len, pow_len))
 
-        # Wybieramy top 'top_num' najblizszych budynkow (w mierze euklidesowej) dla wszystkich punktow PRG,
-        # np.argpartition jest 10 razy szybsze niż argsort(), ale zwraca top indeksy nieposortowane od najwiekszego
-        # do najmniejszego
-        top_num = min(int(os.environ["TOP_NUM"]), c_len)
-        temp_top_ids = np.argpartition(eukl_dists, top_num)[:, :top_num]
+            # Wybieramy top 'top_num' najblizszych budynkow (w mierze euklidesowej) dla wszystkich punktow PRG,
+            # np.argpartition jest 10 razy szybsze niż argsort(), ale zwraca top indeksy nieposortowane od najwiekszego
+            # do najmniejszego
+            top_num = int(os.environ["TOP_NUM"])
 
-        # Macierz indeksow sortujacych top najblizszych bundynkow
-        srtd_top_ids = eukl_dists[np.arange(eukl_dists.shape[0])[:, None], temp_top_ids].argsort()
+            if pow_len > top_num:
+                temp_top_ids = np.argpartition(eukl_dists, top_num)[:, :top_num]
 
-        # Posortowane indeksy najblizszych budynkow oraz posortowane geojsony tych budynkow
-        top_ids = temp_top_ids[np.arange(temp_top_ids.shape[0])[:, None], srtd_top_ids]
-        top_geojson = pow_bubd_arr[top_ids, -1]
+                # Macierz indeksow sortujacych top najblizszych bundynkow
+                srtd_top_ids = eukl_dists[np.arange(eukl_dists.shape[0])[:, None], temp_top_ids].argsort()
 
-        # Dla kazdego z punktow adresowych PRG wybieramy 'top_num' najblizszych mu budynkow (pod katem odleglosci
-        # euklidesowej od centroidow tych budynkow) i dla tych 'top_num' budynkow znajdujemy dokladna odleglosc punktu
-        # adresowego od wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi PRG
-        # i zapisujemy jego indeks w bazie w raz z wyliczona odlegloscia
-        c_addr_phrs, addr_phrs_uniq = gen_fin_bubds_ids(c_coords, c_len, top_geojson, top_ids, bdot10k_dist,
-                                                        bdot10k_ids, crds_inds, pow_bubd_arr, dod_opis_list,
-                                                        addr_phrs_list, addr_phrs_len, addr_phrs_uniq, wrld_pl_trans)
-
-        # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
-        if db_session.query(AddrArr).first() is not None:
-            c_cond = AddrArr.kod_sektora == c_sekts[4]
-            addr_phrs_query = db_session.query(AddrArr.sekt_addr_phrs).filter(c_cond)
-            addr_phrs_sekt = addr_phrs_query.first()
-
-            if addr_phrs_sekt is not None:
-                fin_addr_sekt = "".join((addr_phrs_sekt[0], c_addr_phrs))
-                db_session.query(AddrArr).filter(c_cond).update({'sekt_addr_phrs': fin_addr_sekt})
+                # Posortowane indeksy najblizszych budynkow oraz posortowane geojsony tych budynkow
+                top_ids = temp_top_ids[np.arange(temp_top_ids.shape[0])[:, None], srtd_top_ids]
+                top_geojson = pow_bubd_arr[top_ids, -1]
             else:
-                db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
-        else:
-            db_session.add(AddrArr(c_sekts[4], c_addr_phrs))
-            db_session.commit()
+                top_ids = np.indices(eukl_dists.shape)[1]
+                top_geojson = pow_bubd_arr[top_ids, -1]
+
+            # Dla kazdego z punktow adresowych PRG wybieramy 'top_num' najblizszych mu budynkow (pod katem odleglosci
+            # euklidesowej od centroidow tych budynkow) i dla tych 'top_num' budynkow znajdujemy dokladna odleglosc
+            # punktu adresowego od wielokatow poszczegolnych budynkow - wybieramy wielokat najbliższy danemu punktowi
+            # PRG i zapisujemy jego indeks w bazie w raz z wyliczona odlegloscia
+            c_addr_phrs, addr_phrs_uniq = gen_fin_bubds_ids(c_coords, c_len, top_geojson, top_ids, bdot10k_dist,
+                                                            bdot10k_ids, crds_inds, pow_bubd_arr, dod_opis_list,
+                                                            addr_phrs_list, addr_phrs_len, addr_phrs_uniq,
+                                                            wrld_pl_trans)
+
+            # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
+            db_session.add(AddrArr(sekts_arr[x, 4], c_addr_phrs))
 
     return addr_phrs_uniq
 
@@ -547,9 +535,8 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
     for i in range(c_len):
         fin_dist = sys.maxsize
         c_point = ogr.Geometry(ogr.wkbPoint)
-        c_point.AddPoint(c_coords[i, 0], c_coords[i, 1])
+        c_point.AddPoint(*c_coords[i, :])
         fin_idx = 0
-        trans_flag = False
 
         for j, geojson in enumerate(top_geojson[i]):
             c_poly = ogr.CreateGeometryFromJson(geojson)
@@ -559,14 +546,16 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
                 fin_dist = c_dist
                 fin_idx = j
                 break
-            elif c_dist < fin_dist:
-                if not trans_flag:
-                    c_point.Transform(wrld_pl_trans)
-                    trans_flag = True
-
+            else:
+                c_point1 = ogr.Geometry(ogr.wkbPoint)
+                c_point1.AddPoint(*c_coords[i, :])
+                c_point1.Transform(wrld_pl_trans)
                 c_poly.Transform(wrld_pl_trans)
-                fin_dist = c_point.Distance(c_poly)
-                fin_idx = j
+                c_dist = c_point1.Distance(c_poly)
+
+                if c_dist < fin_dist:
+                    fin_dist = c_dist
+                    fin_idx = j
 
         # Przypisujemy do punktow adresowych indeksy najblizszych budunkow oraz odleglosci od nich
         c_inds = crds_inds[i]
