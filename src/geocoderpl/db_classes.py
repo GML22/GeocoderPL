@@ -141,25 +141,6 @@ class UniqPhrs(BASE):
         return "<UniqPhrs('%s')>" % self.uniq_phrs
 
 
-class AddrArr(BASE):
-    """ Class that defines addresses array """
-
-    # Defniujemy nazwę tabeli
-    __tablename__ = 'ADDR_TABLE'
-
-    # Definiujemy kolumny tabeli
-    addr_id = sa.Column('ADDR_ID', sa.Integer, primary_key=True)
-    kod_sektora = sa.Column('KOD_SEKTORA', sa.String, nullable=False)
-    sekt_addr_phrs = sa.Column('SEKT_ADDR_PHRS', sa.Text, nullable=False)
-
-    def __init__(self, kod_sektora: str, sekt_addr_phrs: str) -> None:
-        self.kod_sektora = kod_sektora
-        self.sekt_addr_phrs = sekt_addr_phrs
-
-    def __repr__(self) -> str:
-        return "<AddrArr('%s', '%s')>" % (self.kod_sektora, self.sekt_addr_phrs)
-
-
 class TerytCodes(BASE):
     """ Class that defines TERYT codes """
 

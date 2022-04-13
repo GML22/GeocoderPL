@@ -1,4 +1,4 @@
-import gc
+import pickle
 from abc import ABC, abstractmethod
 from io import BytesIO
 
@@ -236,6 +236,8 @@ class PRGDataParser(XmlParser):
 
         # Tworzymy transformacje wspolrzednych
         wrld_pl_trans = create_coords_transform(int(os.environ['WORLD_CRDS']), int(os.environ['PL_CRDS']), True)
+        sekt_num = int(os.environ["SEKT_NUM"])
+        sekt_addr_phrs = np.full(shape=(sekt_num, sekt_num), fill_value='', dtype=object)
 
         # Definiujemy sesję sql engine
         with sa.orm.Session(SQL_ENGINE) as db_session:
@@ -258,14 +260,14 @@ class PRGDataParser(XmlParser):
             points_list = self.create_points_list(xml_contex)
             points_arr = np.empty(shape=(len(points_list), 11), dtype=object)
             points_arr[:] = points_list[:]
-            xml_contex.root.clear()
-            del xml_contex
-            del points_list
-            gc.collect()
 
             # Konwertujemy wspolrzedne PRG z ukladu polskiego do ukladu mag Google i sprawdzamy czy leżą one
             # wewnątrz shapefile'a swojej gminy
-            self.check_prg_pts_add_db(points_arr, woj_name, teryt_arr, json_arr, wrld_pl_trans)
+            self.check_prg_pts_add_db(points_arr, woj_name, teryt_arr, json_arr, wrld_pl_trans, sekt_addr_phrs)
+
+        # Zapisujemy zbiór unikalnych adresow na dysku twardym
+        with open(os.path.join(os.environ["PARENT_PATH"], os.environ['ADDRS_PATH']), 'wb') as f:
+            pickle.dump(sekt_addr_phrs, f, pickle.HIGHEST_PROTOCOL)
 
     def create_points_list(self, xml_contex: etree.iterparse) -> list:
         """ Creating list of data points """
@@ -330,7 +332,7 @@ class PRGDataParser(XmlParser):
 
     @time_decorator
     def check_prg_pts_add_db(self, points_arr: np.ndarray, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                             wrld_pl_trans: osr.CoordinateTransformation) -> None:
+                             wrld_pl_trans: osr.CoordinateTransformation, sekt_addr_phrs: np.ndarray) -> None:
         """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
         to shapefile of its district and finds closest building shape for given PRG point """
 
@@ -361,7 +363,7 @@ class PRGDataParser(XmlParser):
         # gminy oraz znajdujemy najbliższy budynek do danego punktu PRG
         points_inside_polygon(grouped_regions, woj_name, trans_crds, points_arr, popraw_list, dists_list, zrodlo_list,
                               bdot10k_ids, bdot10k_dist, sekt_kod_list, dod_opis_list, self.addr_phrs_list,
-                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans)
+                              self.addr_phrs_len, teryt_arr, json_arr, wrld_pl_trans, sekt_addr_phrs)
 
         # Zapisujemy do bazy danych informacje dotyczące budynkow z danego województwa
         prg_rows = []

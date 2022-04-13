@@ -27,7 +27,9 @@ class MyGeoGUI(QtWidgets.QWidget):
         # Pobieramy z bazy danych unikalne ciagi znakow i adressy
         with sa.orm.Session(SQL_ENGINE) as db_session:
             self.addr_uniq_words = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
-            self.addr_arr = pd.read_sql(db_session.query(AddrArr).statement, SQL_ENGINE).to_numpy()
+
+        with open(os.path.join(os.environ["PARENT_PATH"], os.environ['ADDRS_PATH']), 'rb') as file:
+            self.addr_arr = pickle.load(file)
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")

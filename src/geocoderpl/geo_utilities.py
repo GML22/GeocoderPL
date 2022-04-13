@@ -23,7 +23,7 @@ from osgeo import osr
 from pyproj import Proj, transform
 from unidecode import unidecode
 
-from db_classes import BDOT10K, UniqPhrs, AddrArr, TerytCodes, RegJSON, SQL_ENGINE
+from db_classes import BDOT10K, UniqPhrs, TerytCodes, RegJSON, SQL_ENGINE
 from super_permutations import SuperPerms
 
 
@@ -240,7 +240,7 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                           popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
                           bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list,
                           addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
-                          wrld_pl_trans: osr.CoordinateTransformation) -> None:
+                          wrld_pl_trans: osr.CoordinateTransformation, sekt_addr_phrs: np.ndarray) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
 
@@ -313,7 +313,7 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
                     sa.or_(BDOT10K.kod_sektora == v for v in np.unique(sekts_arr))).statement, SQL_ENGINE).to_numpy()
                 fin_addr_uniq = get_bdot10k_id(curr_coords, coords_inds, bdot10k_ids, bdot10k_dist, dod_opis_list,
                                                addr_phrs_list, addr_phrs_len, wrld_pl_trans, addr_phrs_uniq, sekts_arr,
-                                               sekts_ids, pow_bubd_all, db_session)
+                                               sekts_ids, pow_bubd_all, sekt_addr_phrs)
                 db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': fin_addr_uniq})
                 db_session.commit()
 
@@ -415,7 +415,7 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
                    dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
                    wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str, sekts_arr: np.ndarray,
-                   sekts_ids: np.ndarray, pow_bubd_all: np.ndarray, db_session: sa.orm.Session) -> str:
+                   sekts_ids: np.ndarray, pow_bubd_all: np.ndarray, sekt_addr_phrs: np.ndarray) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
 
     # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
@@ -431,7 +431,7 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
         # w odleglosci sekt_rad * szerokosc (dlugosc) sektora - w ten sposob mamy pewnosc, ze wlasciwie przypisane beda
         # budynki do punktow adresowych znajdujacych sie na krawedziach sektorow - unikamy sytuacji w ktorej punkt
         # adresowy znajduje sie na krawedzi jednego sektora a centroid budynku na krawedzi sasiedniego sektora
-        curr_sekt = sekts_arr[x, 4].split("_")
+        curr_sekt = s_names[4].split("_")
         sekt_centr_sz = plnd_min_szer + (float(curr_sekt[0]) + 0.5) * sekt_szer
         sekt_centr_dl = plnd_min_dl + (float(curr_sekt[1]) + 0.5) * sekt_dl
         pow_centr_odl = np.abs(pow_centr_smpl - [sekt_centr_dl, sekt_centr_sz])
@@ -489,7 +489,7 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
                                                             wrld_pl_trans)
 
             # Zapisujemy do bazy danych informacje o ciagach adresowych danego sektora
-            db_session.add(AddrArr(sekts_arr[x, 4], c_addr_phrs))
+            sekt_addr_phrs[int(curr_sekt[0]), int(curr_sekt[1])] += c_addr_phrs
 
     return addr_phrs_uniq
 
