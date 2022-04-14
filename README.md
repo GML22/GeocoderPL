@@ -47,7 +47,7 @@ Geocoding using GeocoderPL search engine requires providing city name, street, b
 </p>
 
 <p align="justify">
-GeocoderPL can be also used for finding address point by providing name of public institution, church or shop - for part of builings such information are avaible in BDOT10k database, so they are also present in GeocoderPL search engine.
+GeocoderPL can be also used for finding address point by providing name of public institution, church or shop - for part of builings such information is avaible in BDOT10k database, so they are also present in GeocoderPL search engine.
 </p>
 
 <p align="center">
