@@ -13,6 +13,6 @@ setup(
     keywords="search-engine geocoding numpy pyqt5 geospatial sqlite3 gdal-python superpermutation folium-maps",
     url="https://github.com/GML22/GeocoderPL",
     packages=['geocoderpl'],
-    install_requires=['folium', 'numpy', 'pyqt5', 'unidecode', 'fiona', 'pyproj', 'shapely', 'lxml', 'geocoder',
-                      'pandas', 'matplotlib', 'yaml', 'pyyaml'],
+    install_requires=['folium', 'numpy', 'pyqt5', 'unidecode', 'pyproj', 'lxml', 'geocoder', 'pandas', 'matplotlib',
+                      'setuptools', 'sqlalchemy', 'python-dotenv'],
 )

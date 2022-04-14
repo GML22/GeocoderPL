@@ -48,10 +48,8 @@ def main() -> None:
     my_geo_gui = MyGeoGUI()
     my_geo_gui.show()
 
-    try:
-        sys.exit(geo_app.exec_())
-    except SystemExit:
-        raise Exception("Przy zamykaniu okna aplikacji wystąpił błąd!")
+    # Zamykamy okno aplikaji
+    sys.exit(geo_app.exec_())
 
 
 if __name__ == "__main__":

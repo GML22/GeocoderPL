@@ -2,6 +2,8 @@
 
 import io
 import json
+import pickle
+import struct
 from itertools import cycle
 
 import folium
@@ -19,6 +21,7 @@ class MyGeoGUI(QtWidgets.QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+
         # Ustalamy patern przeszukiwania
         self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
         self.sekt_num = int(os.environ["SEKT_NUM"])
@@ -28,8 +31,15 @@ class MyGeoGUI(QtWidgets.QWidget):
         with sa.orm.Session(SQL_ENGINE) as db_session:
             self.addr_uniq_words = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
-        with open(os.path.join(os.environ["PARENT_PATH"], os.environ['ADDRS_PATH']), 'rb') as file:
-            self.addr_arr = pickle.load(file)
+        addr_arr_path = os.path.join(os.environ["PARENT_PATH"], os.environ['ADDRS_PATH'])
+
+        try:
+            with open(addr_arr_path, 'rb') as file:
+                self.addr_arr = pickle.load(file)
+
+        except FileNotFoundError:
+            raise Exception("Pod podanym adresem: '" + addr_arr_path + "' nie ma pliku z macierzą adresów. Uzupełnij " +
+                            "ten plik i uruchom program ponownie!")
 
         # Ustalamy najważniejsze parametry okna mapy
         self.setWindowTitle("GeocoderPL")
@@ -227,14 +237,9 @@ class MyGeoGUI(QtWidgets.QWidget):
             # Ustalamy sektory dla wybranych wspołrzędnych
             szer, dlug = get_sector_codes(*c_coords)
 
-            # Dla ustalonego sektora dobieramy sektory, ktore go otaczaja, w ten sposob uzyskujac 9 sektorow dla
-            # kazdego punktu PRG, z których wybieramy unikalne kombinacje sektorow
-            jnd_sekts = [str(max(i, 0)).zfill(3) + "_" + str(min(j, self.sekt_num - 1)).zfill(3)
-                         for i in range(szer - 1, szer + 2) for j in range(dlug - 9, dlug + 10)]
-
             # Pobieramy wszystkie współrzędne dla danego sektora
             prg_cols = [PRG.prg_point_id, PRG.szerokosc, PRG.dlugosc]
-            prg_cond = sa.or_(PRG.kod_sektora == v for v in jnd_sekts)
+            prg_cond = sa.or_(PRG.kod_sektora == str(szer).zfill(3) + "_" + str(dlug).zfill(3))
 
             with sa.orm.Session(SQL_ENGINE) as db_session:
                 sekts_coords = pd.read_sql(db_session.query(*prg_cols).filter(prg_cond).statement,
@@ -250,8 +255,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                 prg_cond = PRG.prg_point_id == int(sekts_coords[eukl_dists.argmin(), 0])
 
                 with sa.orm.Session(SQL_ENGINE) as db_session:
-                    c_row = pd.read_sql(db_session.query(*prg_cols).filter(prg_cond).statement,
-                                        SQL_ENGINE).to_numpy().tolist()
+                    c_row = db_session.query(*prg_cols).filter(prg_cond).first()
 
                 self.change_sekts_order(np.asarray([szer, dlug]))
             else:
@@ -279,7 +283,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                                     control_scale=True, tiles=None)
 
             # Pobieramy kształt budynku dla danego punktu adresowego
-            bdot10k_bubd_id = c_row[-1]
+            bdot10k_bubd_id = struct.unpack('i', c_row[-1])[0]
             dod_info = ""
 
             if bdot10k_bubd_id > 0:
@@ -291,8 +295,7 @@ class MyGeoGUI(QtWidgets.QWidget):
                 bdot10k_cond = BDOT10K.bdot10k_bubd_id == bdot10k_bubd_id
 
                 with sa.orm.Session(SQL_ENGINE) as db_session:
-                    bubd_row = pd.read_sql(db_session.query(*bdot10k_cols).filter(bdot10k_cond).statement,
-                                           SQL_ENGINE).to_numpy()
+                    bubd_row = db_session.query(*bdot10k_cols).filter(bdot10k_cond).first()
 
                 c_geojson = json.loads(bubd_row[-1])
                 dod_info = bubd_row[-2]
