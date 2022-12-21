@@ -27,5 +27,5 @@ setuptools.setup(
                       'matplotlib~=3.5.0',
                       'setuptools>=52.0.0',
                       'sqlalchemy>=1.4.7',
-                      'python-dotenv>=0.19.2]'],
+                      'python-dotenv>=0.19.2'],
 )
