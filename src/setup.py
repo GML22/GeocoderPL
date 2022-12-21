@@ -1,6 +1,8 @@
-from setuptools import setup
+""" GeocoderPL setup file """
 
-setup(
+import setuptools
+
+setuptools.setup(
     name='geocoderpl',
     version='1.1',
     description='GeocoderPL is an application written in Python, which can be used for geocoding address points in ' +
@@ -12,7 +14,18 @@ setup(
     license="MIT License",
     keywords="search-engine geocoding numpy pyqt5 geospatial sqlite3 gdal-python superpermutation folium-maps",
     url="https://github.com/GML22/GeocoderPL",
-    packages=['geocoderpl'],
-    install_requires=['folium', 'numpy', 'pyqt5', 'unidecode', 'pyproj', 'lxml', 'geocoder', 'pandas', 'matplotlib',
-                      'setuptools', 'sqlalchemy', 'python-dotenv'],
+    python_requires='>=3.8',
+    packages=setuptools.find_packages(include=['geocoderpl']),
+    install_requires=['folium~=0.12.1',
+                      'numpy~=1.20.1',
+                      'pyqt5~=5.15.6',
+                      'unidecode~=1.3.2',
+                      'pyproj~=3.2.1',
+                      'lxml~=4.6.3',
+                      'geocoder~=1.38.1',
+                      'pandas~=1.2.4',
+                      'matplotlib~=3.5.0',
+                      'setuptools>=52.0.0',
+                      'sqlalchemy>=1.4.7',
+                      'python-dotenv>=0.19.2]']
 )
