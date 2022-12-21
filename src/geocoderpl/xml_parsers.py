@@ -1,3 +1,5 @@
+""" XML Parsers module """
+
 import pickle
 from abc import ABC, abstractmethod
 from io import BytesIO
@@ -7,6 +9,7 @@ from geo_utilities import *
 
 
 class XmlParser(ABC):
+    """ XML Parser class"""
     def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str) -> None:
         self.xml_path = xml_path
         self.tags_tuple = tags_tuple
@@ -14,18 +17,22 @@ class XmlParser(ABC):
 
     @property
     def get_xml_path(self) -> str:
+        """ Method that returs path of XML file """
         return f"{self.xml_path}"
 
     @abstractmethod
     def check_path(self) -> None:
+        """ Method that checks if path is valid """
         pass
 
     @abstractmethod
     def parse_xml(self) -> None:
+        """ Method that parses XML file """
         pass
 
 
 class BDOT10kDictsParser(XmlParser):
+    """ BDOT10kDictsParser class """
     def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str) -> None:
         super().__init__(xml_path, tags_tuple, event_type)
         self.bdot10k_dicts = {}
@@ -67,6 +74,7 @@ class BDOT10kDictsParser(XmlParser):
 
 
 class BDOT10kDataParser(XmlParser):
+    """ BDOT10kDataParser class """
     def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, dicts_tags: dict, tags_dict: dict) -> None:
         super().__init__(xml_path, tags_tuple, event_type)
         self.dicts_tags = dicts_tags
@@ -108,7 +116,7 @@ class BDOT10kDataParser(XmlParser):
                 bdot10k_rows = []
                 db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-                with sa.orm.Session(SQL_ENGINE) as db_session:
+                with Session(SQL_ENGINE) as db_session:
                     for i, c_row in enumerate(bdot10k_woj_rows):
                         bdot10k_rows.append(BDOT10K(*c_row))
 
@@ -212,6 +220,7 @@ def read_bdot10k_dicts() -> dict:
 
 
 class PRGDataParser(XmlParser):
+    """ PRGDataParser class """
     def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict) -> None:
         super().__init__(xml_path, tags_tuple, event_type)
         self.perms_dict = perms_dict
@@ -240,7 +249,7 @@ class PRGDataParser(XmlParser):
         sekt_addr_phrs = np.full(shape=(sekt_num, sekt_num), fill_value='', dtype=object)
 
         # Definiujemy sesję sql engine
-        with sa.orm.Session(SQL_ENGINE) as db_session:
+        with Session(SQL_ENGINE) as db_session:
             teryt_arr = pd.read_sql(db_session.query(TerytCodes.teryt_name, TerytCodes.teryt_code).statement,
                                     SQL_ENGINE).to_numpy()
             json_arr = pd.read_sql(db_session.query(RegJSON.json_teryt, RegJSON.json_shape).statement,
@@ -283,7 +292,7 @@ class PRGDataParser(XmlParser):
                     "wTrakcieBudowy": "w trakcie budowy"}
         rep_dict_keys = np.asarray(list(rep_dict.keys()))
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
+        with Session(SQL_ENGINE) as db_session:
             addr_phrs_uniq = db_session.query(UniqPhrs.uniq_phrs).all()[0][0]
 
         for _, curr_node in xml_contex:
@@ -324,7 +333,7 @@ class PRGDataParser(XmlParser):
             # Czyscimy przetworzone obiekty wezlow XML z pamieci
             clear_xml_node(curr_node)
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
+        with Session(SQL_ENGINE) as db_session:
             db_session.query(UniqPhrs).filter(UniqPhrs.uniq_id == 1).update({'uniq_phrs': addr_phrs_uniq})
             db_session.commit()
 
@@ -369,8 +378,9 @@ class PRGDataParser(XmlParser):
         prg_rows = []
         db_save_freq = int(os.environ['DB_SAVE_FREQ'])
 
-        with sa.orm.Session(SQL_ENGINE) as db_session:
+        with Session(SQL_ENGINE) as db_session:
             for i in range(pts_lst_len):
+                # noinspection PyTypeChecker
                 prg_rows.append(PRG(*points_arr[i, :-2], trans_crds[i, 0], trans_crds[i, 1], zrodlo_list[i],
                                     popraw_list[i], dists_list[i], bdot10k_ids[i], bdot10k_dist[i], sekt_kod_list[i],
                                     dod_opis_list[i]))

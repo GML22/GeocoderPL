@@ -4,6 +4,7 @@ from itertools import permutations as perms
 
 
 class SuperPerms(object):
+    """ Superpermutation class """
     def __init__(self, max_v: int) -> None:
         self.max_v = max_v
         self.all_inds = list(range(self.max_v))

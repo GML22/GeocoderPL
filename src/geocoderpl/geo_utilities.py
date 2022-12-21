@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 import sqlalchemy as sa
+from sqlalchemy.orm import Session
 from lxml import etree
 from matplotlib import path
 from osgeo import ogr
@@ -31,7 +32,7 @@ def create_logger(name: str) -> logging.Logger:
     """ Function that creates logging file """
 
     # Deklaracja najwazniejszych sciezek
-    parent_path = os.path.abspath(os.path.join(os.path.join(os.getcwd(), os.pardir), os.pardir))
+    parent_path = os.path.join(os.getcwd()[:os.getcwd().index("GeocoderPL")], "GeocoderPL")
 
     # Tworzymy plik loggera
     logging.basicConfig(filename=os.path.join(parent_path, "files\\geocoderpl_logs.log"), level=logging.DEBUG,
@@ -51,6 +52,7 @@ def time_decorator(func):
 
     @functools.wraps(func)
     def time_wrapper(*args, **kwargs):
+        """ Time wrapper """
         start_time = time.time()
         logger = logging.getLogger('root')
         logger.info("0. Rozpoczęcie wykonywania funkcji '" + func.__name__ + "'")
@@ -238,8 +240,8 @@ def csv_to_dict(c_path: str) -> dict:
 
 def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_arr: np.ndarray,
                           popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
-                          bdot10k_dist: np.ndarray, sekt_kod_list: list, dod_opis_list: list, addr_phrs_list: list,
-                          addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
+                          bdot10k_dist: np.ndarray, sekt_kod_list: np.ndarray, dod_opis_list: np.ndarray,
+                          addr_phrs_list: list, addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
                           wrld_pl_trans: osr.CoordinateTransformation, sekt_addr_phrs: np.ndarray) -> None:
     """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
      given PRG point"""
@@ -413,7 +415,7 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 
 
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
-                   dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
+                   dod_opis_list: np.ndarray, addr_phrs_list: list, addr_phrs_len: int,
                    wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str, sekts_arr: np.ndarray,
                    sekts_ids: np.ndarray, pow_bubd_all: np.ndarray, sekt_addr_phrs: np.ndarray) -> str:
     """ Function that returns id and distance of polygon closest to PRG point """
@@ -510,7 +512,7 @@ def get_sectors_params() -> tuple:
     return fin_tup
 
 
-def get_sector_codes(poly_centr_y: float, poly_centr_x: float) -> (int, int):
+def get_sector_codes(poly_centr_y: np.ndarray, poly_centr_x: np.ndarray) -> (int, int):
     """ Function that returns sector code for given coordinates """
 
     # Wyliczamy finalny kod sektora
@@ -526,7 +528,7 @@ def get_sector_codes(poly_centr_y: float, poly_centr_x: float) -> (int, int):
 
 def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray, top_ids: np.ndarray,
                       bdot10k_dist: np.ndarray, bdot10k_ids: np.ndarray, crds_inds: np.ndarray,
-                      pow_bubd_arr: np.ndarray, dod_opis_list: list, addr_phrs_list: list, addr_phrs_len: int,
+                      pow_bubd_arr: np.ndarray, dod_opis_list: np.ndarray, addr_phrs_list: list, addr_phrs_len: int,
                       c_addr_phrs_uniq: str, wrld_pl_trans: osr.CoordinateTransformation) -> (str, str):
     """ Function that finds closest buidling shape for given PRG point """
 
@@ -591,12 +593,14 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
 
 @overload
 def convert_coords(all_coords: list, in_system: str, out_system: str) -> pyproj.Transformer:
-    ...
+    """ Function that converts multiple coordinates between given systems """
+    pass
 
 
 @overload
 def convert_coords(all_coords: np.ndarray, in_system: str, out_system: str) -> pyproj.Transformer:
-    ...
+    """ Function that converts multiple coordinates between given systems """
+    pass
 
 
 def convert_coords(all_coords, in_system, out_system) -> pyproj.Transformer:
