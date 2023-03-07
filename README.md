@@ -58,7 +58,7 @@ GeocoderPL can be also used for finding address point by providing name of publi
 </p>
 
 <p align="left">
-Technical documentation of GeocoderPL is available at:
+The technical documentation of GeocoderPL is available at:
   
 - https://gml22.github.io/GeocoderPL
 - https://gml22.github.io/GeocoderPL/GeocoderPL%20-%20technical%20documentation.pdf
