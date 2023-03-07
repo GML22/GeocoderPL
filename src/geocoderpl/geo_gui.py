@@ -1,4 +1,4 @@
-""" Module that creates GUI window """
+""" Module that creates GUI window for GeocoderPL project """
 
 import io
 import json
@@ -17,12 +17,17 @@ from geo_utilities import *
 
 
 class MyGeoGUI(QtWidgets.QWidget):
-    """ Class creating GUI window """
+    """ Class that creates GUI window """
 
     def __init__(self) -> None:
-        super().__init__()
+        """
+        Method that creates objects from a class "MyGeoGUI"
+
+        :return: The method does not return any values
+        """
 
         # Ustalamy patern przeszukiwania
+        super().__init__()
         self.c_ptrn = re.compile(os.environ["RE_PATTERN"])
         self.sekt_num = int(os.environ["SEKT_NUM"])
         self.max_sekts = int(os.environ["MAX_SEKTS"])
@@ -147,7 +152,11 @@ class MyGeoGUI(QtWidgets.QWidget):
         self.map_layout.addWidget(web_view)
 
     def on_text_changed(self) -> None:
-        """ Method that implements event on text change in QLineEdit """
+        """
+        Method that implements event on text change in QLineEdit
+
+        :return: The method does not return any values
+        """
 
         # Dodajemy spacje (" ") na początku wyszukiwanej frazy żeby rozróżniać miasta typu: "INNOWROCLAW" i "WROCLAW"
         start_text = self.line_edit.text()
@@ -210,7 +219,12 @@ class MyGeoGUI(QtWidgets.QWidget):
             self.completer.popup().setStyleSheet("font-size: 18px; font-style: italic; color: gray;")
 
     def change_sekts_order(self, c_sekt: np.ndarray) -> None:
-        """ Method that changes order of sectors in adds_list """
+        """
+        Method that changes order of sectors in adds_list
+
+        :param c_sekt: Numpy array containing sectors numbers
+        :return: The method does not return any values
+        """
 
         if np.abs(c_sekt - self.c_sekt).max() > self.max_sekts:
             c_ids_spl = self.spiral_ids_arr + c_sekt
@@ -221,7 +235,11 @@ class MyGeoGUI(QtWidgets.QWidget):
             self.c_sekt = c_sekt
 
     def on_text_selected(self) -> None:
-        """ Methond that implements event on text select in QCompleter """
+        """
+        Methond that implements event on text select in QCompleter
+
+        :return: The method does not return any values
+        """
 
         c_row = list()
         c_text = self.line_edit.text()
@@ -346,7 +364,13 @@ class MyGeoGUI(QtWidgets.QWidget):
 
 
 def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
-    """ Function that returs indices of numpy array in spiral mode up to 'add_arr' shape starting from central point """
+    """
+    Function that returs indices of numpy array in spiral mode up to 'add_arr' shape starting from central point
+
+    :param addr_arr_shp: Shape of address array
+    :param spiral_ids_arr: Numpy array with indices arranged in spirals
+    :return: The method does not return any values
+    """
 
     # Definiujemy podstawowe parametry
     spiral_ids_arr[0, :] = [0, 0]
@@ -384,8 +408,16 @@ def get_addr_spiral_ids(addr_arr_shp: int, spiral_ids_arr: np.ndarray) -> None:
         add_list[c_ind] += c_sign[c_ind]
 
 
-def get_prg_ids(prg_num: int, c_addrs: str, curr_text: str, ids_row: list) -> bool:
-    """ Function that generates indices of points in PRG table matching current text """
+def get_prg_ids(prg_num: int, c_addrs: str, curr_text: str, ids_row: List[str]) -> bool:
+    """
+    Function that generates indices of points in PRG table matching current text
+
+    :param prg_num: PRG number
+    :param c_addrs: Current address
+    :param curr_text: Current text
+    :param ids_row: List of indices
+    :return: Flag indicating that current text was found in PRG table
+    """
 
     # Definiujemy podstawowe parametry
     c_start = 0

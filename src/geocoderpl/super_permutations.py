@@ -1,11 +1,20 @@
 """ Class that calculates indices providing superpermutations for lists of strings with length of maximum 5 elements """
 
 from itertools import permutations as perms
+from typing import List
 
 
 class SuperPerms(object):
-    """ Superpermutation class """
+    """ Class that defines superpermutation indices """
+
     def __init__(self, max_v: int) -> None:
+        """
+        Method that creates objects from a class "SuperPerms"
+
+        :param max_v: Number of words in superpermutation
+        :return: The method does not return any values
+        """
+
         self.max_v = max_v
         self.all_inds = list(range(self.max_v))
         self.base_vals = "".join([str(i) for i in self.all_inds])
@@ -13,8 +22,14 @@ class SuperPerms(object):
         self.c_perms = ["".join(prm) for prm in perms(self.base_vals, self.max_v) if "".join(prm) != self.base_vals]
         self.fin_super_perm_ids = self.get_super_perm()
 
-    def get_super_perm(self, p_vals: str = None, c_perms: list = None) -> list:
-        """ Function that finds final superpermutation (shortests list of indices) """
+    def get_super_perm(self, p_vals: str = None, c_perms: List[str] = None) -> List[int]:
+        """
+        Function that finds final superpermutation (shortests list of indices)
+
+        :param p_vals: Previous permutation values
+        :param c_perms: List of current permutation
+        :return: Final list of indices
+        """
 
         if p_vals is None:
             p_vals, c_perms = str(self.base_vals), self.c_perms

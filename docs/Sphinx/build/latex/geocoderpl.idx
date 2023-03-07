@@ -1,0 +1,78 @@
+\indexentry{module@\spxentry{module}!db\_classes@\spxentry{db\_classes}|hyperpage}{3}
+\indexentry{db\_classes@\spxentry{db\_classes}!module@\spxentry{module}|hyperpage}{3}
+\indexentry{BDOT10K (class in db\_classes)@\spxentry{BDOT10K}\spxextra{class in db\_classes}|hyperpage}{3}
+\indexentry{\_\_init\_\_() (db\_classes.BDOT10K method)@\spxentry{\_\_init\_\_()}\spxextra{db\_classes.BDOT10K method}|hyperpage}{3}
+\indexentry{\_\_repr\_\_() (db\_classes.BDOT10K method)@\spxentry{\_\_repr\_\_()}\spxextra{db\_classes.BDOT10K method}|hyperpage}{3}
+\indexentry{PRG (class in db\_classes)@\spxentry{PRG}\spxextra{class in db\_classes}|hyperpage}{3}
+\indexentry{\_\_init\_\_() (db\_classes.PRG method)@\spxentry{\_\_init\_\_()}\spxextra{db\_classes.PRG method}|hyperpage}{4}
+\indexentry{\_\_repr\_\_() (db\_classes.PRG method)@\spxentry{\_\_repr\_\_()}\spxextra{db\_classes.PRG method}|hyperpage}{4}
+\indexentry{RegJSON (class in db\_classes)@\spxentry{RegJSON}\spxextra{class in db\_classes}|hyperpage}{4}
+\indexentry{\_\_init\_\_() (db\_classes.RegJSON method)@\spxentry{\_\_init\_\_()}\spxextra{db\_classes.RegJSON method}|hyperpage}{5}
+\indexentry{\_\_repr\_\_() (db\_classes.RegJSON method)@\spxentry{\_\_repr\_\_()}\spxextra{db\_classes.RegJSON method}|hyperpage}{5}
+\indexentry{TerytCodes (class in db\_classes)@\spxentry{TerytCodes}\spxextra{class in db\_classes}|hyperpage}{5}
+\indexentry{\_\_init\_\_() (db\_classes.TerytCodes method)@\spxentry{\_\_init\_\_()}\spxextra{db\_classes.TerytCodes method}|hyperpage}{5}
+\indexentry{\_\_repr\_\_() (db\_classes.TerytCodes method)@\spxentry{\_\_repr\_\_()}\spxextra{db\_classes.TerytCodes method}|hyperpage}{5}
+\indexentry{UniqPhrs (class in db\_classes)@\spxentry{UniqPhrs}\spxextra{class in db\_classes}|hyperpage}{5}
+\indexentry{\_\_init\_\_() (db\_classes.UniqPhrs method)@\spxentry{\_\_init\_\_()}\spxextra{db\_classes.UniqPhrs method}|hyperpage}{5}
+\indexentry{\_\_repr\_\_() (db\_classes.UniqPhrs method)@\spxentry{\_\_repr\_\_()}\spxextra{db\_classes.UniqPhrs method}|hyperpage}{6}
+\indexentry{module@\spxentry{module}!xml\_parsers@\spxentry{xml\_parsers}|hyperpage}{7}
+\indexentry{xml\_parsers@\spxentry{xml\_parsers}!module@\spxentry{module}|hyperpage}{7}
+\indexentry{BDOT10kDataParser (class in xml\_parsers)@\spxentry{BDOT10kDataParser}\spxextra{class in xml\_parsers}|hyperpage}{7}
+\indexentry{\_\_init\_\_() (xml\_parsers.BDOT10kDataParser method)@\spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.BDOT10kDataParser method}|hyperpage}{7}
+\indexentry{check\_path() (xml\_parsers.BDOT10kDataParser method)@\spxentry{check\_path()}\spxextra{xml\_parsers.BDOT10kDataParser method}|hyperpage}{7}
+\indexentry{parse\_bdot10k\_xml() (xml\_parsers.BDOT10kDataParser method)@\spxentry{parse\_bdot10k\_xml()}\spxextra{xml\_parsers.BDOT10kDataParser method}|hyperpage}{7}
+\indexentry{parse\_xml() (xml\_parsers.BDOT10kDataParser method)@\spxentry{parse\_xml()}\spxextra{xml\_parsers.BDOT10kDataParser method}|hyperpage}{7}
+\indexentry{BDOT10kDictsParser (class in xml\_parsers)@\spxentry{BDOT10kDictsParser}\spxextra{class in xml\_parsers}|hyperpage}{8}
+\indexentry{\_\_init\_\_() (xml\_parsers.BDOT10kDictsParser method)@\spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.BDOT10kDictsParser method}|hyperpage}{8}
+\indexentry{check\_path() (xml\_parsers.BDOT10kDictsParser method)@\spxentry{check\_path()}\spxextra{xml\_parsers.BDOT10kDictsParser method}|hyperpage}{8}
+\indexentry{get\_bdot10k\_dicts() (xml\_parsers.BDOT10kDictsParser method)@\spxentry{get\_bdot10k\_dicts()}\spxextra{xml\_parsers.BDOT10kDictsParser method}|hyperpage}{8}
+\indexentry{parse\_xml() (xml\_parsers.BDOT10kDictsParser method)@\spxentry{parse\_xml()}\spxextra{xml\_parsers.BDOT10kDictsParser method}|hyperpage}{8}
+\indexentry{PRGDataParser (class in xml\_parsers)@\spxentry{PRGDataParser}\spxextra{class in xml\_parsers}|hyperpage}{8}
+\indexentry{\_\_init\_\_() (xml\_parsers.PRGDataParser method)@\spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.PRGDataParser method}|hyperpage}{8}
+\indexentry{check\_path() (xml\_parsers.PRGDataParser method)@\spxentry{check\_path()}\spxextra{xml\_parsers.PRGDataParser method}|hyperpage}{9}
+\indexentry{check\_prg\_pts\_add\_db() (xml\_parsers.PRGDataParser method)@\spxentry{check\_prg\_pts\_add\_db()}\spxextra{xml\_parsers.PRGDataParser method}|hyperpage}{9}
+\indexentry{create\_points\_list() (xml\_parsers.PRGDataParser method)@\spxentry{create\_points\_list()}\spxextra{xml\_parsers.PRGDataParser method}|hyperpage}{9}
+\indexentry{parse\_xml() (xml\_parsers.PRGDataParser method)@\spxentry{parse\_xml()}\spxextra{xml\_parsers.PRGDataParser method}|hyperpage}{9}
+\indexentry{XmlParser (class in xml\_parsers)@\spxentry{XmlParser}\spxextra{class in xml\_parsers}|hyperpage}{9}
+\indexentry{\_\_init\_\_() (xml\_parsers.XmlParser method)@\spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.XmlParser method}|hyperpage}{10}
+\indexentry{\_\_weakref\_\_ (xml\_parsers.XmlParser attribute)@\spxentry{\_\_weakref\_\_}\spxextra{xml\_parsers.XmlParser attribute}|hyperpage}{10}
+\indexentry{check\_path() (xml\_parsers.XmlParser method)@\spxentry{check\_path()}\spxextra{xml\_parsers.XmlParser method}|hyperpage}{10}
+\indexentry{get\_xml\_path (xml\_parsers.XmlParser property)@\spxentry{get\_xml\_path}\spxextra{xml\_parsers.XmlParser property}|hyperpage}{10}
+\indexentry{parse\_xml() (xml\_parsers.XmlParser method)@\spxentry{parse\_xml()}\spxextra{xml\_parsers.XmlParser method}|hyperpage}{10}
+\indexentry{read\_bdot10k\_dicts() (in module xml\_parsers)@\spxentry{read\_bdot10k\_dicts()}\spxextra{in module xml\_parsers}|hyperpage}{10}
+\indexentry{module@\spxentry{module}!super\_permutations@\spxentry{super\_permutations}|hyperpage}{11}
+\indexentry{super\_permutations@\spxentry{super\_permutations}!module@\spxentry{module}|hyperpage}{11}
+\indexentry{SuperPerms (class in super\_permutations)@\spxentry{SuperPerms}\spxextra{class in super\_permutations}|hyperpage}{11}
+\indexentry{\_\_init\_\_() (super\_permutations.SuperPerms method)@\spxentry{\_\_init\_\_()}\spxextra{super\_permutations.SuperPerms method}|hyperpage}{11}
+\indexentry{\_\_weakref\_\_ (super\_permutations.SuperPerms attribute)@\spxentry{\_\_weakref\_\_}\spxextra{super\_permutations.SuperPerms attribute}|hyperpage}{11}
+\indexentry{get\_super\_perm() (super\_permutations.SuperPerms method)@\spxentry{get\_super\_perm()}\spxextra{super\_permutations.SuperPerms method}|hyperpage}{11}
+\indexentry{module@\spxentry{module}!geo\_utilities@\spxentry{geo\_utilities}|hyperpage}{13}
+\indexentry{geo\_utilities@\spxentry{geo\_utilities}!module@\spxentry{module}|hyperpage}{13}
+\indexentry{calc\_pnt\_dist() (in module geo\_utilities)@\spxentry{calc\_pnt\_dist()}\spxextra{in module geo\_utilities}|hyperpage}{13}
+\indexentry{clear\_xml\_node() (in module geo\_utilities)@\spxentry{clear\_xml\_node()}\spxextra{in module geo\_utilities}|hyperpage}{13}
+\indexentry{convert\_coords() (in module geo\_utilities)@\spxentry{convert\_coords()}\spxextra{in module geo\_utilities}|hyperpage}{13}
+\indexentry{create\_coords\_transform() (in module geo\_utilities)@\spxentry{create\_coords\_transform()}\spxextra{in module geo\_utilities}|hyperpage}{14}
+\indexentry{create\_logger() (in module geo\_utilities)@\spxentry{create\_logger()}\spxextra{in module geo\_utilities}|hyperpage}{14}
+\indexentry{csv\_to\_dict() (in module geo\_utilities)@\spxentry{csv\_to\_dict()}\spxextra{in module geo\_utilities}|hyperpage}{14}
+\indexentry{fill\_regs\_tables() (in module geo\_utilities)@\spxentry{fill\_regs\_tables()}\spxextra{in module geo\_utilities}|hyperpage}{14}
+\indexentry{gen\_fin\_bubds\_ids() (in module geo\_utilities)@\spxentry{gen\_fin\_bubds\_ids()}\spxextra{in module geo\_utilities}|hyperpage}{14}
+\indexentry{get\_bdot10k\_id() (in module geo\_utilities)@\spxentry{get\_bdot10k\_id()}\spxextra{in module geo\_utilities}|hyperpage}{15}
+\indexentry{get\_corr\_reg\_name() (in module geo\_utilities)@\spxentry{get\_corr\_reg\_name()}\spxextra{in module geo\_utilities}|hyperpage}{16}
+\indexentry{get\_osm\_coords() (in module geo\_utilities)@\spxentry{get\_osm\_coords()}\spxextra{in module geo\_utilities}|hyperpage}{16}
+\indexentry{get\_region\_shapes() (in module geo\_utilities)@\spxentry{get\_region\_shapes()}\spxextra{in module geo\_utilities}|hyperpage}{16}
+\indexentry{get\_sector\_codes() (in module geo\_utilities)@\spxentry{get\_sector\_codes()}\spxextra{in module geo\_utilities}|hyperpage}{17}
+\indexentry{get\_sectors\_params() (in module geo\_utilities)@\spxentry{get\_sectors\_params()}\spxextra{in module geo\_utilities}|hyperpage}{17}
+\indexentry{get\_super\_permut\_dict() (in module geo\_utilities)@\spxentry{get\_super\_permut\_dict()}\spxextra{in module geo\_utilities}|hyperpage}{17}
+\indexentry{points\_in\_shape() (in module geo\_utilities)@\spxentry{points\_in\_shape()}\spxextra{in module geo\_utilities}|hyperpage}{17}
+\indexentry{points\_inside\_polygon() (in module geo\_utilities)@\spxentry{points\_inside\_polygon()}\spxextra{in module geo\_utilities}|hyperpage}{18}
+\indexentry{reduce\_coordinates\_precision() (in module geo\_utilities)@\spxentry{reduce\_coordinates\_precision()}\spxextra{in module geo\_utilities}|hyperpage}{18}
+\indexentry{time\_decorator() (in module geo\_utilities)@\spxentry{time\_decorator()}\spxextra{in module geo\_utilities}|hyperpage}{19}
+\indexentry{module@\spxentry{module}!geo\_gui@\spxentry{geo\_gui}|hyperpage}{21}
+\indexentry{geo\_gui@\spxentry{geo\_gui}!module@\spxentry{module}|hyperpage}{21}
+\indexentry{MyGeoGUI (class in geo\_gui)@\spxentry{MyGeoGUI}\spxextra{class in geo\_gui}|hyperpage}{21}
+\indexentry{\_\_init\_\_() (geo\_gui.MyGeoGUI method)@\spxentry{\_\_init\_\_()}\spxextra{geo\_gui.MyGeoGUI method}|hyperpage}{21}
+\indexentry{change\_sekts\_order() (geo\_gui.MyGeoGUI method)@\spxentry{change\_sekts\_order()}\spxextra{geo\_gui.MyGeoGUI method}|hyperpage}{21}
+\indexentry{on\_text\_changed() (geo\_gui.MyGeoGUI method)@\spxentry{on\_text\_changed()}\spxextra{geo\_gui.MyGeoGUI method}|hyperpage}{21}
+\indexentry{on\_text\_selected() (geo\_gui.MyGeoGUI method)@\spxentry{on\_text\_selected()}\spxextra{geo\_gui.MyGeoGUI method}|hyperpage}{21}
+\indexentry{get\_addr\_spiral\_ids() (in module geo\_gui)@\spxentry{get\_addr\_spiral\_ids()}\spxextra{in module geo\_gui}|hyperpage}{21}
+\indexentry{get\_prg\_ids() (in module geo\_gui)@\spxentry{get\_prg\_ids()}\spxextra{in module geo\_gui}|hyperpage}{22}

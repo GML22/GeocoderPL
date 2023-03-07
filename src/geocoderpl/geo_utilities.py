@@ -1,4 +1,4 @@
-""" Module that collects variety utility functions for geospatial programming """
+""" Module that collects variety utility functions for GeocoderPL project """
 
 import functools
 import logging
@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import pyproj
 import sqlalchemy as sa
+import matplotlib
 from sqlalchemy.orm import Session
 from lxml import etree
 from matplotlib import path
@@ -26,10 +27,16 @@ from unidecode import unidecode
 
 from db_classes import BDOT10K, UniqPhrs, TerytCodes, RegJSON, SQL_ENGINE
 from super_permutations import SuperPerms
+from typing import Callable, Dict, List, Hashable, Tuple, Union
 
 
 def create_logger(name: str) -> logging.Logger:
-    """ Function that creates logging file """
+    """
+    Function that creates logging file
+
+    :param name: Name of logger
+    :return: Logger object
+    """
 
     # Deklaracja najwazniejszych sciezek
     parent_path = os.path.join(os.getcwd()[:os.getcwd().index("GeocoderPL")], "GeocoderPL")
@@ -47,12 +54,24 @@ def create_logger(name: str) -> logging.Logger:
     return logger
 
 
-def time_decorator(func):
-    """ Decorator that logs information about time of function execution """
+def time_decorator(func) -> Callable:
+    """
+    Decorator that logs information about time of function execution
+
+    :param func: Function call that should be wrapped
+    :return: Time wrapper function call
+    """
 
     @functools.wraps(func)
     def time_wrapper(*args, **kwargs):
-        """ Time wrapper """
+        """
+        Wrapper that calculates function execution time
+
+        :param args: First set of arguments of wrapped function
+        :param kwargs: Second set of arguments of wrapped function
+        :return: Values returned by wrapped function
+        """
+
         start_time = time.time()
         logger = logging.getLogger('root')
         logger.info("0. Rozpoczęcie wykonywania funkcji '" + func.__name__ + "'")
@@ -69,7 +88,11 @@ def time_decorator(func):
 
 @time_decorator
 def fill_regs_tables() -> None:
-    """ Function that fills tables with parameters of regions shapes """
+    """
+    Function that fills tables with parameters of regions shapes
+
+    :return: The method does not return any values
+    """
 
     # Podstawowe parametry
     regs_shps = get_region_shapes()
@@ -136,8 +159,12 @@ def fill_regs_tables() -> None:
 
 
 @time_decorator
-def get_region_shapes() -> OrderedDict:
-    """ Function that creates shapes for each regions """
+def get_region_shapes() -> Dict[str, ogr.Geometry]:
+    """
+    Function that creates shapes for each regions
+
+    :return: Ordered dictionary containing shapes of regions
+    """
 
     # Scieżka do pliku z jednostkami administracyjnymi
     ja_path = os.path.join(os.environ["PARENT_PATH"], os.environ['JA_PATH'])
@@ -156,9 +183,16 @@ def get_region_shapes() -> OrderedDict:
     return regs_shps
 
 
-def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: bool = False) -> \
-        osr.CoordinateTransformation:
-    """ Function that creates object that transforms geographical coordinates """
+def create_coords_transform(in_epsg: int, out_epsg: int,
+                            change_map_strateg: bool = False) -> osr.CoordinateTransformation:
+    """
+    Function that creates object that transforms geographical coordinates
+
+    :param in_epsg: Number of input EPSG coordinates system
+    :param out_epsg: Number of output EPSG coordinates system
+    :param change_map_strateg: Flag indicating if map strategy should be changed
+    :return: Coordinates transformation that transforms spatial references from input EPSG system to output EPSG system
+    """
 
     # Zmieniamy system koordynatow dla gmin
     in_sp_ref = osr.SpatialReference()
@@ -179,7 +213,13 @@ def create_coords_transform(in_epsg: int, out_epsg: int, change_map_strateg: boo
 
 
 def clear_xml_node(curr_node: etree.Element) -> None:
-    """ Function that clears unnecessary XML nodes from RAM memory """
+    """
+    Function that clears unnecessary XML nodes from RAM memory
+
+    :param curr_node: Current XML node
+    :return: The method does not return any values
+    """
+
     curr_node.clear()
 
     for ancestor in curr_node.xpath('ancestor-or-self::*'):
@@ -188,15 +228,21 @@ def clear_xml_node(curr_node: etree.Element) -> None:
 
 
 def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
-    """ Function that reduce decimal precision of coordinates in GeoJSON file
-        0 decimal places is a precision of about 111 km
-        1 decimal place is a precsion of about 11 km
-        2 decimal places is a precison of about 1.1 km
-        3 decimal places is a precison of about 111 m
-        4 decimal places is a precison of about 11 m
-        5 decimal places is a precison of about 1.1 m
-        6 decimal places is a precison of about 11 cm
-        7 decimal places is a precison of about 1.1 cm """
+    """
+    Function that reduce decimal precision of coordinates in GeoJSON file:
+        - 0 decimal places is a precision of about 111 km
+        - 1 decimal place is a precsion of about 11 km
+        - 2 decimal places is a precison of about 1.1 km
+        - 3 decimal places is a precison of about 111 m
+        - 4 decimal places is a precison of about 11 m
+        - 5 decimal places is a precison of about 1.1 m
+        - 6 decimal places is a precison of about 11 cm
+        - 7 decimal places is a precison of about 1.1 cm
+
+    :param geojson_poly: GeoJSON string representing polynomial shape
+    :param precision: The precision to which the accuracy of the coordinates should be reduced
+    :return: Final GeoJSON string with reduce precision
+    """
 
     # Tworzymy pattern wyszukujacy liczby w ciagu znakow
     num_patt = r'[-+]?\d*\.\d+|\d+'
@@ -220,15 +266,24 @@ def reduce_coordinates_precision(geojson_poly: str, precision: int) -> str:
     return fin_geojson
 
 
-def get_super_permut_dict(max_len: int) -> dict:
-    """ Function that creates indices providing superpermutations for lists of strings with length of maximum 5
-    elements """
+def get_super_permut_dict(max_len: int) -> Dict[int, List[int]]:
+    """
+    Function that creates indices providing superpermutations for lists of strings with length of maximum 5 elements
+
+    :param max_len: Maximum length of superpermutation
+    :return: Dictionary containing superpermutation indices
+    """
 
     return {i: SuperPerms(i).fin_super_perm_ids for i in range(1, max_len + 1)}
 
 
-def csv_to_dict(c_path: str) -> dict:
-    """ Function that imports CSV file and creates dictionairy from first two columns of that file """
+def csv_to_dict(c_path: str) -> Dict[str, str]:
+    """
+    Function that imports CSV file and creates dictionairy from first two columns of that file
+
+    :param c_path: Path of the CSV file that should be read to dictionary
+    :return: Dictionary read from CSV file
+    """
 
     try:
         x_kod = pd.read_csv(c_path, sep=";", dtype=str, engine='c', header=None, low_memory=False).values
@@ -238,13 +293,36 @@ def csv_to_dict(c_path: str) -> dict:
     return {row[0]: row[1] for row in x_kod}
 
 
-def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.ndarray, points_arr: np.ndarray,
-                          popraw_list: list, dists_list: list, zrodlo_list: list, bdot10k_ids: np.ndarray,
-                          bdot10k_dist: np.ndarray, sekt_kod_list: np.ndarray, dod_opis_list: np.ndarray,
-                          addr_phrs_list: list, addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
+def points_inside_polygon(grouped_regions: Dict[Hashable, np.ndarray], woj_name: str, trans_crds: np.ndarray,
+                          points_arr: np.ndarray, popraw_list: List[int], dists_list: List[float],
+                          zrodlo_list: List[str], bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
+                          sekt_kod_list: np.ndarray, dod_opis_list: np.ndarray, addr_phrs_list: List[str],
+                          addr_phrs_len: int, teryt_arr: np.ndarray, json_arr: np.ndarray,
                           wrld_pl_trans: osr.CoordinateTransformation, sekt_addr_phrs: np.ndarray) -> None:
-    """ Function that checks if given points are inside polygon of their districts and finds closest building shape for
-     given PRG point"""
+    """
+    Function that checks if given points are inside polygon of their districts and finds closest building shape for
+    given PRG point
+
+    :param grouped_regions: Regions dictionary grouped by district and municipality name
+    :param woj_name: Name of the province
+    :param trans_crds: Numpy array containing transformed coordinates of address points
+    :param points_arr: Numpy array containing coordinates of address points
+    :param popraw_list: List containing flags indicating if a given address point is valid
+    :param dists_list: List cointaining distance of a given address point to its municipility border
+    :param zrodlo_list: List containing names of the source of a given address point
+    :param bdot10k_ids: Numpy array containing IDs of buildings from BDOT10k database
+    :param bdot10k_dist: Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+                         database
+    :param sekt_kod_list: Numpy array containing sector codes of address points
+    :param dod_opis_list: Numpy array containing additional descriptions of an address point
+    :param addr_phrs_list: List containing address points phrases
+    :param addr_phrs_len: Length of address points phrases list
+    :param teryt_arr: Numpy array containing TERYT codes od address points
+    :param json_arr: Numpy array containing GeoJSON shapes
+    :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180
+    :param sekt_addr_phrs: Numpy array containing sectors of address points
+    :return: The method does not return any values
+    """
 
     for regions, coords_inds in grouped_regions.items():
         pow_name, gmin_name = regions
@@ -322,7 +400,13 @@ def points_inside_polygon(grouped_regions: dict, woj_name: str, trans_crds: np.n
 
 @lru_cache
 def get_corr_reg_name(curr_name: str) -> str:
-    """ Function that corrects wrong regions names """
+    """
+    Function that corrects wrong regions names
+
+    :param curr_name: Current region name
+    :return: Corrected region name
+    """
+
     # Specjalny wyjatek, bo w danych PRG jest powiat "JELENIOGORSKI", a od 2021 roku powiat ten nazywa sie "KARKONOSKI",
     # wiec trzeba to poprawic
     if curr_name == "JELENIOGORSKI":
@@ -341,21 +425,42 @@ def get_corr_reg_name(curr_name: str) -> str:
         return curr_name
 
 
-def points_in_shape(c_paths: list, curr_coords: np.ndarray) -> np.ndarray:
-    """ Checking if point lies inside shape of district """
+def points_in_shape(c_paths: List[matplotlib.path.Path], curr_coords: np.ndarray) -> np.ndarray:
+    """
+    Checking if point lies inside shape of district
+
+    :param c_paths: List containing matplotlib paths of regions
+    :param curr_coords: Numpy array containing all address points in region
+    :return: Numpy array of flags indicating if given address point is inside given region shape
+    """
 
     points_flags = np.zeros(len(curr_coords), dtype=bool)
 
     for pth in c_paths:
+        # noinspection PyTypeChecker
         points_flags = np.logical_or(points_flags, pth.contains_points(curr_coords))
 
     return points_flags
 
 
-def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_list: list, c_ind: int, coord1: float,
-                   coord2: float, dists_list: list, zrodlo_list: list,
+def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: List[matplotlib.path.Path], popraw_list: List[int],
+                   c_ind: int, coord1: float, coord2: float, dists_list:  List[float], zrodlo_list: List[str],
                    wrld_pl_trans: osr.CoordinateTransformation) -> None:
-    """ Function that returns OSM coordinates of address point or distance from the district shapefile """
+    """
+    Function that returns OSM coordinates of address point or distance from the district shapefile
+
+    :param address: Address string
+    :param outside_pts: Numpy array of address points identified as beeing outsiode of given region border
+    :param c_paths: List containing matplotlib paths of regions
+    :param popraw_list: List containing flags indicating if a given address point is valid
+    :param c_ind: Current index of a given address point
+    :param coord1: Longitude of a given address point
+    :param coord2: Latitude of a given address point
+    :param dists_list: List cointaining distance of a given address point to its municipility border
+    :param zrodlo_list: List containing names of the source of a given address point
+    :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180
+    :return: The method does not return any values
+    """
 
     status_code = 500
     geo_addr = None
@@ -394,8 +499,17 @@ def get_osm_coords(address: str, outside_pts: np.ndarray, c_paths: list, popraw_
             dists_list[c_ind] = max_dist
 
 
-def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.CoordinateTransformation) -> float:
-    """ Function that calculates distances of point to given polygon """
+def calc_pnt_dist(c_paths: List[matplotlib.path.Path], x_val: float, y_val: float,
+                  wrld_pl_trans: osr.CoordinateTransformation) -> float:
+    """
+    Function that calculates distances of point to given polygon
+
+    :param c_paths: List containing matplotlib paths of regions
+    :param x_val: Longitude of a given address point
+    :param y_val: Latitude of a given address point
+    :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180
+    :return: Distance from a givent address point do closest polygon
+    """
 
     # Zaczynamy od dużej liczby
     min_dist = sys.maxsize
@@ -415,10 +529,28 @@ def calc_pnt_dist(c_paths: list, x_val: float, y_val: float, wrld_pl_trans: osr.
 
 
 def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids: np.ndarray, bdot10k_dist: np.ndarray,
-                   dod_opis_list: np.ndarray, addr_phrs_list: list, addr_phrs_len: int,
+                   dod_opis_list: np.ndarray, addr_phrs_list: List[str], addr_phrs_len: int,
                    wrld_pl_trans: osr.CoordinateTransformation, addr_phrs_uniq: str, sekts_arr: np.ndarray,
                    sekts_ids: np.ndarray, pow_bubd_all: np.ndarray, sekt_addr_phrs: np.ndarray) -> str:
-    """ Function that returns id and distance of polygon closest to PRG point """
+    """
+    Function that returns id and distance of polygon closest to PRG point
+
+    :param curr_coords: Numpy array containing all address points in region
+    :param coords_inds: Numpy array containng BDOT10k buildings indices
+    :param bdot10k_ids: Numpy array containing IDs of buildings from BDOT10k database
+    :param bdot10k_dist: Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+                         database
+    :param dod_opis_list: Numpy array containing additional descriptions of an address point
+    :param addr_phrs_list: List containing address points phrases
+    :param addr_phrs_len: Length of address points phrases list
+    :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180
+    :param addr_phrs_uniq: Unique addresses string
+    :param sekts_arr: Numpy array contaning sectors of address points
+    :param sekts_ids: Numpy array containing indices of sectors
+    :param pow_bubd_all: Numpy array containing information about all BDOT10k buildings in current region
+    :param sekt_addr_phrs: Numpy array containing sectors of address points
+    :return: Unique addresses string
+    """
 
     # Wybieramy z tablicy BDOT10K_TABLE wszystkie budynki z zadanych sektorow
     sekt_szer, sekt_dl, plnd_min_szer, plnd_min_dl = get_sectors_params()
@@ -497,8 +629,16 @@ def get_bdot10k_id(curr_coords: np.ndarray, coords_inds: np.ndarray, bdot10k_ids
 
 
 @lru_cache
-def get_sectors_params() -> tuple:
-    """ Calculating basic parameters of sectors """
+def get_sectors_params() -> Tuple[float, float, int, int]:
+    """
+    Funtion that calculates basic parameters of sectors
+
+    :return:
+        - sekt_szer (:py:class:`float`) - width of sectors
+        - sekt_dl (:py:class:`float`) - height of sectors
+        - plnd_min_szer (:py:class:`int`) - min latitude of Poland
+        - plnd_min_dl (:py:class:`int`) - min longitude of Poland
+    """
 
     # Ustalamy podstawowe parametry
     sekt_num = int(os.environ["SEKT_NUM"])
@@ -512,8 +652,16 @@ def get_sectors_params() -> tuple:
     return fin_tup
 
 
-def get_sector_codes(poly_centr_y: np.ndarray, poly_centr_x: np.ndarray) -> (int, int):
-    """ Function that returns sector code for given coordinates """
+def get_sector_codes(poly_centr_y: np.ndarray, poly_centr_x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Function that returns sector code for given coordinates
+
+    :param poly_centr_y: Numpy array containing latitudes of address points
+    :param poly_centr_x: Numpy array containing longitudes of address points
+    :return:
+        - c_sekt_szer (:py:class:`np.ndarray`) - rows indices of sectors for given coordinates
+        - c_sekt_dl (:py:class:`np.ndarray`) - columns indices of sectors for given coordinates
+    """
 
     # Wyliczamy finalny kod sektora
     sek_tup = get_sectors_params()
@@ -528,9 +676,30 @@ def get_sector_codes(poly_centr_y: np.ndarray, poly_centr_x: np.ndarray) -> (int
 
 def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray, top_ids: np.ndarray,
                       bdot10k_dist: np.ndarray, bdot10k_ids: np.ndarray, crds_inds: np.ndarray,
-                      pow_bubd_arr: np.ndarray, dod_opis_list: np.ndarray, addr_phrs_list: list, addr_phrs_len: int,
-                      c_addr_phrs_uniq: str, wrld_pl_trans: osr.CoordinateTransformation) -> (str, str):
-    """ Function that finds closest buidling shape for given PRG point """
+                      pow_bubd_arr: np.ndarray, dod_opis_list: np.ndarray, addr_phrs_list: List[str],
+                      addr_phrs_len: int, c_addr_phrs_uniq: str,
+                      wrld_pl_trans: osr.CoordinateTransformation) -> Tuple[str, str]:
+    """
+    Function that finds closest buidling shape for given PRG point
+
+    :param c_coords: Numpy array containing all address points in given sector
+    :param c_len: Numper of current address points
+    :param top_geojson: Numpy array containing top "n" BDOT10k buildinigs located closest to given address point
+    :param top_ids: Numpy array containing IDs of top "n" BDOT10k buildinigs located closest to given address point
+    :param bdot10k_dist: Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+                         database
+    :param bdot10k_ids: Numpy array containing IDs of buildings from BDOT10k database
+    :param crds_inds: Numpy array containng BDOT10k buildings indices for given sector
+    :param pow_bubd_arr: Numpy array containing information about all BDOT10k buildings in current sector
+    :param dod_opis_list: Numpy array containing additional descriptions of an address point
+    :param addr_phrs_list: List containing address points phrases
+    :param addr_phrs_len: Length of address points phrases list
+    :param c_addr_phrs_uniq: Current unique addresses string
+    :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180
+    :return:
+        - c_adr_phr (:py:class:`str`) - current addresses phrase
+        - c_addr_phrs_uniq (:py:class:`str`) - current unique addresses string
+    """
 
     c_adr_phr = ""
 
@@ -592,19 +761,45 @@ def gen_fin_bubds_ids(c_coords: np.ndarray, c_len: int, top_geojson: np.ndarray,
 
 
 @overload
-def convert_coords(all_coords: list, in_system: str, out_system: str) -> pyproj.Transformer:
-    """ Function that converts multiple coordinates between given systems """
+def convert_coords(all_coords: List[List[float]], in_system: str, out_system: str) -> pyproj.Transformer:
+    """
+    Function that converts multiple coordinates between given systems
+
+    :param all_coords: List of coordinates that should be transformed from one EPSG coordinates system to the other
+    :param in_system: Input coordinates system (EPSG number)
+    :param out_system: Output coordinates system (EPSG number)
+    :return: Transformation object that converts coordinates from one EPSG system (in_system) to the other (out_system)
+    """
+
     pass
 
 
 @overload
 def convert_coords(all_coords: np.ndarray, in_system: str, out_system: str) -> pyproj.Transformer:
-    """ Function that converts multiple coordinates between given systems """
+    """
+    Function that converts multiple coordinates between given systems
+
+    :param all_coords: Numpy array contining coordinates that should be transformed from one EPSG coordinates system to
+                       the other
+    :param in_system: Input coordinates system (EPSG string number)
+    :param out_system: Output coordinates system (EPSG string number)
+    :return: Transformation object that converts coordinates from one EPSG system (in_system) to the other (out_system)
+    """
+
     pass
 
 
-def convert_coords(all_coords, in_system, out_system) -> pyproj.Transformer:
-    """ Function that converts multiple coordinates between given systems """
+def convert_coords(all_coords: Union[np.ndarray, List[List[float]]], in_system: str,
+                   out_system: str) -> pyproj.Transformer:
+    """
+    Function that converts multiple coordinates between given systems
+
+    :param all_coords: Numpy array / list contining coordinates that should be transformed from one EPSG coordinates
+                       system to the other
+    :param in_system: Input coordinates system (EPSG string number)
+    :param out_system: Output coordinates system (EPSG string number)
+    :return: Transformation object that converts coordinates from one EPSG system (in_system) to the other (out_system)
+    """
 
     in_proj = Proj('epsg:' + in_system)
     out_proj = Proj('epsg:' + out_system)

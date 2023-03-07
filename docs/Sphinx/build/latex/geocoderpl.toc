@@ -1,0 +1,9 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}db\_classes.py}{3}{chapter.1}%
+\contentsline {chapter}{\numberline {2}xml\_parsers.py}{7}{chapter.2}%
+\contentsline {chapter}{\numberline {3}super\_permutations.py}{11}{chapter.3}%
+\contentsline {chapter}{\numberline {4}geo\_utilities.py}{13}{chapter.4}%
+\contentsline {chapter}{\numberline {5}geo\_gui.py}{21}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Indices and tables}{23}{chapter.6}%
+\contentsline {chapter}{Python Module Index}{25}{section*.71}%
+\contentsline {chapter}{Index}{27}{section*.72}%

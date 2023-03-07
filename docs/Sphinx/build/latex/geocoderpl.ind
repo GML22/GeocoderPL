@@ -1,0 +1,139 @@
+\begin{sphinxtheindex}
+\let\bigletter\sphinxstyleindexlettergroup
+\let\spxpagem \sphinxstyleindexpagemain
+\let\spxentry \sphinxstyleindexentry
+\let\spxextra \sphinxstyleindexextra
+
+  \bigletter {\sphinxsymbolsname}
+  \item \spxentry{\_\_init\_\_()}\spxextra{db\_classes.BDOT10K method}, \hyperpage{3}
+  \item \spxentry{\_\_init\_\_()}\spxextra{db\_classes.PRG method}, \hyperpage{4}
+  \item \spxentry{\_\_init\_\_()}\spxextra{db\_classes.RegJSON method}, \hyperpage{5}
+  \item \spxentry{\_\_init\_\_()}\spxextra{db\_classes.TerytCodes method}, \hyperpage{5}
+  \item \spxentry{\_\_init\_\_()}\spxextra{db\_classes.UniqPhrs method}, \hyperpage{5}
+  \item \spxentry{\_\_init\_\_()}\spxextra{geo\_gui.MyGeoGUI method}, \hyperpage{21}
+  \item \spxentry{\_\_init\_\_()}\spxextra{super\_permutations.SuperPerms method}, \hyperpage{11}
+  \item \spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.BDOT10kDataParser method}, \hyperpage{7}
+  \item \spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.BDOT10kDictsParser method}, \hyperpage{8}
+  \item \spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.PRGDataParser method}, \hyperpage{8}
+  \item \spxentry{\_\_init\_\_()}\spxextra{xml\_parsers.XmlParser method}, \hyperpage{10}
+  \item \spxentry{\_\_repr\_\_()}\spxextra{db\_classes.BDOT10K method}, \hyperpage{3}
+  \item \spxentry{\_\_repr\_\_()}\spxextra{db\_classes.PRG method}, \hyperpage{4}
+  \item \spxentry{\_\_repr\_\_()}\spxextra{db\_classes.RegJSON method}, \hyperpage{5}
+  \item \spxentry{\_\_repr\_\_()}\spxextra{db\_classes.TerytCodes method}, \hyperpage{5}
+  \item \spxentry{\_\_repr\_\_()}\spxextra{db\_classes.UniqPhrs method}, \hyperpage{6}
+  \item \spxentry{\_\_weakref\_\_}\spxextra{super\_permutations.SuperPerms attribute}, 
+		\hyperpage{11}
+  \item \spxentry{\_\_weakref\_\_}\spxextra{xml\_parsers.XmlParser attribute}, \hyperpage{10}
+
+  \indexspace
+  \bigletter B
+  \item \spxentry{BDOT10K}\spxextra{class in db\_classes}, \hyperpage{3}
+  \item \spxentry{BDOT10kDataParser}\spxextra{class in xml\_parsers}, \hyperpage{7}
+  \item \spxentry{BDOT10kDictsParser}\spxextra{class in xml\_parsers}, \hyperpage{8}
+
+  \indexspace
+  \bigletter C
+  \item \spxentry{calc\_pnt\_dist()}\spxextra{in module geo\_utilities}, \hyperpage{13}
+  \item \spxentry{change\_sekts\_order()}\spxextra{geo\_gui.MyGeoGUI method}, \hyperpage{21}
+  \item \spxentry{check\_path()}\spxextra{xml\_parsers.BDOT10kDataParser method}, \hyperpage{7}
+  \item \spxentry{check\_path()}\spxextra{xml\_parsers.BDOT10kDictsParser method}, \hyperpage{8}
+  \item \spxentry{check\_path()}\spxextra{xml\_parsers.PRGDataParser method}, \hyperpage{9}
+  \item \spxentry{check\_path()}\spxextra{xml\_parsers.XmlParser method}, \hyperpage{10}
+  \item \spxentry{check\_prg\_pts\_add\_db()}\spxextra{xml\_parsers.PRGDataParser method}, 
+		\hyperpage{9}
+  \item \spxentry{clear\_xml\_node()}\spxextra{in module geo\_utilities}, \hyperpage{13}
+  \item \spxentry{convert\_coords()}\spxextra{in module geo\_utilities}, \hyperpage{13}
+  \item \spxentry{create\_coords\_transform()}\spxextra{in module geo\_utilities}, \hyperpage{14}
+  \item \spxentry{create\_logger()}\spxextra{in module geo\_utilities}, \hyperpage{14}
+  \item \spxentry{create\_points\_list()}\spxextra{xml\_parsers.PRGDataParser method}, 
+		\hyperpage{9}
+  \item \spxentry{csv\_to\_dict()}\spxextra{in module geo\_utilities}, \hyperpage{14}
+
+  \indexspace
+  \bigletter D
+  \item \spxentry{db\_classes}
+    \subitem \spxentry{module}, \hyperpage{3}
+
+  \indexspace
+  \bigletter F
+  \item \spxentry{fill\_regs\_tables()}\spxextra{in module geo\_utilities}, \hyperpage{14}
+
+  \indexspace
+  \bigletter G
+  \item \spxentry{gen\_fin\_bubds\_ids()}\spxextra{in module geo\_utilities}, \hyperpage{14}
+  \item \spxentry{geo\_gui}
+    \subitem \spxentry{module}, \hyperpage{21}
+  \item \spxentry{geo\_utilities}
+    \subitem \spxentry{module}, \hyperpage{13}
+  \item \spxentry{get\_addr\_spiral\_ids()}\spxextra{in module geo\_gui}, \hyperpage{21}
+  \item \spxentry{get\_bdot10k\_dicts()}\spxextra{xml\_parsers.BDOT10kDictsParser method}, 
+		\hyperpage{8}
+  \item \spxentry{get\_bdot10k\_id()}\spxextra{in module geo\_utilities}, \hyperpage{15}
+  \item \spxentry{get\_corr\_reg\_name()}\spxextra{in module geo\_utilities}, \hyperpage{16}
+  \item \spxentry{get\_osm\_coords()}\spxextra{in module geo\_utilities}, \hyperpage{16}
+  \item \spxentry{get\_prg\_ids()}\spxextra{in module geo\_gui}, \hyperpage{22}
+  \item \spxentry{get\_region\_shapes()}\spxextra{in module geo\_utilities}, \hyperpage{16}
+  \item \spxentry{get\_sector\_codes()}\spxextra{in module geo\_utilities}, \hyperpage{17}
+  \item \spxentry{get\_sectors\_params()}\spxextra{in module geo\_utilities}, \hyperpage{17}
+  \item \spxentry{get\_super\_perm()}\spxextra{super\_permutations.SuperPerms method}, 
+		\hyperpage{11}
+  \item \spxentry{get\_super\_permut\_dict()}\spxextra{in module geo\_utilities}, \hyperpage{17}
+  \item \spxentry{get\_xml\_path}\spxextra{xml\_parsers.XmlParser property}, \hyperpage{10}
+
+  \indexspace
+  \bigletter M
+  \item \spxentry{module}
+    \subitem \spxentry{db\_classes}, \hyperpage{3}
+    \subitem \spxentry{geo\_gui}, \hyperpage{21}
+    \subitem \spxentry{geo\_utilities}, \hyperpage{13}
+    \subitem \spxentry{super\_permutations}, \hyperpage{11}
+    \subitem \spxentry{xml\_parsers}, \hyperpage{7}
+  \item \spxentry{MyGeoGUI}\spxextra{class in geo\_gui}, \hyperpage{21}
+
+  \indexspace
+  \bigletter O
+  \item \spxentry{on\_text\_changed()}\spxextra{geo\_gui.MyGeoGUI method}, \hyperpage{21}
+  \item \spxentry{on\_text\_selected()}\spxextra{geo\_gui.MyGeoGUI method}, \hyperpage{21}
+
+  \indexspace
+  \bigletter P
+  \item \spxentry{parse\_bdot10k\_xml()}\spxextra{xml\_parsers.BDOT10kDataParser method}, 
+		\hyperpage{7}
+  \item \spxentry{parse\_xml()}\spxextra{xml\_parsers.BDOT10kDataParser method}, \hyperpage{7}
+  \item \spxentry{parse\_xml()}\spxextra{xml\_parsers.BDOT10kDictsParser method}, \hyperpage{8}
+  \item \spxentry{parse\_xml()}\spxextra{xml\_parsers.PRGDataParser method}, \hyperpage{9}
+  \item \spxentry{parse\_xml()}\spxextra{xml\_parsers.XmlParser method}, \hyperpage{10}
+  \item \spxentry{points\_in\_shape()}\spxextra{in module geo\_utilities}, \hyperpage{17}
+  \item \spxentry{points\_inside\_polygon()}\spxextra{in module geo\_utilities}, \hyperpage{18}
+  \item \spxentry{PRG}\spxextra{class in db\_classes}, \hyperpage{3}
+  \item \spxentry{PRGDataParser}\spxextra{class in xml\_parsers}, \hyperpage{8}
+
+  \indexspace
+  \bigletter R
+  \item \spxentry{read\_bdot10k\_dicts()}\spxextra{in module xml\_parsers}, \hyperpage{10}
+  \item \spxentry{reduce\_coordinates\_precision()}\spxextra{in module geo\_utilities}, 
+		\hyperpage{18}
+  \item \spxentry{RegJSON}\spxextra{class in db\_classes}, \hyperpage{4}
+
+  \indexspace
+  \bigletter S
+  \item \spxentry{super\_permutations}
+    \subitem \spxentry{module}, \hyperpage{11}
+  \item \spxentry{SuperPerms}\spxextra{class in super\_permutations}, \hyperpage{11}
+
+  \indexspace
+  \bigletter T
+  \item \spxentry{TerytCodes}\spxextra{class in db\_classes}, \hyperpage{5}
+  \item \spxentry{time\_decorator()}\spxextra{in module geo\_utilities}, \hyperpage{19}
+
+  \indexspace
+  \bigletter U
+  \item \spxentry{UniqPhrs}\spxextra{class in db\_classes}, \hyperpage{5}
+
+  \indexspace
+  \bigletter X
+  \item \spxentry{xml\_parsers}
+    \subitem \spxentry{module}, \hyperpage{7}
+  \item \spxentry{XmlParser}\spxextra{class in xml\_parsers}, \hyperpage{9}
+
+\end{sphinxtheindex}

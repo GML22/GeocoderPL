@@ -1,4 +1,4 @@
-""" XML Parsers module """
+""" XML Parsers module of the GeocoderPL project """
 
 import pickle
 from abc import ABC, abstractmethod
@@ -6,48 +6,92 @@ from io import BytesIO
 
 from db_classes import PRG
 from geo_utilities import *
+from typing import List, Tuple, Dict, Any
 
 
 class XmlParser(ABC):
-    """ XML Parser class"""
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str) -> None:
+    """ Parent XML parsers class """
+
+    def __init__(self, xml_path: str, tags_tuple: Tuple[str, ...], event_type: str) -> None:
+        """
+        Abstract method that creates objects from a class "XmlParser"
+
+        :param xml_path: Path of a given XML file
+        :param tags_tuple: Tuple containig XML tags
+        :param event_type: Type of event in XML file
+        :return: The method does not return any values
+        """
+
         self.xml_path = xml_path
         self.tags_tuple = tags_tuple
         self.event_type = event_type
 
     @property
     def get_xml_path(self) -> str:
-        """ Method that returs path of XML file """
+        """
+        Abstract method that returs path of a given XML file
+
+        :return: Path of a given XML file
+        """
+
         return f"{self.xml_path}"
 
     @abstractmethod
     def check_path(self) -> None:
-        """ Method that checks if path is valid """
+        """
+        Abstract method that checks if path is valid
+
+        :return: The method does not return any values
+        """
+
         pass
 
     @abstractmethod
     def parse_xml(self) -> None:
-        """ Method that parses XML file """
+        """
+        Abstract method that parses XML file
+
+        :return: The method does not return any values
+        """
+
         pass
 
 
 class BDOT10kDictsParser(XmlParser):
     """ BDOT10kDictsParser class """
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str) -> None:
+
+    def __init__(self, xml_path: str, tags_tuple: Tuple[str, ...], event_type: str) -> None:
+        """
+        Method that creates objects from a class "BDOT10kDictsParser"
+
+        :param xml_path: Path of a given XML file
+        :param tags_tuple: Tuple containig XML tags
+        :param event_type: Type of event in XML file
+        :return: The method does not return any values
+        """
+
         super().__init__(xml_path, tags_tuple, event_type)
         self.bdot10k_dicts = {}
         self.check_path()
         self.parse_xml()
 
     def check_path(self) -> None:
-        """" Method that checks if path to file is valid """
+        """
+        Method that checks if path is valid
+
+        :return: The method does not return any values
+        """
 
         if not os.path.isfile(self.xml_path):
             raise Exception("Pod adresem: '" + self.xml_path + "' nie ma pliku '" + os.environ['BDOT10K_DICTS_NAME'] +
                             "'. Uzupełnij ten plik i uruchom program ponownie!")
 
     def parse_xml(self) -> None:
-        """ Method that parses xml file to dictionairy object """
+        """
+        Method that parses XML file to dictionairy object
+
+        :return: The method does not return any values
+        """
 
         xml_contex = etree.iterparse(self.xml_path, events=(self.event_type,), tag=self.tags_tuple)
         curr_dict = {}
@@ -68,14 +112,32 @@ class BDOT10kDictsParser(XmlParser):
                 curr_dict = {}
                 self.bdot10k_dicts[curr_attrib['name']] = curr_dict
 
-    def get_bdot10k_dicts(self) -> dict:
-        """ Method that returns final dicts """
+    def get_bdot10k_dicts(self) -> Dict[Any, Any]:
+        """
+        Method that returns final BDOT10k dicts
+
+        :return: Method that returns final BDOT10k dicts
+        """
+
         return self.bdot10k_dicts
 
 
 class BDOT10kDataParser(XmlParser):
     """ BDOT10kDataParser class """
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, dicts_tags: dict, tags_dict: dict) -> None:
+
+    def __init__(self, xml_path: str, tags_tuple:  Tuple[str, ...], event_type: str, dicts_tags: Dict[str, str],
+                 tags_dict: Dict[str, int]) -> None:
+        """
+        Method that creates objects from a class "BDOT10kDataParser"
+
+        :param xml_path: Path of a given XML file
+        :param tags_tuple: Tuple containig XML tags
+        :param event_type: Type of event in XML file
+        :param dicts_tags: XML tags of BDOT10k dicts
+        :param tags_dict: Tags dicts of BDOT10k buildings
+        :return: The method does not return any values
+        """
+
         super().__init__(xml_path, tags_tuple, event_type)
         self.dicts_tags = dicts_tags
         self.tags_dict = tags_dict
@@ -84,14 +146,23 @@ class BDOT10kDataParser(XmlParser):
         self.parse_xml()
 
     def check_path(self) -> None:
-        """" Method that checks if path to file is valid """
+        """
+        Method that checks if path to file is valid
+
+        :return: The method does not return any values
+        """
+
         if not os.path.isfile(self.xml_path):
             raise Exception("Pod adresem: '" + self.xml_path + "' nie ma pliku '" + os.environ['BDOT10K_NAME'] +
                             "'. Pobierz ten plik ze strony: '" + os.environ['BDOT10K_LINK'] + "' i uruchom program" +
                             " ponownie!")
 
     def parse_xml(self) -> None:
-        """ Method that parses xml file and saves data to SQL database """
+        """
+        Method that parses XML file and saves data to SQL database
+
+        :return: The method does not return any values
+        """
 
         with zipfile.ZipFile(self.xml_path, "r") as zfile:
             for woj_name in zfile.namelist():
@@ -129,8 +200,14 @@ class BDOT10kDataParser(XmlParser):
                         db_session.bulk_save_objects(bdot10k_rows)
                         db_session.commit()
 
-    def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: list) -> list:
-        """ Method that exctrats data from BDOT10k XML file """
+    def parse_bdot10k_xml(self, xml_contex: etree.iterparse, fin_row: List[Any]) -> List[List[Any]]:
+        """
+        Method that exctrats data from BDOT10k XML file
+
+        :param xml_contex: Root of XML data tree
+        :param fin_row: List containing information on a single building from the BDOT10k database
+        :return: List contsining data extracted from BDOT10k database
+        """
 
         # Tworzymy liste przechowujaca dane z XML o powiatach
         bdot10k_pow_rows = []
@@ -201,8 +278,12 @@ class BDOT10kDataParser(XmlParser):
 
 
 @time_decorator
-def read_bdot10k_dicts() -> dict:
-    """ Function that reads BDOT10K dicts into dictionairy"""
+def read_bdot10k_dicts() -> Dict[str, Dict[str, np.ndarray]]:
+    """
+    Function that reads to RAM BDOT10k dictionaries
+
+    :return: Dictionary containing BDOT10k dictionaries
+    """
 
     # Parsujemy plik XML do postaci słowika
     dicts_path = os.path.join(os.environ["PARENT_PATH"], os.environ['SLOWS_PATH'])
@@ -221,7 +302,19 @@ def read_bdot10k_dicts() -> dict:
 
 class PRGDataParser(XmlParser):
     """ PRGDataParser class """
-    def __init__(self, xml_path: str, tags_tuple: tuple, event_type: str, perms_dict: dict) -> None:
+
+    def __init__(self, xml_path: str, tags_tuple: Tuple[str, ...], event_type: str,
+                 perms_dict: Dict[int, List[int]]) -> None:
+        """
+        Method that creates objects from a class "PRGDataParser"
+
+        :param xml_path: Path of a given XML file
+        :param tags_tuple: Tuple containig XML tags
+        :param event_type: Type of event in XML file
+        :param perms_dict: Dictionary containing superpermutation indices
+        :return: The method does not return any values
+        """
+
         super().__init__(xml_path, tags_tuple, event_type)
         self.perms_dict = perms_dict
         self.check_path()
@@ -230,14 +323,23 @@ class PRGDataParser(XmlParser):
         self.parse_xml()
 
     def check_path(self) -> None:
-        """" Method that checks if path to file is valid """
+        """
+        Method that checks if path to file is valid
+
+        :return: The method does not return any values
+        """
+
         if not os.path.isfile(self.xml_path):
             raise Exception("Pod adresem: '" + self.xml_path + "' nie ma pliku '" + os.environ['PRG_NAME'] +
                             "'. Pobierz ten plik ze strony: '" + os.environ['PRG_LINK'] +
                             "' i uruchom program ponownie!")
 
     def parse_xml(self) -> None:
-        """ Method that parses xml file and saves data to SQL database """
+        """
+        Method that parses XML file and saves data to SQL database
+
+        :return: The method does not return any values
+        """
 
         # Definiujemy podstawowe parametry
         x_path, x_filename = os.path.split(self.xml_path)
@@ -278,8 +380,13 @@ class PRGDataParser(XmlParser):
         with open(os.path.join(os.environ["PARENT_PATH"], os.environ['ADDRS_PATH']), 'wb') as f:
             pickle.dump(sekt_addr_phrs, f, pickle.HIGHEST_PROTOCOL)
 
-    def create_points_list(self, xml_contex: etree.iterparse) -> list:
-        """ Creating list of data points """
+    def create_points_list(self, xml_contex: etree.iterparse) -> List[List[str]]:
+        """
+        Creating list of data points
+
+        :param xml_contex: Root of XML data tree
+        :return: List containing lists of address points
+        """
 
         # Definiujemy podstawowe parametry
         c_ind = 0
@@ -342,8 +449,18 @@ class PRGDataParser(XmlParser):
     @time_decorator
     def check_prg_pts_add_db(self, points_arr: np.ndarray, woj_name: str, teryt_arr: np.ndarray, json_arr: np.ndarray,
                              wrld_pl_trans: osr.CoordinateTransformation, sekt_addr_phrs: np.ndarray) -> None:
-        """ Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
-        to shapefile of its district and finds closest building shape for given PRG point """
+        """
+        Function that converts spatial reference of PRG points from 2180 to 4326, checks if given PRG point belongs
+        to shapefile of its district and finds closest building shape for given PRG point
+
+        :param points_arr: Numpy array containing all address points in a given province
+        :param woj_name: Name of the province
+        :param teryt_arr: Numpy array containing TERYT names and TERYT codes
+        :param json_arr: Numpy array containing JSON shapefiles
+        :param wrld_pl_trans: Coordinates transformation that transforms spatial references from EPSG 2180 to EPSG 4326
+        :param sekt_addr_phrs: Numpy array containing address phrases
+        :return: The method does not return any values
+        """
 
         # Konwertujemy wpółrzędne do oczekiwanego układu wspolrzednych 4326 i dodajemy do bazy danych kolumny
         # zawierajace przekonwertowane wspolrzedne

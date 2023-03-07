@@ -1,4 +1,4 @@
-""" __main_.py module """
+""" Main module of GeocoderPL project """
 
 from PyQt5 import QtWidgets
 

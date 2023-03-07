@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeocoderPL &mdash; GeocoderPL 1.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="db_classes.py" href="db_classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            GeocoderPL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="db_classes.html">db_classes.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xml_parsers.html">xml_parsers.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="super_permutations.html">super_permutations.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geo_utilities.html">geo_utilities.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geo_gui.html">geo_gui.py</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">GeocoderPL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">GeocoderPL</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geocoderpl">
+<h1>GeocoderPL<a class="headerlink" href="#geocoderpl" title="Permalink to this heading"></a></h1>
+<p>GeocoderPL is an application written in Python, which can be used for geocoding address points in Poland along with the possibility to display basic information about a given address point and the building assigned to this address. GeocoderPL has a form of search engine with three map layers: OpenStreetMap, Google Maps and Stamens Map.</p>
+<p>GeocoderPL creates SQLite database containing all address points and buildings in Poland by parsing files in Geography Markup Language format to SQL tables. The main data sources of GeocoderPL are following:
+The National Register of Boundaries Database (a.k.a. PRG database)- state maintained reference database of all address points in Poland (including administrative division of the country):</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538">https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538</a></p></li>
+<li><p><a class="reference external" href="https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515">https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29515</a></p></li>
+</ul>
+<p>The Topographic Objects Database (a.k.a. BDOT10k database) - state maintained vector database which contains the spatial location of all topographic features in Poland:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip">https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip</a></p></li>
+</ul>
+<p>The SQLite database created in this way can easily cooperate with GeocoderPL search engine - when the user type name of the city, street or postal code, query to SQLite database is sent.</p>
+<p>Geographic coordinates of every address point from the PRG database are cross-validated by checking that they lie inside the polygon of their district. For every address point in PRG database the closest building in the BDOT10k database is found and if the distance between polygon of this building and address point is less than 10 meters then the building is assigned to adress point.</p>
+<p>Geocoding using GeocoderPL search engine requires providing city name, street, building number or postal code of the address point for which we would like to find geographic coordinates. It is also possible to perform reverse geocoding - if you pass geographic coordinates to search engine then you will receive address point closest to these coordinates.</p>
+<p>GeocoderPL can be also used for finding address point by providing name of public institution, church or shop - for part of builings such information is avaible in BDOT10k database, so they are also present in GeocoderPL search engine. GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQLite database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen’s Map (visualisation purpose only).</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="db_classes.html">db_classes.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="db_classes.html#db_classes.BDOT10K"><code class="docutils literal notranslate"><span class="pre">BDOT10K</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.BDOT10K.__init__"><code class="docutils literal notranslate"><span class="pre">BDOT10K.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.BDOT10K.__repr__"><code class="docutils literal notranslate"><span class="pre">BDOT10K.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db_classes.html#db_classes.PRG"><code class="docutils literal notranslate"><span class="pre">PRG</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.PRG.__init__"><code class="docutils literal notranslate"><span class="pre">PRG.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.PRG.__repr__"><code class="docutils literal notranslate"><span class="pre">PRG.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db_classes.html#db_classes.RegJSON"><code class="docutils literal notranslate"><span class="pre">RegJSON</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.RegJSON.__init__"><code class="docutils literal notranslate"><span class="pre">RegJSON.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.RegJSON.__repr__"><code class="docutils literal notranslate"><span class="pre">RegJSON.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db_classes.html#db_classes.TerytCodes"><code class="docutils literal notranslate"><span class="pre">TerytCodes</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.TerytCodes.__init__"><code class="docutils literal notranslate"><span class="pre">TerytCodes.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.TerytCodes.__repr__"><code class="docutils literal notranslate"><span class="pre">TerytCodes.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="db_classes.html#db_classes.UniqPhrs"><code class="docutils literal notranslate"><span class="pre">UniqPhrs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.UniqPhrs.__init__"><code class="docutils literal notranslate"><span class="pre">UniqPhrs.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="db_classes.html#db_classes.UniqPhrs.__repr__"><code class="docutils literal notranslate"><span class="pre">UniqPhrs.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xml_parsers.html">xml_parsers.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDataParser"><code class="docutils literal notranslate"><span class="pre">BDOT10kDataParser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDataParser.__init__"><code class="docutils literal notranslate"><span class="pre">BDOT10kDataParser.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDataParser.check_path"><code class="docutils literal notranslate"><span class="pre">BDOT10kDataParser.check_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDataParser.parse_bdot10k_xml"><code class="docutils literal notranslate"><span class="pre">BDOT10kDataParser.parse_bdot10k_xml()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDataParser.parse_xml"><code class="docutils literal notranslate"><span class="pre">BDOT10kDataParser.parse_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDictsParser"><code class="docutils literal notranslate"><span class="pre">BDOT10kDictsParser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDictsParser.__init__"><code class="docutils literal notranslate"><span class="pre">BDOT10kDictsParser.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDictsParser.check_path"><code class="docutils literal notranslate"><span class="pre">BDOT10kDictsParser.check_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDictsParser.get_bdot10k_dicts"><code class="docutils literal notranslate"><span class="pre">BDOT10kDictsParser.get_bdot10k_dicts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.BDOT10kDictsParser.parse_xml"><code class="docutils literal notranslate"><span class="pre">BDOT10kDictsParser.parse_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser"><code class="docutils literal notranslate"><span class="pre">PRGDataParser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser.__init__"><code class="docutils literal notranslate"><span class="pre">PRGDataParser.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser.check_path"><code class="docutils literal notranslate"><span class="pre">PRGDataParser.check_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser.check_prg_pts_add_db"><code class="docutils literal notranslate"><span class="pre">PRGDataParser.check_prg_pts_add_db()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser.create_points_list"><code class="docutils literal notranslate"><span class="pre">PRGDataParser.create_points_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.PRGDataParser.parse_xml"><code class="docutils literal notranslate"><span class="pre">PRGDataParser.parse_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser"><code class="docutils literal notranslate"><span class="pre">XmlParser</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser.__init__"><code class="docutils literal notranslate"><span class="pre">XmlParser.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser.__weakref__"><code class="docutils literal notranslate"><span class="pre">XmlParser.__weakref__</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser.check_path"><code class="docutils literal notranslate"><span class="pre">XmlParser.check_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser.get_xml_path"><code class="docutils literal notranslate"><span class="pre">XmlParser.get_xml_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="xml_parsers.html#xml_parsers.XmlParser.parse_xml"><code class="docutils literal notranslate"><span class="pre">XmlParser.parse_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="xml_parsers.html#xml_parsers.read_bdot10k_dicts"><code class="docutils literal notranslate"><span class="pre">read_bdot10k_dicts()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="super_permutations.html">super_permutations.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="super_permutations.html#super_permutations.SuperPerms"><code class="docutils literal notranslate"><span class="pre">SuperPerms</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="super_permutations.html#super_permutations.SuperPerms.__init__"><code class="docutils literal notranslate"><span class="pre">SuperPerms.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="super_permutations.html#super_permutations.SuperPerms.__weakref__"><code class="docutils literal notranslate"><span class="pre">SuperPerms.__weakref__</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="super_permutations.html#super_permutations.SuperPerms.get_super_perm"><code class="docutils literal notranslate"><span class="pre">SuperPerms.get_super_perm()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geo_utilities.html">geo_utilities.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.calc_pnt_dist"><code class="docutils literal notranslate"><span class="pre">calc_pnt_dist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.clear_xml_node"><code class="docutils literal notranslate"><span class="pre">clear_xml_node()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.convert_coords"><code class="docutils literal notranslate"><span class="pre">convert_coords()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.create_coords_transform"><code class="docutils literal notranslate"><span class="pre">create_coords_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.create_logger"><code class="docutils literal notranslate"><span class="pre">create_logger()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.csv_to_dict"><code class="docutils literal notranslate"><span class="pre">csv_to_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.fill_regs_tables"><code class="docutils literal notranslate"><span class="pre">fill_regs_tables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.gen_fin_bubds_ids"><code class="docutils literal notranslate"><span class="pre">gen_fin_bubds_ids()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_bdot10k_id"><code class="docutils literal notranslate"><span class="pre">get_bdot10k_id()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_corr_reg_name"><code class="docutils literal notranslate"><span class="pre">get_corr_reg_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_osm_coords"><code class="docutils literal notranslate"><span class="pre">get_osm_coords()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_region_shapes"><code class="docutils literal notranslate"><span class="pre">get_region_shapes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_sector_codes"><code class="docutils literal notranslate"><span class="pre">get_sector_codes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_sectors_params"><code class="docutils literal notranslate"><span class="pre">get_sectors_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.get_super_permut_dict"><code class="docutils literal notranslate"><span class="pre">get_super_permut_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.points_in_shape"><code class="docutils literal notranslate"><span class="pre">points_in_shape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.points_inside_polygon"><code class="docutils literal notranslate"><span class="pre">points_inside_polygon()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.reduce_coordinates_precision"><code class="docutils literal notranslate"><span class="pre">reduce_coordinates_precision()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_utilities.html#geo_utilities.time_decorator"><code class="docutils literal notranslate"><span class="pre">time_decorator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geo_gui.html">geo_gui.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="geo_gui.html#geo_gui.MyGeoGUI"><code class="docutils literal notranslate"><span class="pre">MyGeoGUI</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="geo_gui.html#geo_gui.MyGeoGUI.__init__"><code class="docutils literal notranslate"><span class="pre">MyGeoGUI.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_gui.html#geo_gui.MyGeoGUI.change_sekts_order"><code class="docutils literal notranslate"><span class="pre">MyGeoGUI.change_sekts_order()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_gui.html#geo_gui.MyGeoGUI.on_text_changed"><code class="docutils literal notranslate"><span class="pre">MyGeoGUI.on_text_changed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="geo_gui.html#geo_gui.MyGeoGUI.on_text_selected"><code class="docutils literal notranslate"><span class="pre">MyGeoGUI.on_text_selected()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geo_gui.html#geo_gui.get_addr_spiral_ids"><code class="docutils literal notranslate"><span class="pre">get_addr_spiral_ids()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geo_gui.html#geo_gui.get_prg_ids"><code class="docutils literal notranslate"><span class="pre">get_prg_ids()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="db_classes.html" class="btn btn-neutral float-right" title="db_classes.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mateusz Gomulski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

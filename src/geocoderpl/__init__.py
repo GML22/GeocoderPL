@@ -1,4 +1,4 @@
-""" __init_.py module """
+""" Init module of GeocoderPL project """
 
 from . import db_classes, geo_gui, geo_utilities, super_permutations, xml_parsers
 

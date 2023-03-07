@@ -1,4 +1,4 @@
-""" GeocoderPL setup file """
+""" Setup module of GeocoderPL project """
 
 import setuptools
 
