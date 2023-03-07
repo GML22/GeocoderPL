@@ -61,8 +61,9 @@ GeocoderPL can be also used for finding address point by providing name of publi
 GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQLite database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen's Map (visualisation purpose only).
 </p>
 
-<p align="justify">
+<p align="left">
 Technical documentation of GeocoderPL is available at:
-* https://gml22.github.io/GeocoderPL
-* https://gml22.github.io/GeocoderPL/GeocoderPL%20-%20technical%20documentation.pdf
+  
+- https://gml22.github.io/GeocoderPL
+- https://gml22.github.io/GeocoderPL/GeocoderPL%20-%20technical%20documentation.pdf
 </p>
