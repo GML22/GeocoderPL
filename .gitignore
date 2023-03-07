@@ -4,12 +4,10 @@
 *.db
 *.npy
 *.pyc
-*.pdf
 *.xlsx
 *.xls
 *.xlsb
 *.obj
-*.npy
 *.xml
 *.iml
 *.log
