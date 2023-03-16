@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geo_utilities.py &mdash; GeocoderPL 1.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="geo_gui.py" href="geo_gui.html" />
+    <link rel="prev" title="super_permutations.py" href="super_permutations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeocoderPL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="db_classes.html">db_classes.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xml_parsers.html">xml_parsers.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="super_permutations.html">super_permutations.py</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">geo_utilities.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.calc_pnt_dist"><code class="docutils literal notranslate"><span class="pre">calc_pnt_dist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.clear_xml_node"><code class="docutils literal notranslate"><span class="pre">clear_xml_node()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.convert_coords"><code class="docutils literal notranslate"><span class="pre">convert_coords()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.create_coords_transform"><code class="docutils literal notranslate"><span class="pre">create_coords_transform()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.create_logger"><code class="docutils literal notranslate"><span class="pre">create_logger()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.csv_to_dict"><code class="docutils literal notranslate"><span class="pre">csv_to_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.fill_regs_tables"><code class="docutils literal notranslate"><span class="pre">fill_regs_tables()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.gen_fin_bubds_ids"><code class="docutils literal notranslate"><span class="pre">gen_fin_bubds_ids()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_bdot10k_id"><code class="docutils literal notranslate"><span class="pre">get_bdot10k_id()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_corr_reg_name"><code class="docutils literal notranslate"><span class="pre">get_corr_reg_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_osm_coords"><code class="docutils literal notranslate"><span class="pre">get_osm_coords()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_region_shapes"><code class="docutils literal notranslate"><span class="pre">get_region_shapes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_sector_codes"><code class="docutils literal notranslate"><span class="pre">get_sector_codes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_sectors_params"><code class="docutils literal notranslate"><span class="pre">get_sectors_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.get_super_permut_dict"><code class="docutils literal notranslate"><span class="pre">get_super_permut_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.points_in_shape"><code class="docutils literal notranslate"><span class="pre">points_in_shape()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.points_inside_polygon"><code class="docutils literal notranslate"><span class="pre">points_inside_polygon()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.reduce_coordinates_precision"><code class="docutils literal notranslate"><span class="pre">reduce_coordinates_precision()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geo_utilities.time_decorator"><code class="docutils literal notranslate"><span class="pre">time_decorator()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geo_gui.html">geo_gui.py</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeocoderPL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geo_utilities.py</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geo_utilities.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geo_utilities">
+<span id="geo-utilities-py"></span><h1>geo_utilities.py<a class="headerlink" href="#module-geo_utilities" title="Permalink to this heading"></a></h1>
+<p>Module that collects variety utility functions for GeocoderPL project</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.calc_pnt_dist">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">calc_pnt_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrld_pl_trans</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.calc_pnt_dist" title="Permalink to this definition"></a></dt>
+<dd><p>Function that calculates distances of point to given polygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c_paths</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – List containing matplotlib paths of regions</p></li>
+<li><p><strong>x_val</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Longitude of a given address point</p></li>
+<li><p><strong>y_val</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Latitude of a given address point</p></li>
+<li><p><strong>wrld_pl_trans</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code>) – Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Distance from a givent address point do closest polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.clear_xml_node">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">clear_xml_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curr_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.clear_xml_node" title="Permalink to this definition"></a></dt>
+<dd><p>Function that clears unnecessary XML nodes from RAM memory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>curr_node</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code>) – Current XML node</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.convert_coords">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">convert_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_system</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.convert_coords" title="Permalink to this definition"></a></dt>
+<dd><p>Function that converts multiple coordinates between given systems</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_coords</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]]) – Numpy array / list contining coordinates that should be transformed from one EPSG coordinates
+system to the other</p></li>
+<li><p><strong>in_system</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Input coordinates system (EPSG string number)</p></li>
+<li><p><strong>out_system</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Output coordinates system (EPSG string number)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Transformer</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Transformation object that converts coordinates from one EPSG system (in_system) to the other (out_system)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.create_coords_transform">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">create_coords_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_map_strateg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.create_coords_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Function that creates object that transforms geographical coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_epsg</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of input EPSG coordinates system</p></li>
+<li><p><strong>out_epsg</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Number of output EPSG coordinates system</p></li>
+<li><p><strong>change_map_strateg</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Flag indicating if map strategy should be changed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Coordinates transformation that transforms spatial references from input EPSG system to output EPSG system</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.create_logger">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">create_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.create_logger" title="Permalink to this definition"></a></dt>
+<dd><p>Function that creates logging file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of logger</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Logger object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.csv_to_dict">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">csv_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.csv_to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Function that imports CSV file and creates dictionairy from first two columns of that file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>c_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path of the CSV file that should be read to dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary read from CSV file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.fill_regs_tables">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">fill_regs_tables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.fill_regs_tables" title="Permalink to this definition"></a></dt>
+<dd><p>Function that fills tables with parameters of regions shapes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.gen_fin_bubds_ids">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">gen_fin_bubds_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_geojson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crds_inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_bubd_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dod_opis_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_addr_phrs_uniq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrld_pl_trans</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.gen_fin_bubds_ids" title="Permalink to this definition"></a></dt>
+<dd><p>Function that finds closest buidling shape for given PRG point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c_coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing all address points in given sector</p></li>
+<li><p><strong>c_len</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numper of current address points</p></li>
+<li><p><strong>top_geojson</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing top “n” BDOT10k buildinigs located closest to given address point</p></li>
+<li><p><strong>top_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing IDs of top “n” BDOT10k buildinigs located closest to given address point</p></li>
+<li><p><strong>bdot10k_dist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+database</p></li>
+<li><p><strong>bdot10k_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing IDs of buildings from BDOT10k database</p></li>
+<li><p><strong>crds_inds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containng BDOT10k buildings indices for given sector</p></li>
+<li><p><strong>pow_bubd_arr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing information about all BDOT10k buildings in current sector</p></li>
+<li><p><strong>dod_opis_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing additional descriptions of an address point</p></li>
+<li><p><strong>addr_phrs_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List containing address points phrases</p></li>
+<li><p><strong>addr_phrs_len</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Length of address points phrases list</p></li>
+<li><p><strong>c_addr_phrs_uniq</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Current unique addresses string</p></li>
+<li><p><strong>wrld_pl_trans</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code>) – Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>c_adr_phr (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) - current addresses phrase</p></li>
+<li><p>c_addr_phrs_uniq (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) - current unique addresses string</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_bdot10k_id">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_bdot10k_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curr_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords_inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dod_opis_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrld_pl_trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_uniq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekts_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekts_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pow_bubd_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekt_addr_phrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_bdot10k_id" title="Permalink to this definition"></a></dt>
+<dd><p>Function that returns id and distance of polygon closest to PRG point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curr_coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing all address points in region</p></li>
+<li><p><strong>coords_inds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containng BDOT10k buildings indices</p></li>
+<li><p><strong>bdot10k_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing IDs of buildings from BDOT10k database</p></li>
+<li><p><strong>bdot10k_dist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+database</p></li>
+<li><p><strong>dod_opis_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing additional descriptions of an address point</p></li>
+<li><p><strong>addr_phrs_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List containing address points phrases</p></li>
+<li><p><strong>addr_phrs_len</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Length of address points phrases list</p></li>
+<li><p><strong>wrld_pl_trans</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code>) – Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180</p></li>
+<li><p><strong>addr_phrs_uniq</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Unique addresses string</p></li>
+<li><p><strong>sekts_arr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array contaning sectors of address points</p></li>
+<li><p><strong>sekts_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing indices of sectors</p></li>
+<li><p><strong>pow_bubd_all</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing information about all BDOT10k buildings in current region</p></li>
+<li><p><strong>sekt_addr_phrs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing sectors of address points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Unique addresses string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_corr_reg_name">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_corr_reg_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curr_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_corr_reg_name" title="Permalink to this definition"></a></dt>
+<dd><p>Function that corrects wrong regions names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>curr_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Current region name</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Corrected region name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_osm_coords">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_osm_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popraw_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dists_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zrodlo_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrld_pl_trans</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_osm_coords" title="Permalink to this definition"></a></dt>
+<dd><p>Function that returns OSM coordinates of address point or distance from the district shapefile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Address string</p></li>
+<li><p><strong>outside_pts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array of address points identified as beeing outsiode of given region border</p></li>
+<li><p><strong>c_paths</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – List containing matplotlib paths of regions</p></li>
+<li><p><strong>popraw_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List containing flags indicating if a given address point is valid</p></li>
+<li><p><strong>c_ind</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Current index of a given address point</p></li>
+<li><p><strong>coord1</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Longitude of a given address point</p></li>
+<li><p><strong>coord2</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Latitude of a given address point</p></li>
+<li><p><strong>dists_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – List cointaining distance of a given address point to its municipility border</p></li>
+<li><p><strong>zrodlo_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List containing names of the source of a given address point</p></li>
+<li><p><strong>wrld_pl_trans</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code>) – Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_region_shapes">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_region_shapes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_region_shapes" title="Permalink to this definition"></a></dt>
+<dd><p>Function that creates shapes for each regions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code>]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ordered dictionary containing shapes of regions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_sector_codes">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_sector_codes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_centr_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_centr_x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_sector_codes" title="Permalink to this definition"></a></dt>
+<dd><p>Function that returns sector code for given coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poly_centr_y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing latitudes of address points</p></li>
+<li><p><strong>poly_centr_x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing longitudes of address points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>c_sekt_szer (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code>) - rows indices of sectors for given coordinates</p></li>
+<li><p>c_sekt_dl (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code>) - columns indices of sectors for given coordinates</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_sectors_params">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_sectors_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_sectors_params" title="Permalink to this definition"></a></dt>
+<dd><p>Funtion that calculates basic parameters of sectors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>sekt_szer (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) - width of sectors</p></li>
+<li><p>sekt_dl (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) - height of sectors</p></li>
+<li><p>plnd_min_szer (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) - min latitude of Poland</p></li>
+<li><p>plnd_min_dl (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) - min longitude of Poland</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.get_super_permut_dict">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">get_super_permut_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.get_super_permut_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Function that creates indices providing superpermutations for lists of strings with length of maximum 5 elements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>max_len</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum length of superpermutation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary containing superpermutation indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.points_in_shape">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">points_in_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr_coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.points_in_shape" title="Permalink to this definition"></a></dt>
+<dd><p>Checking if point lies inside shape of district</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>c_paths</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – List containing matplotlib paths of regions</p></li>
+<li><p><strong>curr_coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing all address points in region</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Numpy array of flags indicating if given address point is inside given region shape</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.points_inside_polygon">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">points_inside_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grouped_regions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">woj_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trans_crds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popraw_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dists_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zrodlo_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10k_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekt_kod_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dod_opis_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_phrs_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teryt_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrld_pl_trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekt_addr_phrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.points_inside_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>Function that checks if given points are inside polygon of their districts and finds closest building shape for
+given PRG point</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grouped_regions</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Hashable</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – Regions dictionary grouped by district and municipality name</p></li>
+<li><p><strong>woj_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of the province</p></li>
+<li><p><strong>trans_crds</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing transformed coordinates of address points</p></li>
+<li><p><strong>points_arr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing coordinates of address points</p></li>
+<li><p><strong>popraw_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List containing flags indicating if a given address point is valid</p></li>
+<li><p><strong>dists_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – List cointaining distance of a given address point to its municipility border</p></li>
+<li><p><strong>zrodlo_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List containing names of the source of a given address point</p></li>
+<li><p><strong>bdot10k_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing IDs of buildings from BDOT10k database</p></li>
+<li><p><strong>bdot10k_dist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy arrray cointaining distance of a given address point to closest building from BDOT10k
+database</p></li>
+<li><p><strong>sekt_kod_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing sector codes of address points</p></li>
+<li><p><strong>dod_opis_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing additional descriptions of an address point</p></li>
+<li><p><strong>addr_phrs_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – List containing address points phrases</p></li>
+<li><p><strong>addr_phrs_len</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Length of address points phrases list</p></li>
+<li><p><strong>teryt_arr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing TERYT codes od address points</p></li>
+<li><p><strong>json_arr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing GeoJSON shapes</p></li>
+<li><p><strong>wrld_pl_trans</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">CoordinateTransformation</span></code>) – Coordinates transformation that transforms spatial references from EPSG 4326 to EPSG 2180</p></li>
+<li><p><strong>sekt_addr_phrs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>) – Numpy array containing sectors of address points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.reduce_coordinates_precision">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">reduce_coordinates_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geojson_poly</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.reduce_coordinates_precision" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Function that reduce decimal precision of coordinates in GeoJSON file:</dt><dd><ul class="simple">
+<li><p>0 decimal places is a precision of about 111 km</p></li>
+<li><p>1 decimal place is a precsion of about 11 km</p></li>
+<li><p>2 decimal places is a precison of about 1.1 km</p></li>
+<li><p>3 decimal places is a precison of about 111 m</p></li>
+<li><p>4 decimal places is a precison of about 11 m</p></li>
+<li><p>5 decimal places is a precison of about 1.1 m</p></li>
+<li><p>6 decimal places is a precison of about 11 cm</p></li>
+<li><p>7 decimal places is a precison of about 1.1 cm</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geojson_poly</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – GeoJSON string representing polynomial shape</p></li>
+<li><p><strong>precision</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The precision to which the accuracy of the coordinates should be reduced</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Final GeoJSON string with reduce precision</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_utilities.time_decorator">
+<span class="sig-prename descclassname"><span class="pre">geo_utilities.</span></span><span class="sig-name descname"><span class="pre">time_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geo_utilities.time_decorator" title="Permalink to this definition"></a></dt>
+<dd><p>Decorator that logs information about time of function execution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – Function call that should be wrapped</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Time wrapper function call</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="super_permutations.html" class="btn btn-neutral float-left" title="super_permutations.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geo_gui.html" class="btn btn-neutral float-right" title="geo_gui.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mateusz Gomulski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

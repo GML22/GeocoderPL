@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>db_classes.py &mdash; GeocoderPL 1.2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="xml_parsers.py" href="xml_parsers.html" />
+    <link rel="prev" title="GeocoderPL" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeocoderPL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">db_classes.py</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#db_classes.BDOT10K"><code class="docutils literal notranslate"><span class="pre">BDOT10K</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.BDOT10K.__init__"><code class="docutils literal notranslate"><span class="pre">BDOT10K.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.BDOT10K.__repr__"><code class="docutils literal notranslate"><span class="pre">BDOT10K.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#db_classes.PRG"><code class="docutils literal notranslate"><span class="pre">PRG</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.PRG.__init__"><code class="docutils literal notranslate"><span class="pre">PRG.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.PRG.__repr__"><code class="docutils literal notranslate"><span class="pre">PRG.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#db_classes.RegJSON"><code class="docutils literal notranslate"><span class="pre">RegJSON</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.RegJSON.__init__"><code class="docutils literal notranslate"><span class="pre">RegJSON.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.RegJSON.__repr__"><code class="docutils literal notranslate"><span class="pre">RegJSON.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#db_classes.TerytCodes"><code class="docutils literal notranslate"><span class="pre">TerytCodes</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.TerytCodes.__init__"><code class="docutils literal notranslate"><span class="pre">TerytCodes.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.TerytCodes.__repr__"><code class="docutils literal notranslate"><span class="pre">TerytCodes.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#db_classes.UniqPhrs"><code class="docutils literal notranslate"><span class="pre">UniqPhrs</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.UniqPhrs.__init__"><code class="docutils literal notranslate"><span class="pre">UniqPhrs.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#db_classes.UniqPhrs.__repr__"><code class="docutils literal notranslate"><span class="pre">UniqPhrs.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xml_parsers.html">xml_parsers.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="super_permutations.html">super_permutations.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geo_utilities.html">geo_utilities.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geo_gui.html">geo_gui.py</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeocoderPL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">db_classes.py</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/db_classes.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-db_classes">
+<span id="db-classes-py"></span><h1>db_classes.py<a class="headerlink" href="#module-db_classes" title="Permalink to this heading"></a></h1>
+<p>Module that defines SQL database classes in the GeocoderPL project</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="db_classes.BDOT10K">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">db_classes.</span></span><span class="sig-name descname"><span class="pre">BDOT10K</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kod_sektora</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kat_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nazwa_kart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stan_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funkcja_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liczba_kond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">czy_zabytek</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opis_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powierzchnia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centr_lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centr_long</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bubd_geojson</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.BDOT10K" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Class that defines columns of “BDOT10K_TABLE”</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.BDOT10K.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kod_sektora</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kat_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nazwa_kart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stan_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">funkcja_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liczba_kond</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">czy_zabytek</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opis_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powierzchnia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centr_lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centr_long</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bubd_geojson</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.BDOT10K.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that creates objects from a class “BDOT10K”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kod_sektora</strong> – Code of the sector in which the building is located</p></li>
+<li><p><strong>kat_budynku</strong> – Type of building</p></li>
+<li><p><strong>nazwa_kart</strong> – Cartographic name of the building</p></li>
+<li><p><strong>stan_budynku</strong> – Condition of the building</p></li>
+<li><p><strong>funkcja_budynku</strong> – Function of the building</p></li>
+<li><p><strong>liczba_kond</strong> – Number of storeys in the building</p></li>
+<li><p><strong>czy_zabytek</strong> – Flag indicating whether a building is a historic building</p></li>
+<li><p><strong>opis_budynku</strong> – Brief description of the building</p></li>
+<li><p><strong>powierzchnia</strong> – Building surface in square metres</p></li>
+<li><p><strong>centr_lat</strong> – Latitude of the centroid of the building</p></li>
+<li><p><strong>centr_long</strong> – Longitude of the centroid of the building</p></li>
+<li><p><strong>bubd_geojson</strong> – Building outline in GEOJSON format</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.BDOT10K.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.BDOT10K.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that represents an objects in a class “BDOT10K” as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String that represents objects of the class “BDOT10K”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="db_classes.PRG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">db_classes.</span></span><span class="sig-name descname"><span class="pre">PRG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wojewodztwo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powiat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmina</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miejscowosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miejscowosc2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ulica</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kod_pocztowy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">szerokosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dlugosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zrodlo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">czy_poprawny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odleglosc_od_gminy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10_bubd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odleglosc_od_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kod_sektora</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dodatkowy_opis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.PRG" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Class that defines columns of “PRG_TABLE”</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.PRG.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wojewodztwo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">powiat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmina</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miejscowosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miejscowosc2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ulica</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kod_pocztowy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">szerokosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dlugosc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zrodlo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">czy_poprawny</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odleglosc_od_gminy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bdot10_bubd_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odleglosc_od_budynku</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kod_sektora</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dodatkowy_opis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.PRG.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that creates objects from a class “PRG”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wojewodztwo</strong> – Name of the province in which the address point is located</p></li>
+<li><p><strong>powiat</strong> – Name of the county in which the address point is located</p></li>
+<li><p><strong>gmina</strong> – Name of the municipality in which the address point is located</p></li>
+<li><p><strong>miejscowosc</strong> – Name of the town in which the address point is located</p></li>
+<li><p><strong>miejscowosc2</strong> – Additional name of the town where the address point is located</p></li>
+<li><p><strong>ulica</strong> – Name of the street in which the address point is located</p></li>
+<li><p><strong>numer</strong> – Number of the building in which the address point is located</p></li>
+<li><p><strong>kod_pocztowy</strong> – Postcode where the address point is located</p></li>
+<li><p><strong>status</strong> – Status of a given address point</p></li>
+<li><p><strong>szerokosc</strong> – Longitude of a given address point</p></li>
+<li><p><strong>dlugosc</strong> – Latitude of a given address point</p></li>
+<li><p><strong>zrodlo</strong> – Source of data from which information on a given address point is derived</p></li>
+<li><p><strong>czy_poprawny</strong> – Flag indicating whether an address point is correct</p></li>
+<li><p><strong>odleglosc_od_gminy</strong> – The distance of a given point from the contour of its municipality (in meters)</p></li>
+<li><p><strong>bdot10_bubd_id</strong> – D of the nearest building in the BDOT10k database</p></li>
+<li><p><strong>odleglosc_od_budynku</strong> – Distance of a given address point from the nearest building</p></li>
+<li><p><strong>kod_sektora</strong> – Code of the sector in which given point is located</p></li>
+<li><p><strong>dodatkowy_opis</strong> – Additional description of the address point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.PRG.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.PRG.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that represents an objects in a class “PRG” as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String that represents objects of the class “PRG”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="db_classes.RegJSON">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">db_classes.</span></span><span class="sig-name descname"><span class="pre">RegJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_teryt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.RegJSON" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Class that defines regional JSON files</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.RegJSON.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_teryt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.RegJSON.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that creates objects from a class “RegJSON”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_name</strong> – Name of the reginal JSON file</p></li>
+<li><p><strong>json_teryt</strong> – TERYT code of the reginal JSON file</p></li>
+<li><p><strong>json_shape</strong> – JSON shape of region</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.RegJSON.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.RegJSON.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that represents an objects in a class “RegJSON” as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String that represents objects of the class “RegJSON”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="db_classes.TerytCodes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">db_classes.</span></span><span class="sig-name descname"><span class="pre">TerytCodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">teryt_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teryt_code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.TerytCodes" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Class that defines TERYT codes</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.TerytCodes.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">teryt_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">teryt_code</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.TerytCodes.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that creates objects from a class “TerytCodes”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>teryt_name</strong> – TERYT name</p></li>
+<li><p><strong>teryt_code</strong> – TERYT code</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.TerytCodes.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.TerytCodes.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that represents an objects in a class “TerytCodes” as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String that represents objects of the class “TerytCodes”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="db_classes.UniqPhrs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">db_classes.</span></span><span class="sig-name descname"><span class="pre">UniqPhrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uniq_phrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.UniqPhrs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></p>
+<p>Class that defines unique phrases</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.UniqPhrs.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uniq_phrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.UniqPhrs.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that creates objects from a class “UniqPhrs”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>uniq_phrs</strong> – String containing unique street addresses in Poland</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The method does not return any values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="db_classes.UniqPhrs.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#db_classes.UniqPhrs.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Method that represents an objects in a class “UniqPhrs” as a string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String that represents objects of the class “UniqPhrs”</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="GeocoderPL" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="xml_parsers.html" class="btn btn-neutral float-right" title="xml_parsers.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Mateusz Gomulski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>
