@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 
+from pyproj.crs import CRSError
 from geocoderpl.super_permutations import SuperPerms
 from geocoderpl.geo_utilities import convert_coords
 
@@ -21,19 +22,28 @@ class TestCoordsTransforms(unittest.TestCase):
         """
 
         # Oczekiwane wartości przetransformowanych współrzędnych wyliczone przy pomocy strony https://epsg.io/
-        # 2169 -> 4326
+        # 2180 -> 4326
         self.exp_val1 = np.sum([[53.123], [23.444]])
-        self.exp_val2 = np.sum([[50.723], [18.398]])
+        self.exp_val2 = np.sum([[55.237, 54.672, 53.641, 52.9654, 51.3245, 50.23423, 49.3121, 48.4567, 47.8884],
+                                [17.529, 18.4342, 19.44343, 20.5621, 21.345, 22.456, 23.784, 24.2356, 25.2343]])
+
+        # 4326 -> 2180
+        self.exp_val3 = np.sum([[317508.550767323, 715578.2249603242], [457519.78638788883, 587702.5546628572]])
+        self.exp_val4 = np.sum([[558742.5008345963, 124709.68333851639, 376329.7954527512],
+                                [567192.4343290976, 851622.1212396007, 648197.1329118722]])
 
     def test_ct1_2180_4326(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326
+        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326 (1)
 
         :return: The method does not return any values
         """
 
+        # Testowe koordynaty
+        test_coords1 = [[593415.2087601414], [797217.5666588726]]
+
         # noinspection PyTypeChecker
-        test_sum1 = np.sum(convert_coords([[593415.2087601414], [797217.5666588726]], '2180', '4326'))
+        test_sum1 = np.sum(convert_coords(test_coords1, '2180', '4326'))
         err_msg1 = 'Geographical coordinates have not been correctly transformed from EPSG 2180 to EPSG 4326!'
 
         # noinspection PyTypeChecker
@@ -41,17 +51,124 @@ class TestCoordsTransforms(unittest.TestCase):
 
     def test_ct2_2180_4326(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326
+        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326 (3)
 
         :return: The method does not return any values
         """
 
+        # Testowe koordynaty
+        test_coords2 = np.array([[820314.203902998, 406489.40976672835], [756621.6274770098, 463523.10154106584],
+                                 [641887.8945878604, 529307.2601361987], [567801.785547792, 604881.8547989755],
+                                 [386815.23930981196, 663338.2845925333], [268718.6531911418, 746374.9381498817],
+                                 [171526.4596051555, 847557.4199094148], [78700.16428317595, 886911.7302979091],
+                                 [21140.37740988657, 965819.9583809776]])
+
         # noinspection PyTypeChecker
-        test_sum2 = np.sum(convert_coords([[317508.550767323], [457519.78638788883]], '2180', '4326'))
+        test_sum2 = np.sum(convert_coords(test_coords2, '2180', '4326'))
         err_msg2 = 'Geographical coordinates have not been correctly transformed from EPSG 2180 to EPSG 4326!'
 
         # noinspection PyTypeChecker
         self.assertAlmostEqual(test_sum2, self.exp_val2, 5, err_msg2)
+
+    def test_ct3_2180_4326(self) -> None:
+        """
+        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180 (2)
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords3 = [[50.723, 53.111], [18.398, 22.222]]
+
+        # noinspection PyTypeChecker
+        test_sum3 = np.sum(convert_coords(test_coords3, '4326', '2180'))
+        err_msg3 = 'Geographical coordinates have not been correctly transformed from EPSG 4326 to EPSG 2180!'
+
+        # noinspection PyTypeChecker
+        self.assertAlmostEqual(test_sum3, self.exp_val3, 5, err_msg3)
+
+    def test_ct4_4326_2180(self) -> None:
+        """
+        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180 (4)
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords4 = np.array([[52.89, 19.999], [48.89, 23.799], [51.2344, 21.12344]])
+
+        # noinspection PyTypeChecker
+        test_sum4 = np.sum(convert_coords(test_coords4, '4326', '2180'))
+        err_msg4 = 'Geographical coordinates have not been correctly transformed from EPSG 4326 to EPSG 2180!'
+
+        # noinspection PyTypeChecker
+        self.assertAlmostEqual(test_sum4, self.exp_val4, 5, err_msg4)
+
+    def test_ct5_dict(self) -> None:
+        """
+        Test if function "convert_coords" returns TypeError for dict object
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords5 = dict({52.4556: 21.1234, 47.567: 25.7865})
+        self.assertRaises(TypeError, convert_coords, test_coords5, '4326', '2180')
+
+    def test_ct6_tuple(self) -> None:
+        """
+        Test if function "convert_coords" returns TypeError for tuple object
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords6 = ((52.4556, 47.567), (21.1234, 25.7865))
+        self.assertRaises(TypeError, convert_coords, test_coords6, '4326', '2180')
+
+    def test_ct7_str(self) -> None:
+        """
+        Test if function "convert_coords" returns TypeError for string coordinate
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords7 = [[52.4556, "47.567"], [21.1234, 25.7865]]
+        self.assertRaises(TypeError, convert_coords, test_coords7, '4326', '2180')
+
+    def test_ct8_empty(self) -> None:
+        """
+        Test if function "convert_coords" returns IndexError for empty list
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords8 = []
+        self.assertRaises(IndexError, convert_coords, test_coords8, '4326', '2180')
+
+    def test_ct9_epsg(self) -> None:
+        """
+        Test if function "convert_coords" returns CRSError error for wrong EPSG number
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords9 = np.array([[52.89, 19.999], [48.89, 23.799], [51.2344, 21.12344]])
+        self.assertRaises(CRSError, convert_coords, test_coords9, '-32323232', '2180')
+
+    def test_ct10_epsg_fmt(self) -> None:
+        """
+        Test if function "convert_coords" returns TypeError for wrong EPSG number format
+
+        :return: The method does not return any values
+        """
+
+        # Testowe koordynaty
+        test_coords10 = np.array([[52.89, 19.999], [48.89, 23.799], [51.2344, 21.12344]])
+        self.assertRaises(TypeError, convert_coords, test_coords10, '4326', 2180)
 
 
 class TestSuperPermutations(unittest.TestCase):
