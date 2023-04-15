@@ -10,7 +10,7 @@ GeocoderPL is an application written in Python, which can be used for geocoding 
 </p>
 
 <p align="justify">
-GeocoderPL creates SQLite database containing all address points and buildings in Poland by parsing files in Geography Markup Language format to SQL tables. The main data sources of GeocoderPL are following:<br>
+GeocoderPL creates SQL database containing all address points and buildings in Poland by parsing files in Geography Markup Language format to SQL tables. The main data sources of GeocoderPL are following:<br>
 
   1. The National Register of Boundaries Database (a.k.a. PRG database)- state maintained reference database of all address points in Poland (including administrative division of the country):<br>
   https://dane.gov.pl/pl/dataset/726,panstwowy-rejestr-granic-i-powierzchni-jednostek-podziaow-terytorialnych-kraju/resource/29538 <br>
@@ -18,7 +18,7 @@ GeocoderPL creates SQLite database containing all address points and buildings i
   
   2. The Topographic Objects Database (a.k.a. BDOT10k database) -  state maintained vector database which contains the spatial location of all topographic features in Poland:<br> https://opendata.geoportal.gov.pl/bdot10k/Polska_GML.zip 
 
-The SQLite database created in this way can easily cooperate with GeocoderPL search engine - when the user type name of the city, street or postal code, query to SQLite database is sent. 
+The SQL database created in this way can easily cooperate with GeocoderPL search engine - when the user type the name of the city, street or postal code, query to SQL database is sent. 
 </p>
   
 <p align="center">
@@ -50,7 +50,7 @@ Geocoding using GeocoderPL search engine requires providing city name, street, b
 </p>
 
 <p align="justify">
-GeocoderPL can be also used for finding address point by providing name of public institution, church or shop - for part of builings such information is avaible in BDOT10k database, so they are also present in GeocoderPL search engine. GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQLite database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen's Map (visualisation purpose only).
+GeocoderPL can be also used for finding address point by providing name of public institution, church or shop - for part of builings such information is avaible in BDOT10k database, so they are also present in GeocoderPL search engine. GeocoderPL search engine does not utilize any external search engines - it relies only on data gather in SQL database fed with Polish government data and on three map layers: OpenStreetMap, Google Maps and Stamen's Map (visualisation purpose only).
 </p>
 
 <p align="center">
