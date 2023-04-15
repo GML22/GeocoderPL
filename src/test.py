@@ -34,7 +34,7 @@ class TestCoordsTransforms(unittest.TestCase):
 
     def test_ct1_2180_4326(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326 (1)
+        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326
 
         :return: The method does not return any values
         """
@@ -51,7 +51,7 @@ class TestCoordsTransforms(unittest.TestCase):
 
     def test_ct2_2180_4326(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326 (3)
+        Test if geographical coordinates are correctly transformed from EPSG 2180 to EPSG 4326
 
         :return: The method does not return any values
         """
@@ -72,7 +72,7 @@ class TestCoordsTransforms(unittest.TestCase):
 
     def test_ct3_2180_4326(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180 (2)
+        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180
 
         :return: The method does not return any values
         """
@@ -89,7 +89,7 @@ class TestCoordsTransforms(unittest.TestCase):
 
     def test_ct4_4326_2180(self) -> None:
         """
-        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180 (4)
+        Test if geographical coordinates are correctly transformed from EPSG 4326 to EPSG 2180
 
         :return: The method does not return any values
         """
